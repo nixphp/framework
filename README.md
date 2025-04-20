@@ -34,6 +34,41 @@ It is built on native PHP features, follows modern best practices, and lets you 
 
 ---
 
+## ❓ Why not just use Laravel or Symfony?
+
+Frameworks like Laravel and Symfony are fantastic — but they often come with a heavy stack of features, conventions, and dependencies you may not always need.
+
+**PHPico** offers a different approach:
+
+- **No hidden complexity**: You see exactly what happens.
+- **No forced patterns**: Use only what you need, when you need it.
+- **No unnecessary overhead**: Keep performance and flexibility under your control.
+- **Real extendability**: Bring your favorite libraries if needed — but stay light if you don't.
+
+If you want full control without fighting against a "big framework" structure,  
+**PHPico** might be the perfect starting point for you.
+
+---
+
+## 🧠 Design Principles
+
+- **Don't reinvent the wheel**: Extend only where necessary.
+- **Stay lightweight**: No forced ORMs, templating engines, or service containers.
+- **Stay readable**: Code should be easy to understand even after months.
+- **Stay optional**: Want PSR-7? Middleware? Dependency Injection? You can add it when needed — but you don't have to.
+
+---
+
+## 🎯 In short
+
+**PHPico** is a modern, minimal microframework for those who love  
+**clarity, speed, and true PHP craftsmanship** — without unnecessary overhead.
+
+It gives you **everything you need to build real applications**,  
+and **nothing you don't**.
+
+---
+
 ## 📂 Project Structure
 
 ```
@@ -73,16 +108,7 @@ class HelloController
 
 ---
 
-## 🧠 Design Principles
-
-- **Don't reinvent the wheel**: Extend only where necessary.
-- **Stay lightweight**: No forced ORMs, templating engines, or service containers.
-- **Stay readable**: Code should be easy to understand even after months.
-- **Stay optional**: Want PSR-7? Middleware? Dependency Injection? You can add it when needed — but you don't have to.
-
----
-
-## 🛠 Planned Extensions (Optional)
+## 🛠 Planned Extensions
 
 | Feature | Description |
 |:---|:---|
@@ -94,19 +120,58 @@ class HelloController
 
 ---
 
-## 🎯 In short
-
-**PHPico** is a modern, minimal microframework for those who love  
-**clarity, speed, and true PHP craftsmanship** — without unnecessary overhead.
-
-It gives you **everything you need to build real applications**,  
-and **nothing you don't**.
-
----
-
 # 📢 Installation
 
 Coming soon. (If you are reading this early: clone and set up manually.)
+
+---
+
+## 🚀 First Steps
+
+1. **Create a route**
+
+```php
+//File: app/routes.php
+
+router()->add('GET', '/hello', [HelloController::class, 'index']);
+```
+
+2. **Create a controller**
+
+```php
+//File: app/Controllers/HelloController.php
+
+namespace App\Controllers;
+
+class HelloController
+{
+    public function index()
+    {
+        return view('hello', ['name' => 'World']);
+    }
+}
+```
+
+3. **Create a view**
+
+```php
+//File: app/views/hello.phtml
+
+<h1>Hello, <?= htmlspecialchars($name) ?>!</h1>
+```
+
+4. **Access your page**
+
+Visit:
+```
+http://your-app.local/hello
+```
+
+You should see:
+
+```
+Hello, World!
+```
 
 ---
 
