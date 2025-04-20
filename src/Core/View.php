@@ -86,8 +86,6 @@ class View
 
             $fullPath = rtrim($path, '/') . '/' . str_replace('.', '/', $templateName) . '.phtml';
 
-            var_dump($fullPath);
-
             if (file_exists($fullPath)) {
                 return $fullPath;
             }

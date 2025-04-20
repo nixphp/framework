@@ -34,7 +34,7 @@ use function PHPico\s;
             font-family: "Arial Black", sans-serif;
             font-weight: 900;
             font-size: 20pt;
-            color: #9872cc;
+            color: #DDD;
             padding: 0;
             margin: 0;
         }
@@ -49,9 +49,9 @@ use function PHPico\s;
             padding: 0;
         }
 
-        code {
+        .code {
             display: block;
-            padding: 1rem;
+            padding: .5rem 1rem;
             box-sizing: border-box;
             background-color: #252525;
             width: 100%;
@@ -68,10 +68,15 @@ use function PHPico\s;
             text-align: center;
         }
 
+        .font-primary {
+            color: #9872cc;
+        }
+
         .footer {
             display: flex;
             gap: .6rem;
             justify-content: end;
+            font-family: Verdana, sans-serif;
         }
 
         a {
@@ -82,6 +87,10 @@ use function PHPico\s;
 
         a:hover {
             text-decoration: none;
+        }
+
+        .font-light {
+            color: #EEE;
         }
     </style>
 </head>
