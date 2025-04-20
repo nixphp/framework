@@ -3,6 +3,7 @@
   "description": "PHPico – the ultra-light, functional PHP framework for fast microservices and APIs.",
   "minimum-stability": "stable",
   "license": "MIT",
+  "type": "library",
   "authors": [
     {
       "name": "Flo Knapp",
@@ -15,7 +16,8 @@
     },
     "files": [
       "src/functions.php",
-      "src/helpers.php"
+      "src/helpers.php",
+      "src/view_helpers.php"
     ]
   },
   "require": {

@@ -4,7 +4,7 @@ namespace PHPico\Support;
 
 class Collection
 {
-    protected array $items;
+    protected array $items = [];
 
     public function __construct(array $items = [])
     {
@@ -14,6 +14,19 @@ class Collection
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->items[$key] ?? $default;
+    }
+
+    public function add(string $key, mixed $value): static
+    {
+        $lowerKey = strtolower($key);
+
+        if ($lowerKey === 'set-cookie') {
+            $this->items[$key][] = $value;
+        } else {
+            $this->items[$key] = $value;
+        }
+
+        return $this;
     }
 
     public function all(): array

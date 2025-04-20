@@ -2,8 +2,12 @@
 
 namespace PHPico\Core;
 
+use \PDO;
+
 class Database
 {
+
+    protected \PDO $pdo;
 
     public function __construct(array $config)
     {
@@ -16,18 +20,18 @@ class Database
         );
 
         $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
         ];
 
         try {
-            $this->pdo = new PDO($dsn, $config['username'], $config['password'], $options);
-        } catch (PDOException $e) {
+            $this->pdo = new \PDO($dsn, $config['username'], $config['password'], $options);
+        } catch (\PDOException $e) {
             die('Database connection failed: ' . $e->getMessage());
         }
     }
 
-    public function getConnection()
+    public function getConnection(): PDO
     {
         return $this->pdo;
     }

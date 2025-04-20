@@ -2,32 +2,43 @@
 
 namespace PHPico\Core;
 
+use PHPico\Http\Response;
+use function PHPico\abort;
+use function PHPico\render;
+
 class Dispatcher
 {
-    private Router $router;
+    private Route $router;
 
-    public function __construct(Router $router)
+    public function __construct(Route $router)
     {
         $this->router = $router;
     }
 
-    public function forward(string $uri)
+    public function forward(string $uri): Response|null
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $route = $this->router->find($uri, $method);
-        if ($route) {
-            $action = $route['action'];
 
-            if (is_array($action)) {
-                $class = $action[0];
-                $classAction = $action[1];
-                return (new $class())->$classAction($route['params'] ?? null);
+        if (!$route) {
+            if ($uri === '/') {
+                return render('welcome');
             }
-
-            return $action($route['params'] ?? null);
+            abort(404, 'Not Found');
         }
 
-        abort(404, 'Not Found');
+        $response = null;
+        $action = $route['action'];
+
+        if (is_array($action)) {
+            [$class, $classAction] = $action;
+            $response = (new $class())->$classAction($route['params'] ?? null);
+        } else if (is_callable($action)) {
+            $response = $action($route['params'] ?? null);
+        }
+
+        if ($response instanceof Response) return $response;
+        abort(500, 'No valid response returned.');
         return null;
     }
 

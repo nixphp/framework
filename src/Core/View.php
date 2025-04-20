@@ -3,6 +3,7 @@
 namespace PHPico\Core;
 
 use function PHPico\app;
+use function PHPico\asset;
 
 class View
 {
@@ -19,9 +20,7 @@ class View
 
     public function setTemplate(string $template): View
     {
-        if (!file_exists($template)) {
-            $template = $this->buildTemplatePath($template);
-        }
+        $template = $this->buildTemplatePath($template);
         $this->template = $template;
         return $this;
     }
@@ -52,13 +51,13 @@ class View
         return $content;
     }
 
-    public function block(string $name)
+    public function block(string $name): void
     {
         $this->variables[$name] = 'initial';
         ob_start();
     }
 
-    public function endblock(string $name)
+    public function endblock(string $name): void
     {
         if ($this->variables[$name] !== 'initial') {
             throw new \Exception("Variable $name does not exist");
@@ -66,19 +65,35 @@ class View
         $this->variables[$name] = ob_get_clean();
     }
 
-    public function renderBlock(string $name, string $default = '')
+    public function renderBlock(string $name, string $default = ''): string
     {
         return $this->variables[$name] ?? $default;
     }
 
-    private function getViewsRoot()
+    private function getViewsRoot(): string
     {
         return app()->getBasePath() . '/app/views';
     }
 
-    private function buildTemplatePath(string $templateName)
+    private function buildTemplatePath(string $templateName): string
     {
-        return sprintf('%s/%s.phtml', $this->getViewsRoot(), $templateName);
+        $paths = [
+            $this->getViewsRoot(), // App-Views
+            __DIR__ . '/../Resources/views', // Framework-Default-Views
+        ];
+
+        foreach ($paths as $path) {
+
+            $fullPath = rtrim($path, '/') . '/' . str_replace('.', '/', $templateName) . '.phtml';
+
+            var_dump($fullPath);
+
+            if (file_exists($fullPath)) {
+                return $fullPath;
+            }
+        }
+
+        throw new \RuntimeException("View [$templateName] not found in any known paths.");
     }
 
 }

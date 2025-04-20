@@ -7,13 +7,13 @@ use PHPico\Support\Collection;
 class Request
 {
 
-    private string $method;
-    private string $uri;
-    private Collection $query;
-    private Collection $body;
-    private Collection $cookies;
-    private Collection $files;
-    private Collection $headers;
+    protected string $method;
+    protected string $uri;
+    protected Collection $query;
+    protected Collection $body;
+    protected Collection $cookies;
+    protected Collection $files;
+    protected Collection $headers;
 
     public function __construct()
     {

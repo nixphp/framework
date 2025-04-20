@@ -1,0 +1,91 @@
+<?php
+use function PHPico\s;
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><?= s($this->renderBlock('title', 'App')) ?></title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #202020;
+            color: #DDD;
+        }
+
+        .box {
+            width: 400px;
+            height: auto;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2rem;
+            box-sizing: border-box;
+            background-color: #303030;
+            color: #AAA;
+            border-radius: .5rem;
+        }
+
+        h1 {
+            font-family: "Arial Black", sans-serif;
+            font-weight: 900;
+            font-size: 20pt;
+            color: #9872cc;
+            padding: 0;
+            margin: 0;
+        }
+
+        h2 {
+            font-family: "Arial", sans-serif;
+            font-weight: 600;
+            font-size: 11pt;
+            color: #606060;
+            text-transform: uppercase;
+            margin: .5rem 0;
+            padding: 0;
+        }
+
+        code {
+            display: block;
+            padding: 1rem;
+            box-sizing: border-box;
+            background-color: #252525;
+            width: 100%;
+            border-radius: .5rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #505050;
+            margin: 1.5rem 0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .footer {
+            display: flex;
+            gap: .6rem;
+            justify-content: end;
+        }
+
+        a {
+            font-size: 8pt;
+            color: #DDD;
+            text-decoration: underline;
+        }
+
+        a:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<?= $this->renderBlock('content') ?>
+</body>
+</html>

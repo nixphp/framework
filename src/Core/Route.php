@@ -2,7 +2,7 @@
 
 namespace PHPico\Core;
 
-class Router
+class Route
 {
     private array $routes = [];
 

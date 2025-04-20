@@ -1,0 +1,28 @@
+<?php $this->setLayout('layout') ?>
+
+<?php $this->block('content') ?>
+
+<div class="box">
+
+    <h1>Welcome to PHPico!</h1>
+    <p>To begin developing, you may add your first route to <strong>/app/routes.php</strong>.</p>
+
+    <hr />
+
+    <h2>Example</h2>
+    <code>
+    <pre>&lt;?php<br /><br />route()->add('GET', '/', function() {<br />    return response('Hello World!')<br />});</pre>
+    </code>
+
+    <hr />
+
+    <div class="footer">
+
+        <a href="https://github.com/fkde/phpico/wiki" target="_blank">Documentation</a>
+        <a href="https://github.com/fkde/phpico" target="_blank">Github</a>
+
+    </div>
+
+</div>
+
+<?php $this->endblock('content') ?>

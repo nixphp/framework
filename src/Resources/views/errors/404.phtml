@@ -1,0 +1,11 @@
+<?php $this->setLayout('layout') ?>
+
+<?php $this->block('content') ?>
+
+<div class="box">
+    <h1>Fehler <?= $statusCode ?></h1>
+    <p><?= $message ?></p>
+</div>
+
+<?php $this->endblock('content') ?>
+
