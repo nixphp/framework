@@ -1,0 +1,26 @@
+{
+  "name": "fkde/phpico",
+  "description": "PHPico – the ultra-light, functional PHP framework for fast microservices and APIs.",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Flo Knapp",
+      "email": "office@florianknapp.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "PHPico\\": "src/"
+    },
+    "files": [
+      "src/functions.php",
+      "src/helpers.php"
+    ]
+  },
+  "require": {
+    "php": ">=8.2",
+    "ext-pdo": "*",
+    "ext-json": "*"
+  }
+}
