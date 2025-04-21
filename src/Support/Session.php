@@ -6,7 +6,7 @@ class Session
 {
     protected bool $started = false;
 
-    public function __construct()
+    public function start(): void
     {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
