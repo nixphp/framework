@@ -89,32 +89,6 @@ composer.json
 
 ---
 
-## 🚀 Quick Example
-
-```php
-// Define a route (app/routes.php)
-router()->add('GET', '/hello', [HelloController::class, 'index']);
-
-
-
-// Create a controller (app/Controllers/HelloController.php)
-class HelloController
-{
-    public function index()
-    {
-        return render('hello', ['name' => 'World']);
-    }
-}
-```
-
-```php
-// Simple JSON response everywhere
-//... 
-return json(['success' => true, 'message' => 'Hello, API!']);
-```
-
----
-
 # 📢 Installation
 
 Coming soon. (Until then: clone and set up manually.)
