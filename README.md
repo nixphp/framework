@@ -1,13 +1,3 @@
-Sehr geil, was Ihr da aufgebaut habt! 🚀  
-Und ja, Du hast recht — jetzt wo ihr so viele PSRs sauber unterstützt, wäre es stark, das auch in der **README** klarer und prominenter zu machen.
-
-Ich schlage vor, wir arbeiten die README **strukturiert neu auf**, und stellen die **PSR-Kompatibilität** und die **Professionalität** noch stärker heraus, ohne den minimalistischen Charme zu verlieren.
-
-Hier ein erster Entwurf für die überarbeitete Version:  
-*(Ich bleibe nah an Deinem Stil, aber bringe die neuen Features sichtbar unter.)*
-
----
-
 # PHPico
 
 > **"As simple as possible, as flexible as necessary."**
