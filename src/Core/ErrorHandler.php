@@ -3,19 +3,19 @@
 namespace PHPico\Core;
 
 use function PHPico\view;
+use function PHPico\response;
 
 class ErrorHandler
 {
 
     public static function handleException(\Throwable $e): void
     {
-        http_response_code(500);
-
         $message = htmlspecialchars($e->getMessage());
         $file = htmlspecialchars($e->getFile());
         $line = (int)$e->getLine();
         $trace = htmlspecialchars($e->getTraceAsString());
 
+        http_response_code(500);
         echo view('errors.500', compact('message', 'file', 'line', 'trace'));
     }
 

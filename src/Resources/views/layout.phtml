@@ -8,6 +8,10 @@ use function PHPico\s;
     <meta charset="UTF-8">
     <title><?= s($this->renderBlock('title', 'App')) ?></title>
     <style>
+        :root {
+            --container-width: <?= trim($this->renderBlock('container-width-px', 800)) ?>px;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
@@ -17,7 +21,7 @@ use function PHPico\s;
         }
 
         .box {
-            width: 400px;
+            width: var(--container-width);
             height: auto;
             position: absolute;
             left: 50%;
@@ -91,6 +95,10 @@ use function PHPico\s;
 
         .font-light {
             color: #EEE;
+        }
+
+        .flex {
+            display: flex;
         }
     </style>
 </head>

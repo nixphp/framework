@@ -1,36 +1,64 @@
+Sehr geil, was Ihr da aufgebaut habt! 🚀  
+Und ja, Du hast recht — jetzt wo ihr so viele PSRs sauber unterstützt, wäre es stark, das auch in der **README** klarer und prominenter zu machen.
+
+Ich schlage vor, wir arbeiten die README **strukturiert neu auf**, und stellen die **PSR-Kompatibilität** und die **Professionalität** noch stärker heraus, ohne den minimalistischen Charme zu verlieren.
+
+Hier ein erster Entwurf für die überarbeitete Version:  
+*(Ich bleibe nah an Deinem Stil, aber bringe die neuen Features sichtbar unter.)*
+
+---
+
 # PHPico
 
 > **"As simple as possible, as flexible as necessary."**
 
-**PHPico** is a lightweight, functional PHP microframework created with a clear goal:  
-to offer everything you need to start real-world projects, while staying fast, transparent, and minimal.
+**PHPico** is a modern, lightweight PHP microframework designed for real-world projects:  
+fast, minimal, extendable — and now fully embracing modern PHP standards like PSR-7, PSR-11, PSR-18, and PSR-3.
 
-It is built on native PHP features, follows modern best practices, and lets you extend it freely without getting in your way.
+It builds on native PHP features and lets you stay in control:  
+**Use only what you need — and extend freely when you want.**
 
 ---
 
 ## ✨ Philosophy
 
-- **Minimalist**: Only the essentials are included by default.
-- **Flexible**: You can easily plug in external tools like Blade, Twig, Eloquent, or PSR-7 components if needed.
-- **Transparent**: No hidden magic, no complex abstractions. Everything is visible and understandable.
-- **Native-first**: Uses native PHP strengths like PDO, simple routing, clean templating, and PSR-4 autoloading.
-- **Secure**: Clear separation between application and public directories.
+- **Minimalist Core**: Only essential components by default.
+- **PSR-First**: Native support for key PHP standards (PSR-7, PSR-11, PSR-18, PSR-3).
+- **Extendable**: Easily plug in external libraries — Blade, Twig, Eloquent, Middleware, etc.
+- **Transparent by Design**: No hidden magic, no complicated abstractions.
+- **Native PHP Power**: PDO database, clean routing, lightweight templating.
+- **Secure and Clear Structure**: Safe public directory (`public/`) separated from your app code.
 
 ---
 
-## 📦 Features
+## 📦 Core Features
 
-- **PSR-4 Autoloading** (via Composer)
-- **Lightweight Routing**: Map routes to `[Controller::class, 'method']`
-- **Automatic Dispatching**: Controllers and method parameters are automatically resolved.
-- **Smart Response Handling**: Returns HTML or JSON automatically based on the content.
-- **Simple View System**: Template inheritance, blocks, and layouts — no Blade or Twig needed (but possible to integrate).
-- **PDO Database Connection**: Configurable and ready to use.
-- **Form Memory Helpers**: Restore user input easily after validation errors.
-- **Output Buffering**: Managed centrally for better debugging.
-- **Clear Folder Structure**: Safe and public-friendly (`public/`, `app/`, `vendor/`, etc.)
-- **Composer-Ready**: Just install and go.
+- **✅ PSR-4 Autoloading** (Composer)
+- **✅ Lightweight Routing**: Define routes with `[Controller::class, 'method']`
+- **✅ Smart Dispatcher**: Automatic parameter and controller resolution
+- **✅ Native PSR-7 Request/Response Handling** (integrated or extendable)
+- **✅ PSR-18 HTTP Client** (ready for easy API communication)
+- **✅ PSR-11 Dependency Container** (for flexible dependency injection)
+- **✅ PSR-3 Logging** (lightweight logger ready to use)
+- **✅ Minimalist View System**: Block-based templating (no Blade/Twig needed)
+- **✅ PDO Database Connection**
+- **✅ Session Handling** (with a simple Session object)
+- **✅ Form Memory Helpers** (preserve input after validation)
+- **✅ Output Buffering** (centralized, better debugging)
+- **✅ JSON Response Helper** (for easy API responses)
+- **✅ Composer-Ready**: Easy installation and dependency management
+
+---
+
+## 📚 PSR Compliance Overview
+
+| PSR | Description | Status |
+|:---|:---|:---|
+| PSR-4 | Autoloading Standard | ✅ Native via Composer |
+| PSR-7 | HTTP Message Interface | ✅ Integrated |
+| PSR-11 | Container Interface | ✅ Available |
+| PSR-18 | HTTP Client Interface | ✅ Available |
+| PSR-3 | Logger Interface | ✅ Available |
 
 ---
 
@@ -50,25 +78,6 @@ If you want full control without fighting against a "big framework" structure,
 
 ---
 
-## 🧠 Design Principles
-
-- **Don't reinvent the wheel**: Extend only where necessary.
-- **Stay lightweight**: No forced ORMs, templating engines, or service containers.
-- **Stay readable**: Code should be easy to understand even after months.
-- **Stay optional**: Want PSR-7? Middleware? Dependency Injection? You can add it when needed — but you don't have to.
-
----
-
-## 🎯 In short
-
-**PHPico** is a modern, minimal microframework for those who love  
-**clarity, speed, and true PHP craftsmanship** — without unnecessary overhead.
-
-It gives you **everything you need to build real applications**,  
-and **nothing you don't**.
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -84,45 +93,41 @@ bootstrap.php
 composer.json
 ```
 
-- All core app folders are in **plural** form (Controllers, Models, views).
-- The `public/` folder is the webroot.
-- `bootstrap.php` handles initialization and autoloading.
+- **Plural names** for app folders
+- **`public/`** as webroot for maximum security
+- **`bootstrap.php`** for initialization and autoloading
 
 ---
 
 ## 🚀 Quick Example
 
 ```php
-// Define a route
+// Define a route (app/routes.php)
 router()->add('GET', '/hello', [HelloController::class, 'index']);
 
-// Create a controller
+
+
+// Create a controller (app/Controllers/HelloController.php)
 class HelloController
 {
     public function index()
     {
-        return view('hello', ['name' => 'World']);
+        return render('hello', ['name' => 'World']);
     }
 }
 ```
 
----
-
-## 🛠 Planned Extensions
-
-| Feature | Description |
-|:---|:---|
-| PSR-7 Request/Response support | Native, or via external library like `nyholm/psr7` |
-| Middleware support | Before/after route hooks |
-| Route groups | Prefixing and shared options for routes |
-| Optional DI Container | For cleaner dependency management |
-| Simple Logging | Debug and error logging made easy |
+```php
+// Simple JSON response everywhere
+//... 
+return json(['success' => true, 'message' => 'Hello, API!']);
+```
 
 ---
 
 # 📢 Installation
 
-Coming soon. (If you are reading this early: clone and set up manually.)
+Coming soon. (Until then: clone and set up manually.)
 
 ---
 
@@ -181,7 +186,7 @@ MIT License.
 
 ---
 
-# 🔥 That's it!
+# 🔥 Ready to build?
 
-Ready to build something awesome?  
-Welcome to **PHPico**. 🚀
+Welcome to **PHPico** —  
+your minimalist, modern PHP playground. 🚀

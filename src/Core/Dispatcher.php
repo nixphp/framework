@@ -2,9 +2,15 @@
 
 namespace PHPico\Core;
 
-use PHPico\Http\Response;
+use PHPico\Exceptions\DispatcherException;
+use PHPico\Exceptions\RouteNotFoundException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\abort;
+use function PHPico\event;
 use function PHPico\render;
+use function PHPico\send_response;
+use function PHPico\view;
 
 class Dispatcher
 {
@@ -15,15 +21,15 @@ class Dispatcher
         $this->router = $router;
     }
 
-    public function forward(string $uri): Response|null
+    public function forward(ServerRequestInterface $request): ResponseInterface
     {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $route = $this->router->find($uri, $method);
+        $method = $request->getMethod() ?? 'GET';
+        $uri = $request->getUri()->getPath();
 
-        if (!$route) {
-            if ($uri === '/') {
-                return render('welcome');
-            }
+        try {
+            $route = $this->router->find($uri, $method);
+        } catch (RouteNotFoundException $e) {
+            if ($uri === '/') send_response(render('welcome'));
             abort(404, 'Not Found');
         }
 
@@ -32,14 +38,18 @@ class Dispatcher
 
         if (is_array($action)) {
             [$class, $classAction] = $action;
-            $response = (new $class())->$classAction($route['params'] ?? null);
+            $class = new $class();
+            event()->dispatch('controller.calling', $class, $action);
+            $response = $class->$classAction($route['params'] ?? null);
+            event()->dispatch('controller.called', $class, $action, $response);
         } else if (is_callable($action)) {
+            event()->dispatch('controller.calling', null, $action);
             $response = $action($route['params'] ?? null);
+            event()->dispatch('controller.called', null, $action, $response);
         }
 
-        if ($response instanceof Response) return $response;
-        abort(500, 'No valid response returned.');
-        return null;
+        if ($response instanceof ResponseInterface) return $response;
+        throw new DispatcherException('No valid response returned.');
     }
 
 }

@@ -2,9 +2,16 @@
 
 namespace PHPico\Core;
 
-use PHPico\Http\Request;
-use PHPico\Http\Response;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
+use PHPico\Exceptions\HttpException;
+use PHPico\Support\Session;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\config;
+use function PHPico\event;
+use function PHPico\send_response;
 
 class App
 {
@@ -19,16 +26,32 @@ class App
 
     public function run(): void
     {
-        $request = new Request();
+        $request = $this->createServerRequest();
+        event()->dispatch('request.start', $request);
         $this->container()->set('request', $request);
-        $response = $this->container->get('dispatcher')->forward($request->getUri());
 
-        if ($response instanceof Response) {
-            $response->send();
+        $response = $this->container->get('dispatcher')->forward($request);
+
+        if ($response instanceof ResponseInterface) {
+            event()->dispatch('response.sending', $response);
+            send_response($response);
+            event()->dispatch('request.end', $response, $this);
             exit(0);
         }
 
-        throw new \LogicException('No response object returned.');
+        throw new HttpException('No response object returned.');
+    }
+
+    private function createServerRequest(): ServerRequestInterface
+    {
+        $psr17Factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $psr17Factory, // ServerRequestFactory
+            $psr17Factory, // UriFactory
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory  // StreamFactory
+        );
+        return $creator->fromGlobals();
     }
 
     public function container(): Container
@@ -36,9 +59,14 @@ class App
         return $this->container;
     }
 
-    public function request(): Request
+    public function request(): RequestInterface
     {
         return $this->container->get('request');
+    }
+
+    public function session(): Session
+    {
+        return $this->container->get('session');
     }
 
     public function getBasePath():? string
@@ -64,6 +92,28 @@ class App
 
         $appDir = $this->getBasePath() . '/app';
 
+        $this->container->set('log', function() {
+
+            $logFile   = $this->getBasePath() . '/log/app.log';
+            $directory = dirname($logFile);
+
+            if (!is_dir($directory)) {
+                mkdir($directory, 0775, true);
+            }
+
+            if (!file_exists($logFile)) {
+                touch($logFile);
+                chmod($logFile, 0664);
+            }
+
+            return new Log($logFile);
+
+        });
+
+        $this->container->set('session', function() {
+            return new Session();
+        });
+
         $this->container->set('event', function() {
             return new Event();
         });
@@ -84,7 +134,7 @@ class App
             return new Dispatcher($container->get('route'));
         });
 
-        $this->container->set('database', function($container) {
+        $this->container->set('database', function() {
 
             $config = config('database');
             if (!$config) return null;

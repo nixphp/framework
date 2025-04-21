@@ -4,9 +4,9 @@ namespace PHPico;
 
 use PHPico\Core\Asset;
 use PHPico\Core\View;
-use PHPico\Http\Response;
+use Psr\Http\Message\ResponseInterface;
 
-function render(string $template, array $vars = []): Response
+function render(string $template, array $vars = []): ResponseInterface
 {
     return response(view($template, $vars));
 }

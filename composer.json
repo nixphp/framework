@@ -23,6 +23,13 @@
   "require": {
     "php": ">=8.2",
     "ext-pdo": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "psr/log": "^3.0",
+    "nyholm/psr7": "^1.8",
+    "nyholm/psr7-server": "^1.1",
+    "psr/http-message": "^2.0",
+    "psr/http-factory": "^1.1",
+    "psr/http-client": "^1.0",
+    "psr/container": "^2.0"
   }
 }

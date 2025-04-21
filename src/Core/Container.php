@@ -2,39 +2,45 @@
 
 namespace PHPico\Core;
 
-class Container
+use PHPico\Exceptions\ContainerException;
+use PHPico\Exceptions\ServiceNotFoundException;
+use Psr\Container\ContainerInterface;
+
+class Container implements ContainerInterface
 {
 
     private array $services = [];
 
-    public function get(string $name): object
+    public function get(string $id): mixed
     {
-        if (!isset($this->services[$name])) {
-            throw new \LogicException("Service '$name' not found");
+        if (!isset($this->services[$id])) {
+            throw new ServiceNotFoundException("Service '$id' not found.");
         }
 
-        if ($this->services[$name] instanceof \Closure) { // Transform factory into the actual service
-            $this->services[$name] = call_user_func($this->services[$name], $this);
+        if ($this->services[$id] instanceof \Closure) {
+            try {
+                $this->services[$id] = call_user_func($this->services[$id], $this);
+            } catch (\Throwable $e) {
+                throw new ContainerException('Failed to build service: ' . $e->getMessage());
+            }
         }
 
-        return $this->services[$name];
+        return $this->services[$id];
     }
 
-    public function set(string $name, callable|object $factory): void
+    public function set(string $id, callable|object $factory): void
     {
-        $this->services[$name] = $factory;
+        $this->services[$id] = $factory;
     }
 
-    public function has(string $name): bool
+    public function has(string $id): bool
     {
-        return isset($this->services[$name]);
+        return isset($this->services[$id]);
     }
 
-    public function reset(string $name)
+    public function reset(string $id): void
     {
-        if ($this->has($name)) {
-            unset($this->services[$name]);
-        }
+        unset($this->services[$id]);
     }
 
 }
