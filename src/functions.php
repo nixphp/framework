@@ -70,7 +70,7 @@ function json(mixed $data, int $status = 200, array $headers = []): ResponseInte
 {
     $body = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
-    if ($body === false) {
+    if (false === $body) {
         throw new \RuntimeException('Unable to encode data to JSON: ' . json_last_error_msg());
     }
 
@@ -80,7 +80,7 @@ function json(mixed $data, int $status = 200, array $headers = []): ResponseInte
         'Content-Type' => 'application/json; charset=UTF-8',
     ], $headers);
 
-    return \PHPico\response($stream, $status, $headers);
+    return response($stream, $status, $headers);
 }
 
 function redirect(string $url, int $status = 302): ResponseInterface
@@ -103,15 +103,13 @@ function refresh(): ResponseInterface
 
 function abort(int $statusCode = 404, string $message = ''): never
 {
-    $response = \PHPico\response(view('errors.' . $statusCode, [
+    send_response(response(view('errors.' . $statusCode, [
         'statusCode' => $statusCode,
         'message' => s($message)
-    ]), 500);
-    send_response($response);
-    exit(0);
+    ]), 500));
 }
 
-function send_response(ResponseInterface $response): void
+function send_response(ResponseInterface $response): never
 {
     if (ob_get_length() > 0) ob_end_clean();
 
