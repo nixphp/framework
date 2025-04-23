@@ -18,7 +18,7 @@ class Config
      *
      * @return string|array|object|null
      */
-    public function get(string $key, string|array|object|int $default = null): string|array|object|null
+    public function get(string $key, string|array|object|int|null $default = null): string|array|object|null
     {
         $result = $this->config[$key] ?? null;
         if (str_contains($key, ':') !== false) {
