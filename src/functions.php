@@ -30,7 +30,7 @@ function app(): App
     return $container->get('app');
 }
 
-function config(string $key = null, mixed $default = null): array|object|string|null
+function config(?string $key = null, mixed $default = null): array|object|string|null
 {
     /** @var Config $config */
     $config = app()->container()->get('config');
@@ -42,7 +42,7 @@ function config(string $key = null, mixed $default = null): array|object|string|
     return $config->get($key, $default);
 }
 
-function route(string $name = null, array $params = []): Route|string
+function route(?string $name = null, array $params = []): Route|string
 {
     /* @var Route $route */
     $route = app()->container()->get('route');
