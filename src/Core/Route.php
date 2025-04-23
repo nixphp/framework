@@ -9,7 +9,7 @@ class Route
 {
     protected array $routes = [];
 
-    public function add(string $method, string $path, array|callable $action, string $name = null)
+    public function add(string $method, string $path, array|callable $action, ?string $name = null)
     {
         if (count($this->routes) > 0 && empty($name)) {
             throw new \LogicException('You can\'t add routes without a name when there is more than one route configured.');

@@ -13,9 +13,22 @@
 
     <hr />
 
+    <?php $code = <<<CODE
+    // File: app/routes.php
+    
+    use function PHPico\\response;
+    use function PHPico\\route;
+    
+    &lt;?php
+    
+    route()->add('GET', '/', function() {
+        return response('Hello World!');
+    });
+    CODE; ?>
+
     <h2>Example</h2>
     <div class="code">
-        <pre>// File: app/routes.php<br/><br />&lt;?php<br /><br />route()->add('GET', '/', function() {<br />    return response('Hello World!');<br />});</pre>
+        <pre><?= $code ?></pre>
     </div>
 
     <hr />
