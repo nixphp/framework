@@ -106,7 +106,7 @@ function abort(int $statusCode = 404, string $message = ''): never
     send_response(response(view('errors.' . $statusCode, [
         'statusCode' => $statusCode,
         'message' => s($message)
-    ]), 500));
+    ]), $statusCode));
 }
 
 function send_response(ResponseInterface $response): never
