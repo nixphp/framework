@@ -12,8 +12,10 @@ use PHPico\Core\Event;
 use PHPico\Core\Log;
 use PHPico\Core\Route;
 use PHPico\Core\Container;
+use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 ob_start();
 
@@ -61,7 +63,7 @@ function request(): RequestInterface
 
 function response(mixed $content = '', int $status = 200, array $headers = []): ResponseInterface
 {
-    return (new Response($status, $headers, $content));
+    return new Response($status, $headers, $content);
 }
 
 function json(mixed $data, int $status = 200, array $headers = []): ResponseInterface
@@ -78,7 +80,61 @@ function json(mixed $data, int $status = 200, array $headers = []): ResponseInte
         'Content-Type' => 'application/json; charset=UTF-8',
     ], $headers);
 
-    return response($stream, $status, $headers);
+    return \PHPico\response($stream, $status, $headers);
+}
+
+function redirect(string $url, int $status = 302): ResponseInterface
+{
+    return new Response(
+        $status,
+        ['Location' => $url],
+        null,
+        '1.1',
+        $status === 301 ? 'Moved permanently' : 'Found'
+    );
+}
+
+function refresh(): ResponseInterface
+{
+    /** @var ServerRequestInterface $request */
+    $request = app()->container()->get('request');
+    return redirect($request->getUri());
+}
+
+function abort(int $statusCode = 404, string $message = ''): never
+{
+    $response = \PHPico\response(view('errors.' . $statusCode, [
+        'statusCode' => $statusCode,
+        'message' => s($message)
+    ]), 500);
+    send_response($response);
+    exit(0);
+}
+
+function send_response(ResponseInterface $response): void
+{
+    if (ob_get_length() > 0) ob_end_clean();
+
+    header(sprintf(
+        'HTTP/%s %d %s',
+        $response->getProtocolVersion(),
+        $response->getStatusCode(),
+        $response->getReasonPhrase()
+    ));
+
+    foreach ($response->getHeaders() as $name => $values) {
+        foreach ($values as $value) {
+            header("$name: $value", false);
+        }
+    }
+
+    echo $response->getBody();
+    exit(0);
+}
+
+function session(): Session
+{
+    return \PHPico\app()->session();
 }
 
 function event(): Event

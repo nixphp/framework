@@ -42,18 +42,6 @@ class App
         throw new HttpException('No response object returned.');
     }
 
-    private function createServerRequest(): ServerRequestInterface
-    {
-        $psr17Factory = new Psr17Factory();
-        $creator = new ServerRequestCreator(
-            $psr17Factory, // ServerRequestFactory
-            $psr17Factory, // UriFactory
-            $psr17Factory, // UploadedFileFactory
-            $psr17Factory  // StreamFactory
-        );
-        return $creator->fromGlobals();
-    }
-
     public function container(): Container
     {
         return $this->container;
@@ -76,6 +64,18 @@ class App
         }
 
         return \BASE_PATH;
+    }
+
+    private function createServerRequest(): ServerRequestInterface
+    {
+        $psr17Factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $psr17Factory, // ServerRequestFactory
+            $psr17Factory, // UriFactory
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory  // StreamFactory
+        );
+        return $creator->fromGlobals();
     }
 
     private function loadRoutes(): void

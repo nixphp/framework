@@ -16,7 +16,6 @@
     },
     "files": [
       "src/functions.php",
-      "src/helpers.php",
       "src/view_helpers.php"
     ]
   },
