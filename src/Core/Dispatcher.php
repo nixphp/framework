@@ -29,7 +29,7 @@ class Dispatcher
         try {
             $route = $this->router->find($uri, $method);
         } catch (RouteNotFoundException $e) {
-            if ($uri === '/') send_response(render('welcome'));
+            if ($uri === '/') send_response(render('phpico_welcome'));
             abort(404, 'Not Found');
         }
 

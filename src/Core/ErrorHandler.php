@@ -2,6 +2,7 @@
 
 namespace PHPico\Core;
 
+use function PHPico\send_response;
 use function PHPico\view;
 use function PHPico\response;
 
@@ -15,8 +16,12 @@ class ErrorHandler
         $line = (int)$e->getLine();
         $trace = htmlspecialchars($e->getTraceAsString());
 
-        http_response_code(500);
-        echo view('errors.500', compact('message', 'file', 'line', 'trace'));
+        send_response(
+            response(
+                view('errors.500', compact('message', 'file', 'line', 'trace')),
+                500
+            )
+        );
     }
 
     /**
@@ -24,7 +29,6 @@ class ErrorHandler
      */
     public static function handleError($errno, $errstr, $errfile, $errline)
     {
-        // Wandelt Fehler in eine ErrorException um → wird dann von handleException gefangen
         throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 

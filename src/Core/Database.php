@@ -6,7 +6,6 @@ use \PDO;
 
 class Database
 {
-
     protected \PDO $pdo;
 
     public function __construct(array $config)

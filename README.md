@@ -3,7 +3,7 @@
 > **"As simple as possible, as flexible as necessary."**
 
 **PHPico** is a modern, lightweight PHP microframework designed for real-world projects:  
-fast, minimal, extendable — and now fully embracing modern PHP standards like PSR-7, PSR-11, PSR-18, and PSR-3.
+fast, minimal, extendable — and now fully embracing modern PHP standards like PSR-3, PSR-4, PSR-7, PSR-11 and PSR-18.
 
 It builds on native PHP features and lets you stay in control:  
 **Use only what you need — and extend freely when you want.**
