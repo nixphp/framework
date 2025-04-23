@@ -13,7 +13,7 @@ It builds on native PHP features and lets you stay in control:
 ## ✨ Philosophy
 
 - **Minimalist Core**: Only essential components by default.
-- **PSR-First**: Native support for key PHP standards (PSR-7, PSR-11, PSR-18, PSR-3).
+- **PSR-First**: Native support for key PHP standards (PSR-3, PSR-4, PSR-7, PSR-11, PSR-18).
 - **Extendable**: Easily plug in external libraries — Blade, Twig, Eloquent, Middleware, etc.
 - **Transparent by Design**: No hidden magic, no complicated abstractions.
 - **Native PHP Power**: PDO database, clean routing, lightweight templating.
@@ -23,13 +23,13 @@ It builds on native PHP features and lets you stay in control:
 
 ## 📦 Core Features
 
-- **✅ PSR-4 Autoloading** (Composer)
 - **✅ Lightweight Routing**: Define routes with `[Controller::class, 'method']`
 - **✅ Smart Dispatcher**: Automatic parameter and controller resolution
-- **✅ Native PSR-7 Request/Response Handling** (integrated or extendable)
-- **✅ PSR-18 HTTP Client** (ready for easy API communication)
-- **✅ PSR-11 Dependency Container** (for flexible dependency injection)
 - **✅ PSR-3 Logging** (lightweight logger ready to use)
+- **✅ PSR-4 Autoloading** (Composer)
+- **✅ PSR-7 Request/Response Handling**
+- **✅ PSR-11 Dependency Container** (for flexible dependency injection)
+- **✅ PSR-18 HTTP Client** (ready for easy API communication)
 - **✅ Minimalist View System**: Block-based templating (no Blade/Twig needed)
 - **✅ PDO Database Connection**
 - **✅ Session Handling** (with a simple Session object)
@@ -44,11 +44,12 @@ It builds on native PHP features and lets you stay in control:
 
 | PSR | Description | Status |
 |:---|:---|:---|
+| PSR-3 | Logger Interface | ✅ Available |
 | PSR-4 | Autoloading Standard | ✅ Native via Composer |
 | PSR-7 | HTTP Message Interface | ✅ Integrated |
 | PSR-11 | Container Interface | ✅ Available |
 | PSR-18 | HTTP Client Interface | ✅ Available |
-| PSR-3 | Logger Interface | ✅ Available |
+
 
 ---
 
@@ -74,7 +75,7 @@ If you want full control without fighting against a "big framework" structure,
 /app
     /Controllers
     /Models
-    /Views
+    /views
     config.php
     routes.php
 /public
@@ -84,20 +85,73 @@ composer.json
 ```
 
 - **Plural names** for app folders
+- **`views/`** written in lowercase as the templates are also written in lowercase
 - **`public/`** as webroot for maximum security
-- **`bootstrap.php`** for initialization and autoloading
+- **`bootstrap.php`** for autoloading and... bootstrapping
 
 ---
 
 # 📢 Installation
 
-Coming soon. (Until then: clone and set up manually.)
+## Install via Composer
+
+```bash
+composer require fkde/phpico
+```
+
+This will:
+
+- Download the PHPico core (framework logic inside `/src`)
+- Make it available via Composer autoloading
+- Allow you to use PHPico components in your own project structure
 
 ---
 
-## 🚀 First Steps
+## Set up your project structure
 
-1. **Create a route**
+PHPico leaves the project organization completely up to you.  
+A typical structure could look like this:
+
+```
+/app
+    /Controllers
+    /Models
+    /Views
+    config.php
+    routes.php
+/public
+    index.php
+bootstrap.php
+composer.json
+```
+
+But you are free to organize it however you like.
+
+---
+
+## First Steps
+
+You typically...
+
+- Create a `bootstrap.php` to initialize PHPico
+- Set up your `routes.php`
+- Create a `public/index.php` as your web entry point (which includes bootstrap.php)
+
+1. **Fill bootstrap.php**
+
+```php
+// /bootstrap.php
+
+define('BASE_PATH', __DIR__);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use function PHPico\app;
+
+app()->run(); // Start the application
+```
+
+2. **Create a route**
 
 ```php
 //File: app/routes.php
@@ -105,7 +159,7 @@ Coming soon. (Until then: clone and set up manually.)
 router()->add('GET', '/hello', [HelloController::class, 'index']);
 ```
 
-2. **Create a controller**
+3. **Create a controller**
 
 ```php
 //File: app/Controllers/HelloController.php
@@ -121,7 +175,7 @@ class HelloController
 }
 ```
 
-3. **Create a view**
+4. **Create a view**
 
 ```php
 //File: app/views/hello.phtml
@@ -129,7 +183,7 @@ class HelloController
 <h1>Hello, <?= htmlspecialchars($name) ?>!</h1>
 ```
 
-4. **Access your page**
+5. **Access your page**
 
 Visit:
 ```
@@ -144,13 +198,13 @@ Hello, World!
 
 ---
 
-# 🙌 License
-
-MIT License.
-
----
-
 # 🔥 Ready to build?
 
 Welcome to **PHPico** —  
 your minimalist, modern PHP playground. 🚀
+
+---
+
+# 🙌 License
+
+MIT License.
