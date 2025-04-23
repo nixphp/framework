@@ -69,28 +69,6 @@ If you want full control without fighting against a "big framework" structure,
 
 ---
 
-## 📂 Project Structure
-
-```
-/app
-    /Controllers
-    /Models
-    /views
-    config.php
-    routes.php
-/public
-    index.php
-bootstrap.php
-composer.json
-```
-
-- **Plural names** for app folders
-- **`views/`** written in lowercase as the templates are also written in lowercase
-- **`public/`** as webroot for maximum security
-- **`bootstrap.php`** for autoloading and... bootstrapping
-
----
-
 # 📢 Installation
 
 ## Install via Composer
@@ -125,11 +103,14 @@ bootstrap.php
 composer.json
 ```
 
-But you are free to organize it however you like.
+- **Plural names** for app folders
+- **`views/`** written in lowercase as the templates are also written in lowercase
+- **`public/`** as webroot for maximum security
+- **`bootstrap.php`** for autoloading and... bootstrapping
 
 ---
 
-## First Steps
+## Creating your App
 
 You typically...
 
@@ -180,7 +161,9 @@ class HelloController
 ```php
 //File: app/views/hello.phtml
 
-<h1>Hello, <?= htmlspecialchars($name) ?>!</h1>
+use function PHPico\s; // Sanitize on output
+
+<h1>Hello, <?= s($name) ?>!</h1>
 ```
 
 5. **Access your page**
