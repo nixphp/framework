@@ -23,6 +23,7 @@ It builds on native PHP features and lets you stay in control:
 
 ## 📦 Core Features
 
+- **✅ Plugin System**: Add reusable features via Composer
 - **✅ Lightweight Routing**: Define routes with `[Controller::class, 'method']`
 - **✅ Smart Dispatcher**: Automatic parameter and controller resolution
 - **✅ PSR-3 Logging** (lightweight logger ready to use)
@@ -180,6 +181,38 @@ Hello, World!
 ```
 
 ---
+
+## 🔌 Plugin Support
+
+PHPico includes a clean plugin system that allows you to extend your app modularly — without configuration.
+
+Just install a plugin via Composer (e.g. `composer require vendor/my-plugin`) and it is automatically detected if it uses the correct package type:
+
+```json
+{
+  "type": "phpico-plugin"
+}
+```
+
+A typical plugin might look like this:
+
+```
+my-plugin/
+├── app/
+│   ├── config.php
+│   └── views/
+│       └── errors/404.phtml
+├── bootstrap.php
+└── composer.json
+```
+
+- `config.php` is automatically merged.
+- `views/` are added to the view search path.
+- `bootstrap.php` runs automatically to register routes, events, etc.
+
+You can build plugins exactly like you build an app — with full access to routing, events, and controllers.
+
+> For example plugins, see the [Plugin Wiki](https://github.com/fkde/phpico/wiki/09.-Plugins)
 
 # 🔥 Ready to build?
 
