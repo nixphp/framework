@@ -27,7 +27,7 @@ class ErrorHandler
     /**
      * @throws \ErrorException
      */
-    public static function handleError($errno, $errstr, $errfile, $errline)
+    public static function handleError($errno, $errstr, $errfile, $errline): \ErrorException
     {
         throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     }

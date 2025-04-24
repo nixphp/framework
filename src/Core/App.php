@@ -2,9 +2,11 @@
 
 namespace PHPico\Core;
 
+use Composer\InstalledVersions;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use PHPico\Exceptions\HttpException;
+use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -12,6 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\config;
 use function PHPico\event;
 use function PHPico\send_response;
+use function PHPico\plugin;
 
 class App
 {
@@ -34,9 +37,7 @@ class App
 
         if ($response instanceof ResponseInterface) {
             event()->dispatch('response.sending', $response);
-            send_response($response);
-            event()->dispatch('request.end', $response, $this);
-            exit(0);
+            send_response($response); // This will abort the request as exit(0) is called
         }
 
         throw new HttpException('No response object returned.');
@@ -62,26 +63,15 @@ class App
         if (!defined('\BASE_PATH')) {
             return null;
         }
-
         return \BASE_PATH;
     }
 
-    private function createServerRequest(): ServerRequestInterface
+    private function getCoreBasePath():? string
     {
-        $psr17Factory = new Psr17Factory();
-        $creator = new ServerRequestCreator(
-            $psr17Factory, // ServerRequestFactory
-            $psr17Factory, // UriFactory
-            $psr17Factory, // UploadedFileFactory
-            $psr17Factory  // StreamFactory
-        );
-        return $creator->fromGlobals();
-    }
-
-    private function loadRoutes(): void
-    {
-        $routes = $this->getBasePath() . '/app/routes.php';
-        if (file_exists($routes)) require_once $routes;
+        if (!defined('\PHPICO_BASE_PATH')) {
+            return null;
+        }
+        return \PHPICO_BASE_PATH;
     }
 
     private function boot(): void
@@ -90,7 +80,26 @@ class App
         set_error_handler([ErrorHandler::class, 'handleError']);
         ini_set('display_errors', false);
 
+        $this->loadServices();
+        $this->loadRoutes();
+        $this->loadPlugins();
+
+    }
+
+    private function loadRoutes(): void
+    {
+        $routes = $this->getBasePath() . '/app/routes.php';
+        if (file_exists($routes)) require_once $routes;
+    }
+
+    private function loadServices(): void
+    {
         $appDir = $this->getBasePath() . '/app';
+        $coreDir = $this->getCoreBasePath() . '/src';
+
+        $this->container->set('plugin', function() {
+            return new Plugin();
+        });
 
         $this->container->set('log', function() {
 
@@ -118,8 +127,24 @@ class App
             return new Event();
         });
 
-        $this->container->set('config', function() use ($appDir) {
-             return new Config(require $appDir . '/config.php');
+        $this->container->set('config', function() use ($appDir, $coreDir) {
+
+            $appConfig = file_exists($appDir . '/config.php')
+                ? require $appDir . '/config.php'
+                : [];
+
+            $coreConfig   = file_exists($coreDir.'/src/config.php')
+                ? require $coreDir . '/src/config.php'
+                : [];
+
+            $pluginConfig = [];
+            foreach (plugin()->getMeta('configPaths') as $file) {
+                $pluginConfig = array_replace_recursive($pluginConfig, require $file);
+            }
+
+            $merged = array_replace_recursive($coreConfig, $pluginConfig, $appConfig);
+
+            return new Config($merged);
         });
 
         $this->container->set('asset', function() {
@@ -143,8 +168,38 @@ class App
             return $database->getConnection();
 
         });
+    }
 
-        $this->loadRoutes();
+    private function loadPlugins(): void
+    {
+        $paths = array_unique(array_map(function ($package) {
+            return InstalledVersions::getInstallPath($package);
+        }, InstalledVersions::getInstalledPackagesByType('phpico-plugin')));
+
+        foreach ($paths as $path) {
+            if (file_exists($path . '/bootstrap.php')) {
+                $this->container->get('plugin')->addMeta('bootstraps', $path . '/bootstrap.php');
+                require_once $path . '/bootstrap.php';
+            }
+            if (file_exists($path . '/app/config.php')) {
+                $this->container->get('plugin')->addMeta('configPaths', $path . '/app/config.php');
+            }
+            if (is_dir($path . '/app/views')) {
+                $this->container->get('plugin')->addMeta('viewPaths', $path . '/app/views');
+            }
+        }
+    }
+
+    private function createServerRequest(): ServerRequestInterface
+    {
+        $psr17Factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $psr17Factory, // ServerRequestFactory
+            $psr17Factory, // UriFactory
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory  // StreamFactory
+        );
+        return $creator->fromGlobals();
     }
 
 }

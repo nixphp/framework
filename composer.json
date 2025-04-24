@@ -19,6 +19,11 @@
       "src/view_helpers.php"
     ]
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": ">=8.3",
     "ext-pdo": "*",
@@ -30,5 +35,10 @@
     "psr/http-factory": "^1.1",
     "psr/http-client": "^1.0",
     "psr/container": "^2.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^12.1",
+    "phpspec/prophecy": "^1.3",
+    "phpspec/prophecy-phpunit": "^1.1"
   }
 }

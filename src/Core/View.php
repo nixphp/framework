@@ -4,6 +4,7 @@ namespace PHPico\Core;
 
 use function PHPico\app;
 use function PHPico\asset;
+use function PHPico\plugin;
 
 class View
 {
@@ -78,14 +79,13 @@ class View
     private function buildTemplatePath(string $templateName): string
     {
         $paths = [
-            $this->getViewsRoot(), // App-Views
-            __DIR__ . '/../Resources/views', // Framework-Default-Views
+            $this->getViewsRoot(),                  // App views
+            ...plugin()->getMeta('viewPaths'), // Plugin views
+            __DIR__ . '/../Resources/views',        // Framework views
         ];
 
         foreach ($paths as $path) {
-
             $fullPath = rtrim($path, '/') . '/' . str_replace('.', '/', $templateName) . '.phtml';
-
             if (file_exists($fullPath)) {
                 return $fullPath;
             }

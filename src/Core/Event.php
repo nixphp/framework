@@ -7,13 +7,13 @@ class Event
 
     protected array $listeners = [];
 
-    public function listen(string $event, callable $listener)
+    public function listen(string $event, callable $listener): Event
     {
         $this->listeners[$event][] = $listener;
         return $this;
     }
 
-    public function dispatch(string $event, mixed ...$payload)
+    public function dispatch(string $event, mixed ...$payload): array
     {
         $responses = [];
 

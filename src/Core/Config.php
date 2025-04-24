@@ -27,6 +27,11 @@ class Config
         return $result ?? $default;
     }
 
+    public function all(): array
+    {
+        return $this->config;
+    }
+
     /**
      * @param string $namespace
      * @return string|array|object|null

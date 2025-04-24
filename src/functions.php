@@ -2,6 +2,12 @@
 
 namespace PHPico;
 
+ob_start();
+
+if (!defined('PHPICO_BASE_PATH')) {
+    define('PHPICO_BASE_PATH', dirname(__DIR__, 2));
+}
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use Nyholm\Psr7\Response;
@@ -12,12 +18,11 @@ use PHPico\Core\Event;
 use PHPico\Core\Log;
 use PHPico\Core\Route;
 use PHPico\Core\Container;
+use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
-ob_start();
 
 global $container;
 $container = new Container();
@@ -38,7 +43,7 @@ function config(?string $key = null, mixed $default = null): array|object|string
     $config = app()->container()->get('config');
 
     if (empty($key)) {
-        return $config;
+        return $config->all();
     }
 
     return $config->get($key, $default);
@@ -54,6 +59,11 @@ function route(?string $name = null, array $params = []): Route|string
     }
 
     return $route->url($name, $params);
+}
+
+function plugin(): Plugin
+{
+    return app()->container()->get('plugin');
 }
 
 function request(): RequestInterface
@@ -111,7 +121,9 @@ function abort(int $statusCode = 404, string $message = ''): never
 
 function send_response(ResponseInterface $response): never
 {
-    if (ob_get_length() > 0) ob_end_clean();
+    while (ob_get_level() > 0) {
+        ob_end_clean(); // sauber leeren, aber erst jetzt – nach dem Einsammeln
+    }
 
     header(sprintf(
         'HTTP/%s %d %s',
@@ -127,12 +139,15 @@ function send_response(ResponseInterface $response): never
     }
 
     echo $response->getBody();
+
+    event()->dispatch('request.end', $response);
+
     exit(0);
 }
 
 function session(): Session
 {
-    return \PHPico\app()->session();
+    return app()->session();
 }
 
 function event(): Event
