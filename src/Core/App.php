@@ -76,14 +76,15 @@ class App
 
     private function boot(): void
     {
-        set_exception_handler([ErrorHandler::class, 'handleException']);
-        set_error_handler([ErrorHandler::class, 'handleError']);
-        ini_set('display_errors', false);
+        if (!defined('PHPUNIT_RUNNING')) {
+            set_exception_handler([ErrorHandler::class, 'handleException']);
+            set_error_handler([ErrorHandler::class, 'handleError']);
+            ini_set('display_errors', false);
+        }
 
         $this->loadServices();
         $this->loadRoutes();
         $this->loadPlugins();
-
     }
 
     private function loadRoutes(): void
