@@ -53,8 +53,8 @@ class Route
 
     public function url(string $name, array $params = [])
     {
-        foreach ($this->routes as $route) {
-            if ($route['name'] === $name) {
+        foreach ($this->routes as $routeName => $route) {
+            if ($routeName === $name) {
                 $url = $route['path'];
                 foreach ($params as $key => $value) {
                     $url = str_replace('{' . $key . '}', $value, $url);
@@ -62,7 +62,7 @@ class Route
                 return $url;
             }
         }
-        throw new \Exception("Route '{$name}' not found.");
+        throw new RouteNotFoundException("Route '{$name}' not found.");
     }
 
 }

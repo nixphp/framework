@@ -3,7 +3,6 @@
 namespace PHPico\Core;
 
 use function PHPico\app;
-use function PHPico\asset;
 use function PHPico\plugin;
 
 class View
