@@ -1,3 +1,7 @@
+[![PHPico Build & Test](https://github.com/fkde/phpico/actions/workflows/php.yml/badge.svg)](https://github.com/fkde/phpico/actions/workflows/php.yml)
+
+---
+
 # PHPico
 
 > **"As simple as possible, as flexible as necessary."**
