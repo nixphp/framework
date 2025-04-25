@@ -22,12 +22,14 @@ class Client implements ClientInterface
             }
         }
 
-        $options = ['http' => [
-            'method'  => $method,
-            'header'  => implode("\r\n", $headers),
-            'content' => (string) $request->getBody(),
-            'ignore_errors' => true
-        ]];
+        $options = [
+            'http' => [
+                'method'  => $method,
+                'header'  => implode("\r\n", $headers),
+                'content' => (string) $request->getBody(),
+                'ignore_errors' => true
+            ]
+        ];
 
         if (false === config('client:ssl_verify', true)) {
             $options['ssl']['verify_peer'] = false;

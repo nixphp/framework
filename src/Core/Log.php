@@ -74,4 +74,6 @@ class Log implements LoggerInterface
         return strtr($message, $replace);
     }
 
+
+
 }

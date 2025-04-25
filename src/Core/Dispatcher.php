@@ -6,19 +6,16 @@ use PHPico\Exceptions\DispatcherException;
 use PHPico\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use function PHPico\abort;
 use function PHPico\event;
 use function PHPico\render;
-use function PHPico\send_response;
-use function PHPico\view;
 
 class Dispatcher
 {
-    private Route $router;
+    private Route $route;
 
-    public function __construct(Route $router)
+    public function __construct(Route $route)
     {
-        $this->router = $router;
+        $this->route = $route;
     }
 
     public function forward(ServerRequestInterface $request): ResponseInterface
@@ -27,10 +24,10 @@ class Dispatcher
         $uri = $request->getUri()->getPath();
 
         try {
-            $route = $this->router->find($uri, $method);
+            $route = $this->route->find($uri, $method);
         } catch (RouteNotFoundException $e) {
-            if ($uri === '/') send_response(render('phpico_welcome'));
-            abort(404, 'Not Found');
+            if ($uri === '/') return render('phpico_welcome');
+            throw $e;
         }
 
         $response = null;

@@ -18,6 +18,7 @@ use PHPico\Core\Event;
 use PHPico\Core\Log;
 use PHPico\Core\Route;
 use PHPico\Core\Container;
+use PHPico\Exceptions\AbortException;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
@@ -113,10 +114,7 @@ function refresh(): ResponseInterface
 
 function abort(int $statusCode = 404, string $message = ''): never
 {
-    send_response(response(view('errors.' . $statusCode, [
-        'statusCode' => $statusCode,
-        'message' => s($message)
-    ]), $statusCode));
+    throw new AbortException(s($message), $statusCode);
 }
 
 function send_response(ResponseInterface $response): never

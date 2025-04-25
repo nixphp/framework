@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use PHPico\Core\Route;
 use PHPico\Exceptions\RouteNotFoundException;
 use Tests\PHPicoTestCase;
+use function PHPico\app;
 
 class RouteTest extends PHPicoTestCase
 {
@@ -70,6 +71,13 @@ class RouteTest extends PHPicoTestCase
         $route = new Route();
         $route->add('GET', '/test', function() { return 'test'; }, 'testname');
         $route->url('wrong_testname');
+    }
+
+    public function testHelperFunction()
+    {
+        \PHPico\route()->add('GET', '/test', function() { return 'test'; }, 'test');
+
+        $this->assertSame('/test', \PHPico\route('test'));
     }
 
 }

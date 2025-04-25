@@ -2,6 +2,7 @@
 
 namespace PHPico\Core;
 
+use PHPUnit\Framework\Attributes\CoversNothing;
 use function PHPico\send_response;
 use function PHPico\view;
 use function PHPico\response;
@@ -9,7 +10,7 @@ use function PHPico\response;
 class ErrorHandler
 {
 
-    public static function handleException(\Throwable $e): void
+    #[CoversNothing] public static function handleException(\Throwable $e): void
     {
         $message = htmlspecialchars($e->getMessage());
         $file = htmlspecialchars($e->getFile());
@@ -27,7 +28,7 @@ class ErrorHandler
     /**
      * @throws \ErrorException
      */
-    public static function handleError($errno, $errstr, $errfile, $errline): \ErrorException
+    #[CoversNothing] public static function handleError($errno, $errstr, $errfile, $errline): \ErrorException
     {
         throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
     }

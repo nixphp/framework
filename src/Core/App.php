@@ -5,16 +5,19 @@ namespace PHPico\Core;
 use Composer\InstalledVersions;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use PHPico\Exceptions\AbortException;
 use PHPico\Exceptions\HttpException;
+use PHPico\Exceptions\RouteNotFoundException;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\config;
 use function PHPico\event;
+use function PHPico\response;
 use function PHPico\send_response;
 use function PHPico\plugin;
+use function PHPico\view;
 
 class App
 {
@@ -33,14 +36,29 @@ class App
         event()->dispatch('request.start', $request);
         $this->container()->set('request', $request);
 
-        $response = $this->container->get('dispatcher')->forward($request);
-
-        if ($response instanceof ResponseInterface) {
-            event()->dispatch('response.sending', $response);
-            send_response($response); // This will abort the request as exit(0) is called
+        try {
+            $response = $this->container->get('dispatcher')->forward($request);
+        } catch (AbortException | HttpException | RouteNotFoundException $e) {
+            $response = response(view(
+                'errors.' . $e->getStatusCode(),
+                [
+                    'statusCode' => $e->getCode(),
+                    'message' => $e->getMessage()
+                ]
+            ));
+        } catch (\Throwable $e) {
+            $response = response(view(
+                'errors.500',
+                [
+                    'statusCode' => 500,
+                    'message' => $e->getMessage()
+                ]
+            ));
         }
 
-        throw new HttpException('No response object returned.');
+        event()->dispatch('response.sending', $response);
+        send_response($response); // This will abort the request as exit(0) is called
+
     }
 
     public function container(): Container

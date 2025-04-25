@@ -39,6 +39,6 @@ class Asset
                 $html .= sprintf(self::TAG_JS, s($path)) . PHP_EOL;
             }
         }
-        return $html;
+        return trim($html);
     }
 }

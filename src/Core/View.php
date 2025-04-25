@@ -40,7 +40,7 @@ class View
     public function render(): string
     {
         ob_start();
-        extract($this->variables, EXTR_OVERWRITE);
+        extract($this->variables);
         include $this->template;
         $content = ob_get_clean();
 
@@ -59,7 +59,8 @@ class View
 
     public function endblock(string $name): void
     {
-        if ($this->variables[$name] !== 'initial') {
+        if (!isset($this->variables[$name])) {
+            ob_end_clean();
             throw new \Exception("Variable $name does not exist");
         }
         $this->variables[$name] = ob_get_clean();
