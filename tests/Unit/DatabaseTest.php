@@ -5,6 +5,7 @@ namespace Unit;
 use Fixtures\DummyDatabase;
 use PHPico\Core\Database;
 use Tests\PHPicoTestCase;
+use function PHPico\app;
 
 class DatabaseTest extends PHPIcoTestCase
 {
@@ -40,6 +41,11 @@ class DatabaseTest extends PHPIcoTestCase
         $db = new Database($config, fn() => $pdoMock);
 
         $this->assertSame($pdoMock, $db->getConnection());
+    }
+
+    public function testHelperFunction()
+    {
+        $this->assertNull(\PHPico\database());
     }
 
 }

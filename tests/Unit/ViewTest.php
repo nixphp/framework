@@ -45,4 +45,9 @@ class ViewTest extends PHPicoTestCase
         $view->render();
     }
 
+    public function testHelperFunction()
+    {
+        $this->assertIsString(\PHPico\view('test'));
+    }
+
 }

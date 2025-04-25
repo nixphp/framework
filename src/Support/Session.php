@@ -2,15 +2,24 @@
 
 namespace PHPico\Support;
 
+use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
+
 class Session
 {
     protected bool $started = false;
 
-    public function start(): void
+    public function start(callable $sessionHandler = null): void
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
+        if (null === $sessionHandler) {
+            $sessionHandler = #[CodeCoverageIgnore] function () {
+                if (session_status() !== PHP_SESSION_ACTIVE) {
+                    session_start();
+                }
+            };
         }
+
+        $sessionHandler();
+
         $this->started = true;
     }
 

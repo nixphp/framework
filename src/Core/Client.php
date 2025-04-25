@@ -10,10 +10,10 @@ use function PHPico\config;
 
 class Client implements ClientInterface
 {
-    public function sendRequest(RequestInterface $request): ResponseInterface
+    public function sendRequest(RequestInterface $request, callable $handler = null): ResponseInterface
     {
-        $method = strtoupper($request->getMethod());
-        $url    = (string) $request->getUri();
+        $method  = strtoupper($request->getMethod());
+        $url     = (string) $request->getUri();
         $headers = [];
 
         foreach ($request->getHeaders() as $name => $values) {
@@ -37,17 +37,23 @@ class Client implements ClientInterface
             $options['ssl']['allow_self_signed'] = true;
         }
 
-        $context = stream_context_create($options);
+        if (null === $handler) {
+            $handler = function($url, $options) {
+                $context = stream_context_create($options);
+                $body = file_get_contents($url, false, $context);
+                return [$body, $http_response_header];
+            };
+        }
 
-        $body = file_get_contents($url, false, $context);
+        [$body, $responseHeadersRaw] = $handler($url, $options);
 
-        $statusLine = $http_response_header[0] ?? 'HTTP/1.1 200 OK';
+        $statusLine = $responseHeadersRaw[0] ?? 'HTTP/1.1 200 OK';
         preg_match('#HTTP/\d+\.\d+\s+(\d+)#', $statusLine, $matches);
         $status = (int)($matches[1] ?? 200);
 
         $responseHeaders = [];
 
-        foreach ($http_response_header as $headerLine) {
+        foreach ($responseHeadersRaw as $headerLine) {
             if (str_contains($headerLine, ':')) {
                 [$name, $value] = explode(':', $headerLine, 2);
                 $responseHeaders[trim($name)][] = trim($value);

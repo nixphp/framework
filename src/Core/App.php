@@ -94,21 +94,40 @@ class App
 
     private function boot(): void
     {
-        if (!defined('PHPUNIT_RUNNING')) {
+        $envFile = file_exists($this->getBasePath() . '/.env.local')
+            ? $this->getBasePath() . '/.env.local'
+            : $this->getBasePath() . '/.env';
+
+        $this->loadEnv($envFile);
+
+        if (getenv('APP_ENV') !== Environment::TESTING
+            && getenv('APP_ENV') !== Environment::PRODUCTION
+        ) {
             set_exception_handler([ErrorHandler::class, 'handleException']);
             set_error_handler([ErrorHandler::class, 'handleError']);
             ini_set('display_errors', false);
         }
 
         $this->loadServices();
-        $this->loadRoutes();
         $this->loadPlugins();
+        $this->loadRoutes();
     }
 
-    private function loadRoutes(): void
+    private function loadEnv(string $path = '/.env'): void
     {
-        $routes = $this->getBasePath() . '/app/routes.php';
-        if (file_exists($routes)) require_once $routes;
+        if (!file_exists($path)) return;
+
+        foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+            if (str_starts_with(trim($line), '#')) continue;
+            [$key, $value] = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+
+            if (!array_key_exists($key, $_ENV)) {
+                $_ENV[$key] = $value;
+                putenv("$key=$value");
+            }
+        }
     }
 
     private function loadServices(): void
@@ -116,13 +135,17 @@ class App
         $appDir = $this->getBasePath() . '/app';
         $coreDir = $this->getCoreBasePath() . '/src';
 
+        $this->container->set('environment', function() {
+            return new Environment($_ENV['APP_ENV'] ?? getenv('APP_ENV'));
+        });
+
         $this->container->set('plugin', function() {
             return new Plugin();
         });
 
         $this->container->set('log', function() {
 
-            $logFile   = $this->getBasePath() . '/log/app.log';
+            $logFile   = $this->getBasePath() . '/logs/app.log';
             $directory = dirname($logFile);
 
             if (!is_dir($directory)) {
@@ -152,7 +175,7 @@ class App
                 ? require $appDir . '/config.php'
                 : [];
 
-            $coreConfig   = file_exists($coreDir.'/src/config.php')
+            $coreConfig = file_exists($coreDir.'/src/config.php')
                 ? require $coreDir . '/src/config.php'
                 : [];
 
@@ -189,22 +212,30 @@ class App
         });
     }
 
+    private function loadRoutes(): void
+    {
+        $routes = $this->getBasePath() . '/app/routes.php';
+        if (file_exists($routes)) require_once $routes;
+    }
+
     private function loadPlugins(): void
     {
         $paths = array_unique(array_map(function ($package) {
             return InstalledVersions::getInstallPath($package);
         }, InstalledVersions::getInstalledPackagesByType('phpico-plugin')));
 
+        $pluginService = $this->container->get('plugin');
+
         foreach ($paths as $path) {
             if (file_exists($path . '/bootstrap.php')) {
-                $this->container->get('plugin')->addMeta('bootstraps', $path . '/bootstrap.php');
+                $pluginService->addMeta('bootstraps', $path . '/bootstrap.php');
                 require_once $path . '/bootstrap.php';
             }
             if (file_exists($path . '/app/config.php')) {
-                $this->container->get('plugin')->addMeta('configPaths', $path . '/app/config.php');
+                $pluginService->addMeta('configPaths', $path . '/app/config.php');
             }
             if (is_dir($path . '/app/views')) {
-                $this->container->get('plugin')->addMeta('viewPaths', $path . '/app/views');
+                $pluginService->addMeta('viewPaths', $path . '/app/views');
             }
         }
     }

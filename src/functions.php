@@ -143,6 +143,17 @@ function send_response(ResponseInterface $response): never
     exit(0);
 }
 
+function env(?string $key = null, mixed $default = null): mixed
+{
+    $env = app()->container()->get('environment');
+
+    if (empty($key)) {
+        return $env;
+    }
+
+    return $env->get($key, $default);
+}
+
 function session(): Session
 {
     return app()->session();
@@ -153,7 +164,7 @@ function event(): Event
     return app()->container()->get('event');
 }
 
-function database(): \PDO
+function database(): \PDO|null
 {
     return app()->container()->get('database');
 }

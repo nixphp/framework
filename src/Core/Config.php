@@ -9,7 +9,7 @@ class Config
 
     public function __construct(array $config = [])
     {
-        $this->config = $config;
+        $this->config = $this->resolveEnv($config);
     }
 
     /**
@@ -46,5 +46,17 @@ class Config
         return $pointer;
     }
 
+    function resolveEnv(array $config): array
+    {
+        foreach ($config as $key => $value) {
+            if (is_array($value)) {
+                $config[$key] = $this->resolveEnv($value);
+            } elseif (is_string($value) && str_starts_with($value, 'ENV:')) {
+                $envKey = substr($value, 4);
+                $config[$key] = $_ENV[$envKey] ?? null;
+            }
+        }
+        return $config;
+    }
 
 }

@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use PHPico\Core\Config;
 use Tests\PHPicoTestCase;
 use function PHPico\app;
+use function PHPico\env;
 
 class ConfigTest extends PHPIcoTestCase
 {
@@ -21,6 +22,13 @@ class ConfigTest extends PHPIcoTestCase
         $config = new Config(['foo' => ['bar' => 'baz']]);
         $this->assertEquals('baz', $config->get('foo:bar'));
         $this->assertSame(['foo' => ['bar' => 'baz']], $config->all());
+    }
+
+    public function testConfigInternalsEnvVariables()
+    {
+        $_ENV['BAR'] = 'baz';
+        $config = new Config(['foo' => 'ENV:BAR']);
+        $this->assertSame('baz', $config->get('foo'));
     }
 
     public function testHelperFunction()
