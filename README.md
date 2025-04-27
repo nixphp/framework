@@ -1,4 +1,4 @@
-![Logo](src/Resources/images/phpico-logo.svg)
+![Logo](src/Resources/images/phpico-logo.png)
 
 ---
 
