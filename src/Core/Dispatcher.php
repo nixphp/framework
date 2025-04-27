@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\event;
 use function PHPico\render;
+use function PHPico\response;
 
 class Dispatcher
 {
@@ -26,7 +27,9 @@ class Dispatcher
         try {
             $route = $this->route->find($uri, $method);
         } catch (RouteNotFoundException $e) {
-            if ($uri === '/') return render('phpico_welcome');
+            if ($uri === '/' && $method === 'GET') {
+                return render('phpico_welcome');
+            }
             throw $e;
         }
 
@@ -36,13 +39,13 @@ class Dispatcher
         if (is_array($action)) {
             [$class, $classAction] = $action;
             $class = new $class();
-            event()->dispatch('controller.calling', $class, $action);
+            event()->dispatch('controller.calling', $request, $class, $action);
             $response = $class->$classAction($route['params'] ?? null);
-            event()->dispatch('controller.called', $class, $action, $response);
+            event()->dispatch('controller.called', $request, $class, $action, $response);
         } else if (is_callable($action)) {
-            event()->dispatch('controller.calling', null, $action);
+            event()->dispatch('controller.calling', $request, null, $action);
             $response = $action($route['params'] ?? null);
-            event()->dispatch('controller.called', null, $action, $response);
+            event()->dispatch('controller.called', $request, null, $action, $response);
         }
 
         if ($response instanceof ResponseInterface) return $response;

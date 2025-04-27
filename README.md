@@ -1,3 +1,7 @@
+![Logo](src/Resources/images/phpico-logo.svg)
+
+---
+
 [![PHPico Build & Test](https://github.com/fkde/phpico/actions/workflows/php.yml/badge.svg)](https://github.com/fkde/phpico/actions/workflows/php.yml)
 
 ---

@@ -7,7 +7,7 @@ class Event
 
     protected array $listeners = [];
 
-    public function listen(string $event, callable $listener): Event
+    public function listen(string $event, array|callable $listener): Event
     {
         $this->listeners[$event][] = $listener;
         return $this;
@@ -19,7 +19,12 @@ class Event
 
         if (!empty($this->listeners[$event])) {
             foreach ($this->listeners[$event] as $listener) {
-                $responses[] = $listener(...$payload);
+                if (is_array($listener)) {
+                    [$class, $handle] = $listener;
+                    $responses[] = call_user_func([new $class, $handle], ...$payload);
+                } else if (is_callable($listener)) {
+                    $responses[] = $listener(...$payload);
+                }
             }
         }
 

@@ -30,18 +30,12 @@ function asset(): Asset
  */
 function s(string|array $value): string|array
 {
-    if (is_array($value)) {
-        return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
-    }
-
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    return guard()->safeOutput($value);
 }
 
-function memory(string $key, mixed $default = null): string
+function memory(string $key, mixed $default = null):? string
 {
-    /** @var ServerRequestInterface $request */
     $request = app()->request();
-
     $parsedBody = $request->getParsedBody();
     $queryParams = $request->getQueryParams();
 

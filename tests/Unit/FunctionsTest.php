@@ -3,9 +3,11 @@
 namespace Tests\Unit;
 
 use Nyholm\Psr7\Request;
+use Nyholm\Psr7\ServerRequest;
 use PHPico\Exceptions\AbortException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Tests\PHPicoTestCase;
 use function PHPico\abort;
 use function PHPico\app;
@@ -20,8 +22,8 @@ class FunctionsTest extends PHPicoTestCase
 
     public function testFunctionRequest()
     {
-        app()->container()->set('request', function() { return new Request('GET', '/test'); });
-        $this->assertInstanceOf(RequestInterface::class, request());
+        app()->container()->set('request', function() { return new ServerRequest('GET', '/test'); });
+        $this->assertInstanceOf(ServerRequestInterface::class, request());
     }
     
     public function testFunctionJson()

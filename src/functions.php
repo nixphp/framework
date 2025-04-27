@@ -14,16 +14,26 @@ use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
 use PHPico\Core\App;
 use PHPico\Core\Config;
+use PHPico\Core\Environment;
+use PHPico\Core\ErrorHandler;
 use PHPico\Core\Event;
 use PHPico\Core\Log;
 use PHPico\Core\Route;
 use PHPico\Core\Container;
 use PHPico\Exceptions\AbortException;
+use PHPico\Support\Guard;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+
+if (getenv('APP_ENV') !== Environment::TESTING
+    && getenv('APP_ENV') !== Environment::PRODUCTION
+) {
+    //set_exception_handler([ErrorHandler::class, 'handleException']);
+    set_error_handler([ErrorHandler::class, 'handleError']);
+    ini_set('display_errors', false);
+}
 
 global $container;
 $container = new Container();
@@ -67,7 +77,7 @@ function plugin(): Plugin
     return app()->container()->get('plugin');
 }
 
-function request(): RequestInterface
+function request(): ServerRequestInterface
 {
     return app()->request();
 }
@@ -172,4 +182,9 @@ function database(): \PDO|null
 function log(): Log
 {
     return app()->container()->get('log');
+}
+
+function guard(): Guard
+{
+    return app()->guard();
 }

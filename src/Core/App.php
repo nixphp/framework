@@ -5,9 +5,12 @@ namespace PHPico\Core;
 use Composer\InstalledVersions;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use PHPico\Core\Events\CsrfListener;
 use PHPico\Exceptions\AbortException;
+use PHPico\Exceptions\DispatcherException;
 use PHPico\Exceptions\HttpException;
 use PHPico\Exceptions\RouteNotFoundException;
+use PHPico\Support\Guard;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\RequestInterface;
@@ -33,27 +36,26 @@ class App
     public function run(): void
     {
         $request = $this->createServerRequest();
-        event()->dispatch('request.start', $request);
+        $this->container()->get('event')->dispatch('request.start', $request);
         $this->container()->set('request', $request);
 
         try {
             $response = $this->container->get('dispatcher')->forward($request);
-        } catch (AbortException | HttpException | RouteNotFoundException $e) {
+        } catch (AbortException | HttpException | RouteNotFoundException | DispatcherException $e) {
             $response = response(view(
-                'errors.' . $e->getStatusCode(),
-                [
-                    'statusCode' => $e->getCode(),
+                'errors.' . $e->getStatusCode(), [
+                    'statusCode' => $e->getStatusCode(),
                     'message' => $e->getMessage()
                 ]
             ));
         } catch (\Throwable $e) {
             $response = response(view(
-                'errors.500',
-                [
+                'errors.default', [
                     'statusCode' => 500,
                     'message' => $e->getMessage()
                 ]
             ));
+
         }
 
         event()->dispatch('response.sending', $response);
@@ -66,7 +68,7 @@ class App
         return $this->container;
     }
 
-    public function request(): RequestInterface
+    public function request(): ServerRequestInterface
     {
         return $this->container->get('request');
     }
@@ -74,6 +76,11 @@ class App
     public function session(): Session
     {
         return $this->container->get('session');
+    }
+
+    public function guard(): Guard
+    {
+        return $this->container->get('guard');
     }
 
     public function getBasePath():? string
@@ -99,18 +106,11 @@ class App
             : $this->getBasePath() . '/.env';
 
         $this->loadEnv($envFile);
-
-        if (getenv('APP_ENV') !== Environment::TESTING
-            && getenv('APP_ENV') !== Environment::PRODUCTION
-        ) {
-            set_exception_handler([ErrorHandler::class, 'handleException']);
-            set_error_handler([ErrorHandler::class, 'handleError']);
-            ini_set('display_errors', false);
-        }
-
         $this->loadServices();
         $this->loadPlugins();
         $this->loadRoutes();
+
+        $this->container()->get('event')->listen('controller.calling', [CsrfListener::class, 'handle']);
     }
 
     private function loadEnv(string $path = '/.env'): void
@@ -134,6 +134,10 @@ class App
     {
         $appDir = $this->getBasePath() . '/app';
         $coreDir = $this->getCoreBasePath() . '/src';
+
+        $this->container->set('guard', function() {
+            return new Guard();
+        });
 
         $this->container->set('environment', function() {
             return new Environment($_ENV['APP_ENV'] ?? getenv('APP_ENV'));

@@ -16,10 +16,9 @@ class ErrorHandler
         $file = htmlspecialchars($e->getFile());
         $line = (int)$e->getLine();
         $trace = htmlspecialchars($e->getTraceAsString());
-
         send_response(
             response(
-                view('errors.500', compact('message', 'file', 'line', 'trace')),
+                view('errors.500' . $e->getCode(), compact('message', 'file', 'line', 'trace')),
                 500
             )
         );

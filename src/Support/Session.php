@@ -2,8 +2,6 @@
 
 namespace PHPico\Support;
 
-use PHPUnit\Framework\Attributes\CodeCoverageIgnore;
-
 class Session
 {
     protected bool $started = false;
@@ -11,8 +9,13 @@ class Session
     public function start(callable $sessionHandler = null): void
     {
         if (null === $sessionHandler) {
-            $sessionHandler = #[CodeCoverageIgnore] function () {
+            $sessionHandler = function () {
                 if (session_status() !== PHP_SESSION_ACTIVE) {
+                    session_set_cookie_params([
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'Lax',
+                    ]);
                     session_start();
                 }
             };

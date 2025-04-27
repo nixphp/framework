@@ -45,6 +45,14 @@ class ViewTest extends PHPicoTestCase
         $view->render();
     }
 
+    public function testMaliciousTemplatePath()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $view = new View();
+        $view->setTemplate('../../../../etc/passwd');
+        $view->render();
+    }
+
     public function testHelperFunction()
     {
         $this->assertIsString(\PHPico\view('test'));

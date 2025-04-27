@@ -2,7 +2,9 @@
 
 namespace PHPico\Core;
 
+use function PHPico\abort;
 use function PHPico\app;
+use function PHPico\guard;
 use function PHPico\plugin;
 
 class View
@@ -71,24 +73,19 @@ class View
         return $this->variables[$name] ?? $default;
     }
 
-    private function getViewsRoot(): string
-    {
-        return app()->getBasePath() . '/app/views';
-    }
-
     private function buildTemplatePath(string $templateName): string
     {
+        $templateName = guard()->safePath($templateName);
+
         $paths = [
-            $this->getViewsRoot(),                  // App views
-            ...plugin()->getMeta('viewPaths'), // Plugin views
-            __DIR__ . '/../Resources/views',        // Framework views
+            app()->getBasePath() . '/app/views', // App views
+            ...array_filter(array_map('realpath', plugin()->getMeta('viewPaths'))), // Plugin views
+            __DIR__ . '/../Resources/views', // Framework views
         ];
 
         foreach ($paths as $path) {
             $fullPath = rtrim($path, '/') . '/' . str_replace('.', '/', $templateName) . '.phtml';
-            if (file_exists($fullPath)) {
-                return $fullPath;
-            }
+            if (is_file($fullPath)) return $fullPath;
         }
 
         throw new \RuntimeException("View [$templateName] not found in any known paths.");
