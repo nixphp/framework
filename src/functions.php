@@ -48,7 +48,7 @@ function app(): App
     return $container->get('app');
 }
 
-function config(?string $key = null, mixed $default = null): array|object|string|null
+function config(?string $key = null, mixed $default = null): mixed
 {
     /** @var Config $config */
     $config = app()->container()->get('config');

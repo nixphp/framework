@@ -18,7 +18,7 @@ class Config
      *
      * @return string|array|object|null
      */
-    public function get(string $key, string|array|object|int|null $default = null): string|array|object|null
+    public function get(string $key, mixed $default = null): mixed
     {
         $result = $this->config[$key] ?? null;
         if (str_contains($key, ':') !== false) {
@@ -36,7 +36,7 @@ class Config
      * @param string $namespace
      * @return string|array|object|null
      */
-    private function resolveNamespace(string $namespace): string|array|object|null
+    private function resolveNamespace(string $namespace): mixed
     {
         $parts   = explode(':', $namespace);
         $pointer = $this->config;

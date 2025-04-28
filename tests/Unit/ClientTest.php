@@ -1,6 +1,6 @@
 <?php
 
-namespace Unit;
+namespace Tests\Unit;
 
 use Nyholm\Psr7\Request;
 use PHPico\Core\Client;
@@ -8,7 +8,6 @@ use PHPico\Core\Config;
 use Psr\Http\Message\ResponseInterface;
 use Tests\PHPicoTestCase;
 use function PHPico\app;
-use function PHPico\request;
 
 class ClientTest extends PHPicoTestCase
 {
@@ -45,6 +44,25 @@ class ClientTest extends PHPicoTestCase
                 ]
             ];
         });
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(200, $response->getStatusCode());
+    }
+
+    public function testRequestWithHeaders()
+    {
+        $request = new Request('GET', '/test');
+        $request = $request->withHeader('Content-Type', 'text/plain');
+
+        $client = new Client();
+        $response = $client->sendRequest($request, function () {
+            return [
+                'test', [
+                    'HTTP/1.1 200 OK',
+                    'Content-Type: text/plain'
+                ]
+            ];
+        });
+
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame(200, $response->getStatusCode());
     }

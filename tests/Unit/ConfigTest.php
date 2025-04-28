@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use PHPico\Core\Config;
 use Tests\PHPicoTestCase;
 use function PHPico\app;
-use function PHPico\env;
+use function PHPico\config;
 
 class ConfigTest extends PHPIcoTestCase
 {
@@ -13,14 +13,14 @@ class ConfigTest extends PHPIcoTestCase
     public function testConfigInternals()
     {
         $config = new Config(['foo' => 'bar']);
-        $this->assertEquals('bar', $config->get('foo'));
+        $this->assertSame('bar', $config->get('foo'));
         $this->assertSame(['foo' => 'bar'], $config->all());
     }
 
     public function testConfigInternalsWithNamespace()
     {
         $config = new Config(['foo' => ['bar' => 'baz']]);
-        $this->assertEquals('baz', $config->get('foo:bar'));
+        $this->assertSame('baz', $config->get('foo:bar'));
         $this->assertSame(['foo' => ['bar' => 'baz']], $config->all());
     }
 
@@ -38,8 +38,32 @@ class ConfigTest extends PHPIcoTestCase
             return $config;
         });
 
-        $this->assertEquals('bar', \PHPico\config('foo'));
-        $this->assertSame(['foo' => 'bar'], \PHPico\config());
+        $this->assertSame('bar', config('foo'));
+        $this->assertSame(['foo' => 'bar'], config());
+    }
+
+    public function testTypeIsFalse()
+    {
+        $config = new Config(['foo' => false]);
+        app()->container()->set('config', function () use ($config) {
+            return $config;
+        });
+
+        $this->assertSame(['foo' => false], config());
+        $this->assertSame(false, config('foo'));
+        $this->assertIsBool(config('foo'));
+    }
+
+    public function testTypeIsTrue()
+    {
+        $config = new Config(['foo' => true]);
+        app()->container()->set('config', function () use ($config) {
+            return $config;
+        });
+
+        $this->assertSame(['foo' => true], config());
+        $this->assertSame(true, config('foo'));
+        $this->assertIsBool(config('foo'));
     }
 
 }

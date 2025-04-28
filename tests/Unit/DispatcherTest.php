@@ -17,8 +17,6 @@ use Tests\PHPicoTestCase;
 
 class DispatcherTest extends PHPicoTestCase
 {
-
-
     public function testDispatch()
     {
         $request = new ServerRequest('GET', '/test');
@@ -74,6 +72,28 @@ class DispatcherTest extends PHPicoTestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame('test', $response->getBody()->getContents());
+    }
+
+    public function testDispatchPlaceholderWhenNoRoutesAreConfigured()
+    {
+        $request = new ServerRequest('GET', '/');
+        $route = new Route();
+
+        $dispatcher = new Dispatcher($route);
+        $response = $dispatcher->forward($request);
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertStringContainsString('To begin developing, you may add your first route to', $response->getBody()->getContents());
+    }
+
+    public function testDispatchNotFoundWhenNoRoutesAreConfiguredAndOtherPathIsCalled()
+    {
+        $this->expectException(RouteNotFoundException::class);
+        $request = new ServerRequest('GET', '/test');
+        $route = new Route();
+
+        $dispatcher = new Dispatcher($route);
+        $dispatcher->forward($request);
     }
 
 }
