@@ -11,7 +11,7 @@ class Database
 {
     protected PDO $pdo;
 
-    public function __construct(array $config, callable $pdoFactory = null)
+    public function __construct(array $config, ?callable $pdoFactory = null)
     {
         $dsn      = $this->buildDsn($config);
         $options  = $this->pdoOptions();

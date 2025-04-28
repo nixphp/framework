@@ -6,7 +6,7 @@ class Session
 {
     protected bool $started = false;
 
-    public function start(callable $sessionHandler = null): void
+    public function start(?callable $sessionHandler = null): void
     {
         if (null === $sessionHandler) {
             $sessionHandler = function () {

@@ -10,7 +10,7 @@ use function PHPico\config;
 
 class Client implements ClientInterface
 {
-    public function sendRequest(RequestInterface $request, callable $handler = null): ResponseInterface
+    public function sendRequest(RequestInterface $request, ?callable $handler = null): ResponseInterface
     {
         $method  = strtoupper($request->getMethod());
         $url     = (string) $request->getUri();
