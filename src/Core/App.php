@@ -85,10 +85,10 @@ class App
 
     private function getCoreBasePath():? string
     {
-        if (!defined('\PHPICO_BASE_PATH')) {
+        if (!defined('\NIXPHP_BASE_PATH')) {
             return null;
         }
-        return \PHPICO_BASE_PATH;
+        return \NIXPHP_BASE_PATH;
     }
 
     private function boot(): void
@@ -215,7 +215,7 @@ class App
             $orderedPackages = require $pluginConfigPath;
         }
 
-        $allPackages = InstalledVersions::getInstalledPackagesByType('phpico-plugin');
+        $allPackages = InstalledVersions::getInstalledPackagesByType('nixphp-plugin');
         $ordered = array_filter($orderedPackages, fn($name) => in_array($name, $allPackages));
         $remaining = array_diff($allPackages, $ordered);
 

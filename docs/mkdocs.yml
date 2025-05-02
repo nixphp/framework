@@ -4,14 +4,14 @@ theme:
   name: material
   palette:
     - scheme: default
-      primary: blue
+      primary: grey
       accent: indigo
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
     - scheme: slate
-      primary: blue
-      accent: indigo
+      primary: light blue
+      accent: light blue
       toggle:
         icon: material/weather-night
         name: Switch to dark mode

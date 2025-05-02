@@ -4,8 +4,8 @@ namespace NixPHP;
 
 ob_start();
 
-if (!defined('PHPICO_BASE_PATH')) {
-    define('PHPICO_BASE_PATH', dirname(__DIR__, 2));
+if (!defined('NIXPHP_BASE_PATH')) {
+    define('NIXPHP_BASE_PATH', dirname(__DIR__, 2));
 }
 
 use Nyholm\Psr7\Response;
