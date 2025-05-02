@@ -8,8 +8,6 @@ if (!defined('PHPICO_BASE_PATH')) {
     define('PHPICO_BASE_PATH', dirname(__DIR__, 2));
 }
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
 use PHPico\Core\App;
@@ -79,7 +77,7 @@ function plugin(): Plugin
 
 function request(): ServerRequestInterface
 {
-    return app()->request();
+    return app()->container()->get('request');
 }
 
 function response(mixed $content = '', int $status = 200, array $headers = []): ResponseInterface
@@ -172,11 +170,6 @@ function session(): Session
 function event(): Event
 {
     return app()->container()->get('event');
-}
-
-function database(): \PDO|null
-{
-    return app()->container()->get('database');
 }
 
 function log(): Log

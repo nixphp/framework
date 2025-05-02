@@ -13,7 +13,6 @@ use PHPico\Support\Guard;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
 use Psr\Http\Message\ServerRequestInterface;
-use function PHPico\config;
 use function PHPico\event;
 use function PHPico\response;
 use function PHPico\send_response;
@@ -64,11 +63,6 @@ class App
     public function container(): Container
     {
         return $this->container;
-    }
-
-    public function request(): ServerRequestInterface
-    {
-        return $this->container->get('request');
     }
 
     public function session(): Session
@@ -200,16 +194,6 @@ class App
 
         $this->container->set('dispatcher', function($container) {
             return new Dispatcher($container->get('route'));
-        });
-
-        $this->container->set('database', function() {
-
-            $config = config('database');
-            if (!$config) return null;
-
-            $database = new Database($config);
-            return $database->getConnection();
-
         });
     }
 
