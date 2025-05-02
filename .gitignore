@@ -2,3 +2,4 @@
 vendor
 coverage-report
 .phpunit.result.cache
+docs/.venv
