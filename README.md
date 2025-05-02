@@ -220,7 +220,7 @@ my-plugin/
 
 You can build plugins exactly like you build an app — with full access to routing, events, and controllers.
 
-> For example plugins, see the [Plugin Wiki](https://github.com/fkde/nixphp/wiki/09.-Plugins)
+> For example plugins, see the [Plugin Documentation](https://nixphp.github.io/docs/plugins/)
 
 # 🔥 Ready to build?
 
