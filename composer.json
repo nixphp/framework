@@ -1,5 +1,5 @@
 {
-  "name": "fkde/phpico",
+  "name": "phpico/framework",
   "description": "PHPico – the ultra-light, functional PHP framework for fast microservices and APIs.",
   "minimum-stability": "stable",
   "license": "MIT",

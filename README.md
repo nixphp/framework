@@ -2,7 +2,7 @@
 
 ---
 
-[![PHPico Build & Test](https://github.com/fkde/phpico/actions/workflows/php.yml/badge.svg)](https://github.com/fkde/phpico/actions/workflows/php.yml)
+[![PHPico Build & Test](https://github.com/phpico/framework/actions/workflows/php.yml/badge.svg)](https://github.com/phpico/framework/actions/workflows/php.yml)
 
 ---
 
@@ -15,6 +15,10 @@ fast, minimal, extendable — and now fully embracing modern PHP standards like 
 
 It builds on native PHP features and lets you stay in control:  
 **Use only what you need — and extend freely when you want.**
+
+> 🧩 PHPico provides a minimal core with a clean plugin architecture.  
+> Everything beyond routing and dispatching — such as sessions, views, forms, or database — is handled by optional plugins.  
+> You get full control over what your app includes — and nothing more.
 
 ---
 
@@ -38,11 +42,11 @@ It builds on native PHP features and lets you stay in control:
 - **✅ PSR-4 Autoloading** (Composer)
 - **✅ PSR-7 Request/Response Handling**
 - **✅ PSR-11 Dependency Container** (for flexible dependency injection)
-- **✅ PSR-18 HTTP Client** (ready for easy API communication)
-- **✅ Minimalist View System**: Block-based templating (no Blade/Twig needed)
-- **✅ PDO Database Connection**
-- **✅ Session Handling** (with a simple Session object)
-- **✅ Form Memory Helpers** (preserve input after validation)
+- **✅ PSR-18 HTTP Client** (via `phpico/client`)
+- **✅ Minimalist View System**: Block-based templating (via `phpico/view`)
+- **✅ PDO Database Connection** (via `phpico/database`)
+- **✅ Session Handling** (via `phpico/session`)
+- **✅ Form Memory Helpers** (via `phpico/form`)
 - **✅ Output Buffering** (centralized, better debugging)
 - **✅ JSON Response Helper** (for easy API responses)
 - **✅ Composer-Ready**: Easy installation and dependency management
@@ -51,13 +55,13 @@ It builds on native PHP features and lets you stay in control:
 
 ## 📚 PSR Compliance Overview
 
-| PSR | Description | Status |
-|:---|:---|:---|
-| PSR-3 | Logger Interface | ✅ Available |
-| PSR-4 | Autoloading Standard | ✅ Native via Composer |
-| PSR-7 | HTTP Message Interface | ✅ Integrated |
-| PSR-11 | Container Interface | ✅ Available |
-| PSR-18 | HTTP Client Interface | ✅ Available |
+| PSR | Description | Status                             |
+|:---|:---|:---------------------------------------------|
+| PSR-3 | Logger Interface | ✅ Integrated               |
+| PSR-4 | Autoloading Standard | ✅ Native via Composer  |
+| PSR-7 | HTTP Message Interface | ✅ Integrated         |
+| PSR-11 | Container Interface | ✅ Integrated           |
+| PSR-18 | HTTP Client Interface | ✅ Integrated         |
 
 
 ---
@@ -83,14 +87,11 @@ If you want full control without fighting against a "big framework" structure,
 ## Install via Composer
 
 ```bash
-composer require fkde/phpico
+composer require phpico/framework
 ```
 
-This will:
-
-- Download the PHPico core (framework logic inside `/src`)
-- Make it available via Composer autoloading
-- Allow you to use PHPico components in your own project structure
+This installs the **PHPico core** — a minimal routing and dispatch layer.  
+For additional features like views, forms or sessions, just install the corresponding plugins.
 
 ---
 
@@ -103,7 +104,7 @@ A typical structure could look like this:
 /app
     /Controllers
     /Models
-    /Views
+    /Services
     config.php
     routes.php
 /public
@@ -113,9 +114,8 @@ composer.json
 ```
 
 - **Plural names** for app folders
-- **`views/`** written in lowercase as the templates are also written in lowercase
-- **`public/`** as webroot for maximum security
-- **`bootstrap.php`** for autoloading and... bootstrapping
+- **`public/`** as webroot for higher security
+- **`bootstrap.php`** for autoloading and bootstrapping services, registering events, and so on...
 
 ---
 
