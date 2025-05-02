@@ -5,7 +5,6 @@ namespace PHPico\Core;
 use Composer\InstalledVersions;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use PHPico\Core\Events\CsrfListener;
 use PHPico\Exceptions\AbortException;
 use PHPico\Exceptions\DispatcherException;
 use PHPico\Exceptions\HttpException;
@@ -13,7 +12,6 @@ use PHPico\Exceptions\RouteNotFoundException;
 use PHPico\Support\Guard;
 use PHPico\Support\Plugin;
 use PHPico\Support\Session;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function PHPico\config;
 use function PHPico\event;
@@ -110,7 +108,6 @@ class App
         $this->loadPlugins();
         $this->loadRoutes();
 
-        $this->container()->get('event')->listen('controller.calling', [CsrfListener::class, 'handle']);
     }
 
     private function loadEnv(string $path = '/.env'): void
@@ -224,13 +221,27 @@ class App
 
     private function loadPlugins(): void
     {
-        $paths = array_unique(array_map(function ($package) {
-            return InstalledVersions::getInstallPath($package);
-        }, InstalledVersions::getInstalledPackagesByType('phpico-plugin')));
-
         $pluginService = $this->container->get('plugin');
 
-        foreach ($paths as $path) {
+        // Try to load configuration order from user
+        $orderedPackages = [];
+        $pluginConfigPath = __DIR__ . '/../config/plugins.php';
+
+        if (file_exists($pluginConfigPath)) {
+            $orderedPackages = require $pluginConfigPath;
+        }
+
+        $allPackages = InstalledVersions::getInstalledPackagesByType('phpico-plugin');
+        $ordered = array_filter($orderedPackages, fn($name) => in_array($name, $allPackages));
+        $remaining = array_diff($allPackages, $ordered);
+
+        $finalOrder = array_merge($ordered, $remaining);
+
+        // Lade Plugins in finaler Reihenfolge
+        foreach ($finalOrder as $package) {
+            $path = InstalledVersions::getInstallPath($package);
+            if (!$path) continue;
+
             if (file_exists($path . '/bootstrap.php')) {
                 $pluginService->addMeta('bootstraps', $path . '/bootstrap.php');
                 require_once $path . '/bootstrap.php';

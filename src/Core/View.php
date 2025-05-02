@@ -2,7 +2,6 @@
 
 namespace PHPico\Core;
 
-use function PHPico\abort;
 use function PHPico\app;
 use function PHPico\guard;
 use function PHPico\plugin;

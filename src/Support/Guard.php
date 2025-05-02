@@ -2,8 +2,6 @@
 
 namespace PHPico\Support;
 
-use function PHPico\session;
-
 class Guard
 {
 
@@ -28,11 +26,6 @@ class Guard
             return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
         }
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-    }
-
-    public function csrf(): Csrf
-    {
-        return new Csrf();
     }
 
 }
