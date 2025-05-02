@@ -4,20 +4,20 @@ namespace Tests\Unit;
 
 use Nyholm\Psr7\Request;
 use Nyholm\Psr7\ServerRequest;
-use PHPico\Exceptions\AbortException;
+use NixPHP\Exceptions\AbortException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Tests\PHPicoTestCase;
-use function PHPico\abort;
-use function PHPico\app;
+use Tests\NixPHPTestCase;
+use function NixPHP\abort;
+use function NixPHP\app;
 
-use function PHPico\json;
-use function PHPico\redirect;
-use function PHPico\refresh;
-use function PHPico\request;
+use function NixPHP\json;
+use function NixPHP\redirect;
+use function NixPHP\refresh;
+use function NixPHP\request;
 
-class FunctionsTest extends PHPicoTestCase
+class FunctionsTest extends NixPHPTestCase
 {
 
     public function testFunctionRequest()

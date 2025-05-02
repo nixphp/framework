@@ -1,6 +1,6 @@
 # Using External Libraries
 
-PHPico is designed to be minimal and flexible.  
+NixPHP is designed to be minimal and flexible.  
 You are free to integrate any external library you need without fighting against hidden internals.
 
 Thanks to the PSR-4 structure and Composer, adding new tools is simple and clean.
@@ -97,12 +97,12 @@ $user = User::find(1);
 - Register services inside your container via `app()->container()->set()`.
 - Load config values using `config('key')`.
 - Keep external libraries isolated and modular.
-- You are free to build your own architecture around PHPico without restrictions.
+- You are free to build your own architecture around NixPHP without restrictions.
 
 ---
 
 ## Summary
 
-- PHPico allows easy integration of any Composer package.
+- NixPHP allows easy integration of any Composer package.
 - External tools like Blade, Eloquent, or Guzzle work seamlessly.
 - Service registration and configuration stay fully under your control.

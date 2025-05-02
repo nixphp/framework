@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPico;
+namespace NixPHP;
 
 ob_start();
 
@@ -10,18 +10,18 @@ if (!defined('PHPICO_BASE_PATH')) {
 
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
-use PHPico\Core\App;
-use PHPico\Core\Config;
-use PHPico\Core\Environment;
-use PHPico\Core\ErrorHandler;
-use PHPico\Core\Event;
-use PHPico\Core\Log;
-use PHPico\Core\Route;
-use PHPico\Core\Container;
-use PHPico\Exceptions\AbortException;
-use PHPico\Support\Guard;
-use PHPico\Support\Plugin;
-use PHPico\Support\Session;
+use NixPHP\Core\App;
+use NixPHP\Core\Config;
+use NixPHP\Core\Environment;
+use NixPHP\Core\ErrorHandler;
+use NixPHP\Core\Event;
+use NixPHP\Core\Log;
+use NixPHP\Core\Route;
+use NixPHP\Core\Container;
+use NixPHP\Exceptions\AbortException;
+use NixPHP\Support\Guard;
+use NixPHP\Support\Plugin;
+use NixPHP\Support\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 

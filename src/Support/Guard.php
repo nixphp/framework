@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPico\Support;
+namespace NixPHP\Support;
 
 class Guard
 {

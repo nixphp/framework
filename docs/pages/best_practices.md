@@ -1,6 +1,6 @@
 # Best Practices
 
-PHPico gives you a lot of flexibility and freedom.  
+NixPHP gives you a lot of flexibility and freedom.  
 Following a few simple best practices can help keep your project clean, scalable, and maintainable.
 
 ---
@@ -105,12 +105,12 @@ app()->container()->set('userRepository', function () {
 If you find yourself repeating common tasks (like escaping output or creating responses),  
 feel free to add your own global helpers.
 
-PHPico encourages building **small, reusable tools** that fit your needs.
+NixPHP encourages building **small, reusable tools** that fit your needs.
 
 Example:
 
 ```php
-use function PHPico\s;
+use function NixPHP\s;
 
 <h1>Hello, <?= s($user->name) ?>!</h1>
 ```
@@ -126,5 +126,5 @@ use function PHPico\s;
 - Organize config cleanly
 - Build small reusable helpers when needed
 
-PHPico gives you the freedom to structure your app your way —  
+NixPHP gives you the freedom to structure your app your way —  
 following these best practices will help you build clean and scalable projects.

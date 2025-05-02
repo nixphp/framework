@@ -1,8 +1,8 @@
 # Dependency Injection
 
-PHPico provides a simple and flexible PSR-11 compliant container to manage your services and dependencies.
+NixPHP provides a simple and flexible PSR-11 compliant container to manage your services and dependencies.
 
-However, PHPico does **not** automatically inject constructor parameters.  
+However, NixPHP does **not** automatically inject constructor parameters.  
 You manually retrieve and manage your dependencies.
 
 ---
@@ -12,7 +12,7 @@ You manually retrieve and manage your dependencies.
 The application container is accessible globally via the `app()->container()` helper.
 
 ```php
-use function PHPico\app;
+use function NixPHP\app;
 
 $container = app()->container();
 ```
@@ -68,8 +68,8 @@ Using it in a controller:
 ```php
 namespace App\Controllers;
 
-use function PHPico\app;
-use function PHPico\render;
+use function NixPHP\app;
+use function NixPHP\render;
 
 class ProductController
 {
@@ -95,5 +95,5 @@ class ProductController
 - Access the container via `app()->container()`.
 - Register services using **string keys** like `'productService'`, `'db'`, `'log'`, etc.
 - Fetch services manually when needed.
-- PHPico does **not** automatically inject constructor arguments.
+- NixPHP does **not** automatically inject constructor arguments.
 - Services behave as singletons by default (one instance per request).

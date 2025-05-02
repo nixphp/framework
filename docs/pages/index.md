@@ -1,8 +1,8 @@
 # Introduction
 
-Welcome to **PHPico** — a minimalist, modern PHP microframework.
+Welcome to **NixPHP** — a minimalist, modern PHP microframework.
 
-PHPico is built for developers who want:
+NixPHP is built for developers who want:
 
 - Full control over their application's structure
 - Minimal dependencies and maximum flexibility
@@ -10,4 +10,4 @@ PHPico is built for developers who want:
 
 It provides essential features like routing, controller dispatching, view rendering, database access, session handling, and smart response handling — without unnecessary overhead.
 
-Use PHPico as a lightweight foundation for APIs, web applications, or any PHP project that values **clarity**, **speed**, and **simplicity**.
+Use NixPHP as a lightweight foundation for APIs, web applications, or any PHP project that values **clarity**, **speed**, and **simplicity**.

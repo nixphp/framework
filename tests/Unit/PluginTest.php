@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Support\Plugin;
-use Tests\PHPicoTestCase;
+use NixPHP\Support\Plugin;
+use Tests\NixPHPTestCase;
 
-class PluginTest extends PHPicoTestCase
+class PluginTest extends NixPHPTestCase
 {
 
     public function testPluginInternals()

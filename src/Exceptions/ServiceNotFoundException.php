@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPico\Exceptions;
+namespace NixPHP\Exceptions;
 
 use Psr\Container\NotFoundExceptionInterface;
 

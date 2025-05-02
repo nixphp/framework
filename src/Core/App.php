@@ -1,23 +1,23 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
 use Composer\InstalledVersions;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use PHPico\Exceptions\AbortException;
-use PHPico\Exceptions\DispatcherException;
-use PHPico\Exceptions\HttpException;
-use PHPico\Exceptions\RouteNotFoundException;
-use PHPico\Support\Guard;
-use PHPico\Support\Plugin;
-use PHPico\Support\Session;
+use NixPHP\Exceptions\AbortException;
+use NixPHP\Exceptions\DispatcherException;
+use NixPHP\Exceptions\HttpException;
+use NixPHP\Exceptions\RouteNotFoundException;
+use NixPHP\Support\Guard;
+use NixPHP\Support\Plugin;
+use NixPHP\Support\Session;
 use Psr\Http\Message\ServerRequestInterface;
-use function PHPico\event;
-use function PHPico\response;
-use function PHPico\send_response;
-use function PHPico\plugin;
-use function PHPico\view;
+use function NixPHP\event;
+use function NixPHP\response;
+use function NixPHP\send_response;
+use function NixPHP\plugin;
+use function NixPHP\view;
 
 class App
 {

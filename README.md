@@ -1,22 +1,22 @@
-![Logo](src/Resources/images/phpico-logo.png)
+![Logo](src/Resources/images/nixphp-logo.png)
 
 ---
 
-[![PHPico Build & Test](https://github.com/phpico/framework/actions/workflows/php.yml/badge.svg)](https://github.com/phpico/framework/actions/workflows/php.yml)
+[![NixPHP Build & Test](https://github.com/nixphp/framework/actions/workflows/php.yml/badge.svg)](https://github.com/nixphp/framework/actions/workflows/php.yml)
 
 ---
 
-# PHPico
+# NixPHP
 
 > **"As simple as possible, as flexible as necessary."**
 
-**PHPico** is a modern, lightweight PHP microframework designed for real-world projects:  
+**NixPHP** is a modern, lightweight PHP microframework designed for real-world projects:  
 fast, minimal, extendable — and now fully embracing modern PHP standards like PSR-3, PSR-4, PSR-7, PSR-11 and PSR-18.
 
 It builds on native PHP features and lets you stay in control:  
 **Use only what you need — and extend freely when you want.**
 
-> 🧩 PHPico provides a minimal core with a clean plugin architecture.  
+> 🧩 NixPHP provides a minimal core with a clean plugin architecture.  
 > Everything beyond routing and dispatching — such as sessions, views, forms, or database — is handled by optional plugins.  
 > You get full control over what your app includes — and nothing more.
 
@@ -42,11 +42,11 @@ It builds on native PHP features and lets you stay in control:
 - **✅ PSR-4 Autoloading** (Composer)
 - **✅ PSR-7 Request/Response Handling**
 - **✅ PSR-11 Dependency Container** (for flexible dependency injection)
-- **✅ PSR-18 HTTP Client** (via `phpico/client`)
-- **✅ Minimalist View System**: Block-based templating (via `phpico/view`)
-- **✅ PDO Database Connection** (via `phpico/database`)
-- **✅ Session Handling** (via `phpico/session`)
-- **✅ Form Memory Helpers** (via `phpico/form`)
+- **✅ PSR-18 HTTP Client** (via `nixphp/client`)
+- **✅ Minimalist View System**: Block-based templating (via `nixphp/view`)
+- **✅ PDO Database Connection** (via `nixphp/database`)
+- **✅ Session Handling** (via `nixphp/session`)
+- **✅ Form Memory Helpers** (via `nixphp/form`)
 - **✅ Output Buffering** (centralized, better debugging)
 - **✅ JSON Response Helper** (for easy API responses)
 - **✅ Composer-Ready**: Easy installation and dependency management
@@ -70,7 +70,7 @@ It builds on native PHP features and lets you stay in control:
 
 Frameworks like Laravel and Symfony are fantastic — but they often come with a heavy stack of features, conventions, and dependencies you may not always need.
 
-**PHPico** offers a different approach:
+**NixPHP** offers a different approach:
 
 - **No hidden complexity**: You see exactly what happens.
 - **No forced patterns**: Use only what you need, when you need it.
@@ -78,7 +78,7 @@ Frameworks like Laravel and Symfony are fantastic — but they often come with a
 - **Real extendability**: Bring your favorite libraries if needed — but stay light if you don't.
 
 If you want full control without fighting against a "big framework" structure,  
-**PHPico** might be the perfect starting point for you.
+**NixPHP** might be the perfect starting point for you.
 
 ---
 
@@ -87,17 +87,17 @@ If you want full control without fighting against a "big framework" structure,
 ## Install via Composer
 
 ```bash
-composer require phpico/framework
+composer require nixphp/framework
 ```
 
-This installs the **PHPico core** — a minimal routing and dispatch layer.  
+This installs the **NixPHP core** — a minimal routing and dispatch layer.  
 For additional features like views, forms or sessions, just install the corresponding plugins.
 
 ---
 
 ## Set up your project structure
 
-PHPico leaves the project organization completely up to you.  
+NixPHP leaves the project organization completely up to you.  
 A typical structure could look like this:
 
 ```
@@ -123,7 +123,7 @@ composer.json
 
 You typically...
 
-- Create a `bootstrap.php` to initialize PHPico
+- Create a `bootstrap.php` to initialize NixPHP
 - Set up your `routes.php`
 - Create a `public/index.php` as your web entry point (which includes bootstrap.php)
 
@@ -136,7 +136,7 @@ define('BASE_PATH', __DIR__);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use function PHPico\app;
+use function NixPHP\app;
 
 app()->run(); // Start the application
 ```
@@ -170,7 +170,7 @@ class HelloController
 ```php
 //File: app/views/hello.phtml
 
-use function PHPico\s; // Sanitize on output
+use function NixPHP\s; // Sanitize on output
 
 <h1>Hello, <?= s($name) ?>!</h1>
 ```
@@ -192,13 +192,13 @@ Hello, World!
 
 ## 🔌 Plugin Support
 
-PHPico includes a clean plugin system that allows you to extend your app modularly — without configuration.
+NixPHP includes a clean plugin system that allows you to extend your app modularly — without configuration.
 
 Just install a plugin via Composer (e.g. `composer require vendor/my-plugin`) and it is automatically detected if it uses the correct package type:
 
 ```json
 {
-  "type": "phpico-plugin"
+  "type": "nixphp-plugin"
 }
 ```
 
@@ -220,11 +220,11 @@ my-plugin/
 
 You can build plugins exactly like you build an app — with full access to routing, events, and controllers.
 
-> For example plugins, see the [Plugin Wiki](https://github.com/fkde/phpico/wiki/09.-Plugins)
+> For example plugins, see the [Plugin Wiki](https://github.com/fkde/nixphp/wiki/09.-Plugins)
 
 # 🔥 Ready to build?
 
-Welcome to **PHPico** —  
+Welcome to **NixPHP** —  
 your minimalist, modern PHP playground. 🚀
 
 ---

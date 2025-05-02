@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Environment;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
-use function PHPico\env;
+use NixPHP\Core\Environment;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
+use function NixPHP\env;
 
-class EnvironmentTest extends PHPicoTestCase
+class EnvironmentTest extends NixPHPTestCase
 {
 
     public function testEnvironmentLocal()

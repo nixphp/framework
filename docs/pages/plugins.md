@@ -1,6 +1,6 @@
 # Plugins
 
-PHPico includes a clean and lightweight plugin system that allows you to extend the framework with zero configuration.
+NixPHP includes a clean and lightweight plugin system that allows you to extend the framework with zero configuration.
 
 Plugins can provide additional configuration, templates (views), and custom logic via a `bootstrap.php` file. Once a plugin is installed via Composer, it is automatically detected and integrated.
 
@@ -8,7 +8,7 @@ Plugins can provide additional configuration, templates (views), and custom logi
 
 ## Plugin Structure
 
-A PHPico plugin mimics the structure of a full app:
+A NixPHP plugin mimics the structure of a full app:
 
 ```
 your-plugin/
@@ -28,13 +28,13 @@ your-plugin/
 
 ## 🛠 Example `composer.json`
 
-Below is a minimal but complete `composer.json` for a PHPico plugin:
+Below is a minimal but complete `composer.json` for a NixPHP plugin:
 
 ```json
 {
-  "name": "vendor/phpico-plugin-example",
-  "description": "Skeleton for your first plugin when using PHPico",
-  "type": "phpico-plugin",
+  "name": "vendor/NixPHP-plugin-example",
+  "description": "Skeleton for your first plugin when using NixPHP",
+  "type": "NixPHP-plugin",
   "license": "MIT",
   "authors": [
     {
@@ -44,7 +44,7 @@ Below is a minimal but complete `composer.json` for a PHPico plugin:
   ],
   "require": {
     "php": ">=8.3",
-    "fkde/phpico": "dev-main"
+    "fkde/NixPHP": "dev-main"
   },
   "autoload": {
     "psr-4": {
@@ -57,7 +57,7 @@ Below is a minimal but complete `composer.json` for a PHPico plugin:
 ```
 
 > ✅ Important:
-> - `"type": "phpico-plugin"` is required for discovery.
+> - `"type": "NixPHP-plugin"` is required for discovery.
 > - The namespace (e.g. `MyPlugin\\`) must match your plugin classes location.
 
 Run:
@@ -72,7 +72,7 @@ To ensure your classes are properly registered.
 
 ## Automatic Discovery
 
-Plugins are discovered via Composer using the package `"type": "phpico-plugin"`. Once installed, PHPico will:
+Plugins are discovered via Composer using the package `"type": "NixPHP-plugin"`. Once installed, NixPHP will:
 
 - Load `bootstrap.php`
 - Merge `app/config.php`
@@ -133,7 +133,7 @@ my-hello-plugin/
 namespace MyHelloPlugin\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
-use function PHPico\response;
+use function NixPHP\response;
 
 class HelloController
 {
@@ -148,7 +148,7 @@ class HelloController
 
 ```php
 use MyHelloPlugin\Controllers\HelloController;
-use function PHPico\route;
+use function NixPHP\route;
 
 route()->add('GET', '/plugin-hello', [HelloController::class, 'index']);
 ```
@@ -176,7 +176,7 @@ Visit: `http://yourapp.local/plugin-hello`
 ## Summary
 
 - Plugins mimic the structure of the main app (`app/config.php`, `app/views/`, `Controllers/`)
-- Auto-loaded by Composer if `"type": "phpico-plugin"` is set
+- Auto-loaded by Composer if `"type": "NixPHP-plugin"` is set
 - Can register routes, logic, templates, config – with no extra steps
 - Can be overridden by the app cleanly
 - `plugin()` helper gives access to metadata for advanced use

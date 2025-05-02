@@ -1,6 +1,6 @@
 # Installation
 
-PHPico is designed as a lightweight framework package.  
+NixPHP is designed as a lightweight framework package.  
 You install it into your own project using Composer.
 
 ---
@@ -8,20 +8,20 @@ You install it into your own project using Composer.
 ## Install via Composer
 
 ```bash
-composer require fkde/phpico
+composer require fkde/NixPHP
 ```
 
 This will:
 
-- Download the PHPico core (framework logic inside `/src`)
+- Download the NixPHP core (framework logic inside `/src`)
 - Make it available via Composer autoloading
-- Allow you to use PHPico components in your own project structure
+- Allow you to use NixPHP components in your own project structure
 
 ---
 
 ## Set up your project structure
 
-PHPico leaves the project organization completely up to you.  
+NixPHP leaves the project organization completely up to you.  
 A typical structure could look like this:
 
 ```
@@ -45,7 +45,7 @@ But you are free to organize it however you like.
 
 You typically:
 
-- Create a `bootstrap.php` to initialize PHPico
+- Create a `bootstrap.php` to initialize NixPHP
 - Set up your `routes.php`
 - Create a `public/index.php` as your web entry point
 
@@ -58,7 +58,7 @@ define('BASE_PATH', __DIR__);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use function PHPico\app;
+use function NixPHP\app;
 
 app()->run(); // Start the application
 ```

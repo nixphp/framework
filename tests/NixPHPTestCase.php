@@ -4,7 +4,7 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 
-class PHPicoTestCase extends TestCase
+class NixPHPTestCase extends TestCase
 {
 
 

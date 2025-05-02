@@ -1,11 +1,11 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
-use function PHPico\send_response;
-use function PHPico\view;
-use function PHPico\response;
+use function NixPHP\send_response;
+use function NixPHP\view;
+use function NixPHP\response;
 
 class ErrorHandler
 {

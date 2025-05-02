@@ -5,17 +5,17 @@ namespace Tests\Unit;
 use Fixtures\Controllers\TestController;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\ServerRequest;
-use PHPico\Core\Dispatcher;
-use PHPico\Core\Route;
-use PHPico\Exceptions\AbortException;
-use PHPico\Exceptions\DispatcherException;
-use PHPico\Exceptions\RouteNotFoundException;
+use NixPHP\Core\Dispatcher;
+use NixPHP\Core\Route;
+use NixPHP\Exceptions\AbortException;
+use NixPHP\Exceptions\DispatcherException;
+use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
-use Tests\PHPicoTestCase;
+use Tests\NixPHPTestCase;
 
 
 
-class DispatcherTest extends PHPicoTestCase
+class DispatcherTest extends NixPHPTestCase
 {
     public function testDispatch()
     {

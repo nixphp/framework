@@ -2,7 +2,7 @@
 
 namespace Fixtures\Controllers;
 
-use function PHPico\response;
+use function NixPHP\response;
 
 class TestController
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
 class Environment
 {

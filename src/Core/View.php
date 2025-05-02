@@ -1,10 +1,10 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
-use function PHPico\app;
-use function PHPico\guard;
-use function PHPico\plugin;
+use function NixPHP\app;
+use function NixPHP\guard;
+use function NixPHP\plugin;
 
 class View
 {

@@ -1,12 +1,12 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Nyholm\Psr7\Response;
-use function PHPico\config;
+use function NixPHP\config;
 
 class Client implements ClientInterface
 {

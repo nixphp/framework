@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
-use PHPico\Exceptions\ContainerException;
-use PHPico\Exceptions\ServiceNotFoundException;
+use NixPHP\Exceptions\ContainerException;
+use NixPHP\Exceptions\ServiceNotFoundException;
 use Psr\Container\ContainerInterface;
 
 class Container implements ContainerInterface

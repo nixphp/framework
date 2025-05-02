@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Asset;
-use Tests\PHPicoTestCase;
+use NixPHP\Core\Asset;
+use Tests\NixPHPTestCase;
 
-class AssetTest extends PhpicoTestCase
+class AssetTest extends NixPHPTestCase
 {
 
     public function testAssetInternals()

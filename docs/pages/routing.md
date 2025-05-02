@@ -1,6 +1,6 @@
 # Routing
 
-PHPico provides a simple and powerful routing system based on HTTP methods and URIs.  
+NixPHP provides a simple and powerful routing system based on HTTP methods and URIs.  
 Routes map incoming requests to controller methods or closures with minimal configuration.
 
 ---
@@ -70,7 +70,7 @@ class UserController
 
 ## Supported HTTP Methods
 
-PHPico supports all standard HTTP methods:
+NixPHP supports all standard HTTP methods:
 
 - `GET`
 - `POST`

@@ -1,6 +1,6 @@
 # Session
 
-PHPico provides a minimal but powerful session management system.  
+NixPHP provides a minimal but powerful session management system.  
 You can easily work with session data, flash messages, and session control.
 
 Sessions are only started manually when you actually need them.
@@ -12,7 +12,7 @@ Sessions are only started manually when you actually need them.
 To start the PHP session, use the `session()` helper:
 
 ```php
-use function PHPico\session;
+use function NixPHP\session;
 
 session()->start();
 ```

@@ -2,13 +2,13 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Container;
-use PHPico\Exceptions\ContainerException;
-use PHPico\Exceptions\ServiceNotFoundException;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
+use NixPHP\Core\Container;
+use NixPHP\Exceptions\ContainerException;
+use NixPHP\Exceptions\ServiceNotFoundException;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
 
-class ContainerTest extends PHPicoTestCase {
+class ContainerTest extends NixPHPTestCase {
 
     public function testContainerInternals()
     {

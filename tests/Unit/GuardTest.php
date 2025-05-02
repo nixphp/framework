@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Support\Guard;
-use Tests\PHPicoTestCase;
+use NixPHP\Support\Guard;
+use Tests\NixPHPTestCase;
 
-class GuardTest extends PHPicoTestCase
+class GuardTest extends NixPHPTestCase
 {
 
     public function testSafeOutputWithRegularString()

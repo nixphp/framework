@@ -3,13 +3,13 @@
 namespace Tests\Unit;
 
 use Nyholm\Psr7\Request;
-use PHPico\Core\Client;
-use PHPico\Core\Config;
+use NixPHP\Core\Client;
+use NixPHP\Core\Config;
 use Psr\Http\Message\ResponseInterface;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
 
-class ClientTest extends PHPicoTestCase
+class ClientTest extends NixPHPTestCase
 {
 
     public function testClientResponse()

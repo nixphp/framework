@@ -1,6 +1,6 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;

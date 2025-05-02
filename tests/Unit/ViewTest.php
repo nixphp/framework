@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\View;
-use Tests\PHPicoTestCase;
+use NixPHP\Core\View;
+use Tests\NixPHPTestCase;
 
-class ViewTest extends PHPicoTestCase
+class ViewTest extends NixPHPTestCase
 {
 
     public function testViewCreation()
@@ -55,7 +55,7 @@ class ViewTest extends PHPicoTestCase
 
     public function testHelperFunction()
     {
-        $this->assertIsString(\PHPico\view('test'));
+        $this->assertIsString(\NixPHP\view('test'));
     }
 
 }

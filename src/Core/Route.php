@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
-use PHPico\Exceptions\RouteNotFoundException;
-use function PHPico\event;
+use NixPHP\Exceptions\RouteNotFoundException;
+use function NixPHP\event;
 
 class Route
 {

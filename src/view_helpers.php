@@ -1,9 +1,9 @@
 <?php
 
-namespace PHPico;
+namespace NixPHP;
 
-use PHPico\Core\Asset;
-use PHPico\Core\View;
+use NixPHP\Core\Asset;
+use NixPHP\Core\View;
 use Psr\Http\Message\ResponseInterface;
 
 function render(string $template, array $vars = []): ResponseInterface

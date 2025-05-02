@@ -1,15 +1,15 @@
 # Error Handling
 
-PHPico provides a simple and flexible mechanism for handling errors like 404 (Not Found) and 500 (Internal Server Error).
+NixPHP provides a simple and flexible mechanism for handling errors like 404 (Not Found) and 500 (Internal Server Error).
 
-By default, PHPico uses internal error views located in the framework core.  
+By default, NixPHP uses internal error views located in the framework core.  
 However, you can easily override these pages in your project.
 
 ---
 
 ## Default Error Pages
 
-If an error occurs, PHPico will:
+If an error occurs, NixPHP will:
 
 1. First check for a custom error page in your `app/views/errors/` directory.
 2. If no custom page exists, it falls back to the default built-in page.
@@ -31,13 +31,13 @@ You can override any default error page by creating a file in your project at:
 Example: Custom 404 page:
 
 ```php
-<?php use function PHPico\s; ?>
+<?php use function NixPHP\s; ?>
 
 <h1>Page not found</h1>
 <p>The page <?= s($path) ?> does not exist.</p>
 ```
 
-- PHPico automatically passes basic information like the requested path into your error view.
+- NixPHP automatically passes basic information like the requested path into your error view.
 - Use the `s()` helper to safely escape any output.
 
 ---
@@ -45,10 +45,10 @@ Example: Custom 404 page:
 ## Manually Aborting Requests
 
 Sometimes you want to stop execution manually and send an error response.  
-PHPico provides the global `abort()` helper for this.
+NixPHP provides the global `abort()` helper for this.
 
 ```php
-use function PHPico\abort;
+use function NixPHP\abort;
 
 abort(404, 'The requested page was not found.');
 ```
@@ -78,7 +78,7 @@ function abort(int $statusCode = 404, string $message = ''): never
 
 ## Handling Uncaught Exceptions
 
-If an uncaught exception occurs during request processing, PHPico:
+If an uncaught exception occurs during request processing, NixPHP:
 
 1. Automatically catches the exception.
 2. Sends a `500 Internal Server Error` response.

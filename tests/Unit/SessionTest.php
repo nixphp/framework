@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Support\Session;
-use Tests\PHPicoTestCase;
+use NixPHP\Support\Session;
+use Tests\NixPHPTestCase;
 
-class SessionTest extends PhpicoTestCase
+class SessionTest extends NixPHPTestCase
 {
 
     public function testSessionInternals()

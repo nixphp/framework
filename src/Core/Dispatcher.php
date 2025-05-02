@@ -1,14 +1,14 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
-use PHPico\Exceptions\DispatcherException;
-use PHPico\Exceptions\RouteNotFoundException;
+use NixPHP\Exceptions\DispatcherException;
+use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use function PHPico\event;
-use function PHPico\render;
-use function PHPico\response;
+use function NixPHP\event;
+use function NixPHP\render;
+use function NixPHP\response;
 
 class Dispatcher
 {

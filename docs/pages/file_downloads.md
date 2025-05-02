@@ -1,7 +1,7 @@
 # File Downloads
 
 Sometimes you want to send files to the browser for download instead of displaying them.  
-PHPico gives you full control to stream files using a custom response.
+NixPHP gives you full control to stream files using a custom response.
 
 ---
 
@@ -10,7 +10,7 @@ PHPico gives you full control to stream files using a custom response.
 You can manually create a response that forces a file download:
 
 ```php
-use function PHPico\response;
+use function NixPHP\response;
 
 $filePath = BASE_PATH . '/storage/files/example.pdf';
 $fileName = 'example.pdf';
@@ -33,7 +33,7 @@ return $response;
 ```php
 namespace App\Controllers;
 
-use function PHPico\response;
+use function NixPHP\response;
 
 class FileController
 {

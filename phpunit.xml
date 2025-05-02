@@ -7,7 +7,7 @@
         displayDetailsOnPhpunitDeprecations="true">
 
     <testsuites>
-        <testsuite name="PHPico Test Suite">
+        <testsuite name="NixPHP Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

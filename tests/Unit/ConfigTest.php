@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Config;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
-use function PHPico\config;
+use NixPHP\Core\Config;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
+use function NixPHP\config;
 
-class ConfigTest extends PHPIcoTestCase
+class ConfigTest extends NixPHPTestCase
 {
 
     public function testConfigInternals()

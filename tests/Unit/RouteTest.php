@@ -2,12 +2,12 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Route;
-use PHPico\Exceptions\RouteNotFoundException;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
+use NixPHP\Core\Route;
+use NixPHP\Exceptions\RouteNotFoundException;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
 
-class RouteTest extends PHPicoTestCase
+class RouteTest extends NixPHPTestCase
 {
 
     public function testShouldAddRoute()
@@ -75,9 +75,9 @@ class RouteTest extends PHPicoTestCase
 
     public function testHelperFunction()
     {
-        \PHPico\route()->add('GET', '/test', function() { return 'test'; }, 'test');
+        \NixPHP\route()->add('GET', '/test', function() { return 'test'; }, 'test');
 
-        $this->assertSame('/test', \PHPico\route('test'));
+        $this->assertSame('/test', \NixPHP\route('test'));
     }
 
 }

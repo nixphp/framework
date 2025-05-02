@@ -1,6 +1,6 @@
 # Database
 
-PHPico provides a simple and flexible way to work with databases using native PDO.
+NixPHP provides a simple and flexible way to work with databases using native PDO.
 
 You are free to build your own database layer or plug in any external ORM if needed.
 
@@ -11,7 +11,7 @@ You are free to build your own database layer or plug in any external ORM if nee
 The global `database()` helper gives you access to the PDO instance:
 
 ```php
-use function PHPico\database;
+use function NixPHP\database;
 
 $pdo = database();
 ```
@@ -38,7 +38,7 @@ return [
     'database' => [
         'driver'   => 'mysql',
         'host'     => '127.0.0.1',
-        'database' => 'phpico',
+        'database' => 'NixPHP',
         'username' => 'root',
         'password' => 'root',
         'charset'  => 'utf8mb4',
@@ -46,7 +46,7 @@ return [
 ];
 ```
 
-PHPico builds the PDO connection dynamically based on this configuration.
+NixPHP builds the PDO connection dynamically based on this configuration.
 
 - `driver`: e.g., `mysql`, `pgsql`, `sqlite`
 - `host`: database server hostname or IP
@@ -99,5 +99,5 @@ try {
 
 - Access the database via the `database()` helper.
 - Configure database settings in `app/config.php` under the `database` key.
-- PHPico uses native PDO for maximum flexibility.
+- NixPHP uses native PDO for maximum flexibility.
 - You can integrate any external ORM if needed (e.g., Eloquent, Doctrine, etc.).

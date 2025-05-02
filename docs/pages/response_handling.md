@@ -1,8 +1,8 @@
 # Response Handling
 
-In PHPico, every route must return a valid HTTP response that implements `Psr\Http\Message\ResponseInterface`.
+In NixPHP, every route must return a valid HTTP response that implements `Psr\Http\Message\ResponseInterface`.
 
-To make this easy, PHPico provides global helper functions for generating different types of responses.
+To make this easy, NixPHP provides global helper functions for generating different types of responses.
 
 ---
 
@@ -11,7 +11,7 @@ To make this easy, PHPico provides global helper functions for generating differ
 The `response()` function creates a simple HTTP response with a body.
 
 ```php
-use function PHPico\response;
+use function NixPHP\response;
 
 return response('Hello World');
 ```
@@ -29,7 +29,7 @@ If you want to send JSON data, you must use the `json()` helper explicitly.
 Use the `json()` helper to create a proper JSON HTTP response:
 
 ```php
-use function PHPico\json;
+use function NixPHP\json;
 
 return json(['message' => 'Success']);
 ```
@@ -51,7 +51,7 @@ return json(['error' => 'Unauthorized'], 401);
 Use the `render()` helper to render a view and return it wrapped in a response:
 
 ```php
-use function PHPico\render;
+use function NixPHP\render;
 
 return render('home', ['name' => 'World']);
 ```
@@ -67,7 +67,7 @@ return render('home', ['name' => 'World']);
 You can create a redirect response using the `redirect()` helper:
 
 ```php
-use function PHPico\redirect;
+use function NixPHP\redirect;
 
 return redirect('/login');
 ```
@@ -88,7 +88,7 @@ return redirect('/dashboard', 301);
 For full control, you can manually create responses:
 
 ```php
-$response = new \PHPico\Http\Response();
+$response = new \NixPHP\Http\Response();
 $response->getBody()->write('Custom content');
 return $response->withStatus(202);
 ```

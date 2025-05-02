@@ -1,4 +1,4 @@
-site_name: PHPico
+site_name: NixPHP
 site_description: A modern, minimalist PHP microframework
 theme:
   name: material
@@ -36,6 +36,6 @@ nav:
     - Database: database.md
     - Session: sessions.md
 
-repo_url: https://github.com/phpico/framework
-repo_name: phpico/framework
+repo_url: https://github.com/nixphp/framework
+repo_name: nixphp/framework
 docs_dir: pages/

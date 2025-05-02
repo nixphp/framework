@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Support\Collection;
-use Tests\PHPicoTestCase;
+use NixPHP\Support\Collection;
+use Tests\NixPHPTestCase;
 
-class CollectionTest extends PHPicoTestCase
+class CollectionTest extends NixPHPTestCase
 {
 
     public function testCollectionInternals()

@@ -1,8 +1,8 @@
 <?php
 
-namespace PHPico\Core;
+namespace NixPHP\Core;
 
-use function PHPico\s;
+use function NixPHP\s;
 
 class Asset
 {

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Event;
-use Tests\PHPicoTestCase;
+use NixPHP\Core\Event;
+use Tests\NixPHPTestCase;
 
-class EventTest extends PHPicoTestCase
+class EventTest extends NixPHPTestCase
 {
 
     public function testEvent()

@@ -1,6 +1,6 @@
 # Configuration
 
-PHPico provides a simple yet flexible configuration system based on `.env` files, a lightweight environment service, and a powerful configuration loader.
+NixPHP provides a simple yet flexible configuration system based on `.env` files, a lightweight environment service, and a powerful configuration loader.
 
 You can easily manage different settings for local development, staging, and production environments.
 
@@ -8,7 +8,7 @@ You can easily manage different settings for local development, staging, and pro
 
 ## Using `.env` Files
 
-PHPico can automatically load environment variables from a `.env` file placed in the project root.
+NixPHP can automatically load environment variables from a `.env` file placed in the project root.
 
 ```dotenv
 APP_ENV=local
@@ -41,7 +41,7 @@ $host = env('DB_HOST', 'localhost');
 
 ## Environment Detection
 
-PHPico includes a small `Environment` service to detect the current application environment.
+NixPHP includes a small `Environment` service to detect the current application environment.
 
 It supports four predefined environments:
 
@@ -75,7 +75,7 @@ Available methods:
 
 ## Application Configuration
 
-PHPico loads application settings through a lightweight `Config` class.
+NixPHP loads application settings through a lightweight `Config` class.
 
 You can organize configuration into arrays and load them through the container.
 

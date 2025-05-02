@@ -2,11 +2,11 @@
 
 namespace Tests\Unit;
 
-use PHPico\Core\Log;
-use Tests\PHPicoTestCase;
-use function PHPico\app;
+use NixPHP\Core\Log;
+use Tests\NixPHPTestCase;
+use function NixPHP\app;
 
-class LogTest extends PHPicoTestCase
+class LogTest extends NixPHPTestCase
 {
 
     private const TEST_LOG_FILE = '/tmp/log/test.log';
@@ -116,7 +116,7 @@ class LogTest extends PHPicoTestCase
         $log = new Log(static::TEST_LOG_FILE);
         app()->container()->set('log', $log);
 
-        \PHPico\log()->debug('Helper Test');
+        \NixPHP\log()->debug('Helper Test');
         $this->assertStringContainsString('Helper Test', file_get_contents(static::TEST_LOG_FILE));
     }
     
