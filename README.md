@@ -1,4 +1,4 @@
-![Logo](src/Resources/images/nixphp-logo.png)
+![Logo](src/Resources/images/nixphp-logo-small.png)
 
 ---
 
