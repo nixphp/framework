@@ -8,7 +8,7 @@ You install it into your own project using Composer.
 ## Install via Composer
 
 ```bash
-composer require fkde/NixPHP
+composer require nixphp/framework
 ```
 
 This will:
