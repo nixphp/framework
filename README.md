@@ -1,7 +1,11 @@
+[![NixPHP Build & Test](https://github.com/nixphp/framework/actions/workflows/php.yml/badge.svg)](https://github.com/nixphp/framework/actions/workflows/php.yml)
+
+---
+
+![Logo](src/Resources/images/nixphp-logo-small.png) 
 
 
-| ![Logo](src/Resources/images/nixphp-logo-small.png)  | [![NixPHP Build & Test](https://github.com/nixphp/framework/actions/workflows/php.yml/badge.svg)](https://github.com/nixphp/framework/actions/workflows/php.yml) |
-|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+---
 
 # NixPHP
 
