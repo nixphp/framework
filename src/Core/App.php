@@ -206,7 +206,6 @@ class App
         }
 
         $allPackages = InstalledVersions::getInstalledPackagesByType('nixphp-plugin');
-        var_dump($allPackages);
         $ordered = array_filter($orderedPackages, fn($name) => in_array($name, $allPackages));
         $remaining = array_diff($allPackages, $ordered);
 
