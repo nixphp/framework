@@ -44,14 +44,14 @@ class App
                     'statusCode' => $e->getStatusCode(),
                     'message' => $e->getMessage()
                 ]
-            ));
+            ), $e->getStatusCode());
         } catch (\Throwable $e) {
             $response = response(view(
                 'errors.default', [
                     'statusCode' => 500,
                     'message' => $e->getMessage()
                 ]
-            ));
+            ), 500);
 
         }
 
@@ -216,6 +216,7 @@ class App
         }
 
         $allPackages = InstalledVersions::getInstalledPackagesByType('nixphp-plugin');
+        var_dump($allPackages);
         $ordered = array_filter($orderedPackages, fn($name) => in_array($name, $allPackages));
         $remaining = array_diff($allPackages, $ordered);
 

@@ -25,6 +25,8 @@ use NixPHP\Support\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
 if (getenv('APP_ENV') !== Environment::TESTING
     && getenv('APP_ENV') !== Environment::PRODUCTION
 ) {
@@ -128,7 +130,7 @@ function abort(int $statusCode = 404, string $message = ''): never
 function send_response(ResponseInterface $response): never
 {
     while (ob_get_level() > 0) {
-        ob_end_clean(); // sauber leeren, aber erst jetzt – nach dem Einsammeln
+        ob_end_clean();
     }
 
     header(sprintf(
