@@ -21,7 +21,7 @@ class Container implements ContainerInterface
             try {
                 $this->services[$id] = call_user_func($this->services[$id], $this);
             } catch (\Throwable $e) {
-                throw new ContainerException('Failed to build service: ' . $e->getMessage());
+                throw new ContainerException($e->getMessage());
             }
         }
 

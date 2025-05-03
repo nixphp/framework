@@ -3,6 +3,7 @@
 namespace NixPHP\Core;
 
 use Composer\InstalledVersions;
+use NixPHP\Exceptions\ContainerException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use NixPHP\Exceptions\AbortException;
@@ -37,7 +38,7 @@ class App
 
         try {
             $response = $this->container->get('dispatcher')->forward($request);
-        } catch (AbortException | HttpException | RouteNotFoundException | DispatcherException $e) {
+        } catch (AbortException | HttpException | RouteNotFoundException | DispatcherException | ContainerException $e) {
             $response = response(view(
                 'errors.' . $e->getStatusCode(), [
                     'statusCode' => $e->getStatusCode(),
