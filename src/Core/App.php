@@ -11,7 +11,6 @@ use NixPHP\Exceptions\HttpException;
 use NixPHP\Exceptions\RouteNotFoundException;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
-use NixPHP\Support\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use function NixPHP\event;
 use function NixPHP\response;
@@ -63,11 +62,6 @@ class App
     public function container(): Container
     {
         return $this->container;
-    }
-
-    public function session(): Session
-    {
-        return $this->container->get('session');
     }
 
     public function guard(): Guard
@@ -154,10 +148,6 @@ class App
 
             return new Log($logFile);
 
-        });
-
-        $this->container->set('session', function() {
-            return new Session();
         });
 
         $this->container->set('event', function() {

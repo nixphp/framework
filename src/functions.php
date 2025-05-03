@@ -21,11 +21,8 @@ use NixPHP\Core\Container;
 use NixPHP\Exceptions\AbortException;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
-use NixPHP\Support\Session;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-
-require_once __DIR__ . '/../vendor/autoload.php';
 
 if (getenv('APP_ENV') !== Environment::TESTING
     && getenv('APP_ENV') !== Environment::PRODUCTION
@@ -162,11 +159,6 @@ function env(?string $key = null, mixed $default = null): mixed
     }
 
     return $env->get($key, $default);
-}
-
-function session(): Session
-{
-    return app()->session();
 }
 
 function event(): Event
