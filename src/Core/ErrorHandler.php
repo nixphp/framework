@@ -4,7 +4,7 @@ namespace NixPHP\Core;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
 use function NixPHP\send_response;
-use function NixPHP\view;
+use function NixPHP\simple_view;
 use function NixPHP\response;
 
 class ErrorHandler
@@ -18,7 +18,7 @@ class ErrorHandler
         $trace = htmlspecialchars($e->getTraceAsString());
         send_response(
             response(
-                view('errors.500' . $e->getCode(), compact('message', 'file', 'line', 'trace')),
+                simple_view('errors/500' . $e->getCode(), compact('message', 'file', 'line', 'trace')),
                 500
             )
         );

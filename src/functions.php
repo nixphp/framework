@@ -5,7 +5,7 @@ namespace NixPHP;
 ob_start();
 
 if (!defined('NIXPHP_BASE_PATH')) {
-    define('NIXPHP_BASE_PATH', dirname(__DIR__, 2));
+    define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
 use Nyholm\Psr7\Response;

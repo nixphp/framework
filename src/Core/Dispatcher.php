@@ -7,8 +7,7 @@ use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function NixPHP\event;
-use function NixPHP\render;
-use function NixPHP\response;
+use function NixPHP\simple_render;
 
 class Dispatcher
 {
@@ -28,7 +27,7 @@ class Dispatcher
             $route = $this->route->find($uri, $method);
         } catch (RouteNotFoundException $e) {
             if ($uri === '/' && $method === 'GET') {
-                return render('phpico_welcome');
+                return simple_render(__DIR__ . '/../Resources/views/nixphp_welcome.phtml');
             }
             throw $e;
         }

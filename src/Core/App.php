@@ -2,22 +2,17 @@
 
 namespace NixPHP\Core;
 
-use Composer\InstalledVersions;
-use NixPHP\Exceptions\ContainerException;
-use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7Server\ServerRequestCreator;
-use NixPHP\Exceptions\AbortException;
-use NixPHP\Exceptions\DispatcherException;
-use NixPHP\Exceptions\HttpException;
-use NixPHP\Exceptions\RouteNotFoundException;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
+use Composer\InstalledVersions;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
 use function NixPHP\event;
 use function NixPHP\response;
 use function NixPHP\send_response;
 use function NixPHP\plugin;
-use function NixPHP\view;
+use function NixPHP\simple_view;
 
 class App
 {
@@ -35,23 +30,21 @@ class App
         $request = $this->createServerRequest();
         $this->container()->get('event')->dispatch('request.start', $request);
         $this->container()->set('request', $request);
+        $viewPath = $this->getCoreBasePath() . '/src/Resources/views';
 
         try {
             $response = $this->container->get('dispatcher')->forward($request);
-        } catch (AbortException | HttpException | RouteNotFoundException | DispatcherException | ContainerException $e) {
-            $response = response(view(
-                'errors.' . $e->getStatusCode(), [
-                    'statusCode' => $e->getStatusCode(),
-                    'message' => $e->getMessage()
-                ]
-            ), $e->getStatusCode());
         } catch (\Throwable $e) {
-            $response = response(view(
-                'errors.default', [
-                    'statusCode' => 500,
-                    'message' => $e->getMessage()
+            $statusCode = method_exists($e, 'getStatusCode')
+                ? $e->getStatusCode()
+                : 500;
+            $response = response(simple_view(
+                $viewPath . '/errors/default.phtml', [
+                    'statusCode' => $statusCode,
+                    'message' => $e->getMessage(),
+                    'stackTrace' => $e->getTraceAsString(),
                 ]
-            ), 500);
+            ), $statusCode);
 
         }
 
@@ -173,10 +166,6 @@ class App
             $merged = array_replace_recursive($coreConfig, $pluginConfig, $appConfig);
 
             return new Config($merged);
-        });
-
-        $this->container->set('asset', function() {
-            return new Asset();
         });
 
         $this->container->set('route', function() {

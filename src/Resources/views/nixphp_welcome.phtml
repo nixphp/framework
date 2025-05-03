@@ -6,10 +6,10 @@ use function NixPHP\s;
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= s($this->renderBlock('title', 'App')) ?></title>
+    <title>Welcome!</title>
     <style>
         :root {
-            --container-width: <?= trim($this->renderBlock('container-width-px', 800)) ?>px;
+            --container-width: 400px;
         }
 
         html, body {
@@ -103,6 +103,42 @@ use function NixPHP\s;
     </style>
 </head>
 <body>
-<?= $this->renderBlock('content') ?>
+
+    <div class="box">
+
+        <h1>Welcome to <span class="font-primary">NixPHP</span>!</h1>
+        <p>To begin developing, you may add your first route to <strong>/app/routes.php</strong>.</p>
+
+        <hr />
+
+        <?php $code = <<<CODE
+        // File: app/routes.php
+        
+        use function NixPHP\\response;
+        use function NixPHP\\route;
+        
+        &lt;?php
+        
+        route()->add('GET', '/', function() {
+            return response('Hello World!');
+        });
+        CODE; ?>
+
+        <h2>Example</h2>
+        <div class="code">
+            <pre><?= $code ?></pre>
+        </div>
+
+        <hr />
+
+        <div class="footer">
+
+            <a href="https://nixphp.github.io/docs" target="_blank">Documentation</a>
+            <a href="https://github.com/nixphp/framework" target="_blank">Github</a>
+
+        </div>
+
+    </div>
+
 </body>
 </html>
