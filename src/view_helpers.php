@@ -5,17 +5,6 @@ namespace NixPHP;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * Sanitize either a string or an array
- *
- * @param string|array $value
- * @return string|array
- */
-function s(string|array $value): string|array
-{
-    return guard()->safeOutput($value);
-}
-
-/**
  * @param string $template
  * @param array $vars
  * @return ResponseInterface

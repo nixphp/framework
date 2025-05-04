@@ -121,7 +121,7 @@ function refresh(): ResponseInterface
 
 function abort(int $statusCode = 404, string $message = ''): never
 {
-    throw new AbortException(s($message), $statusCode);
+    throw new AbortException(htmlspecialchars($message), $statusCode);
 }
 
 function send_response(ResponseInterface $response): never

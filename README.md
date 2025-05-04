@@ -169,7 +169,7 @@ class HelloController
 ```php
 //File: app/views/hello.phtml
 
-use function NixPHP\s; // Sanitize on output
+use function NixPHP\s; // Sanitize on output (provided through nixphp/view)
 
 <h1>Hello, <?= s($name) ?>!</h1>
 ```

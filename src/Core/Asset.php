@@ -34,9 +34,9 @@ class Asset
 
         foreach ($this->list($type) as $path) {
             if ($type === 'css') {
-                $html .= sprintf(self::TAG_CSS, s($path)) . PHP_EOL;
+                $html .= sprintf(self::TAG_CSS, htmlspecialchars($path)) . PHP_EOL;
             } elseif ($type === 'js') {
-                $html .= sprintf(self::TAG_JS, s($path)) . PHP_EOL;
+                $html .= sprintf(self::TAG_JS, htmlspecialchars($path)) . PHP_EOL;
             }
         }
         return trim($html);
