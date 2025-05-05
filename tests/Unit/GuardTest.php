@@ -36,4 +36,42 @@ class GuardTest extends NixPHPTestCase
         $this->assertSame(['&lt;script&gt;Test&lt;/script&gt;'], $output);
     }
 
+    public function testSafePathSuccess()
+    {
+        $guard = new Guard();
+        $output = $guard->safePath('views/valid/file.php');
+        $this->assertSame('views/valid/file.php', $output);
+    }
+
+    public function testSafePathWithRoot()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $guard = new Guard();
+        $output = $guard->safePath('/views/valid/file.php');
+    }
+
+    public function testSafePathWithTraversingPath()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $maliciousPath = '/../../../home/user/.ssh/id_rsa';
+        $guard = new Guard();
+        $guard->safePath($maliciousPath);
+    }
+
+    public function testSafePathWithInvalidChars()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $maliciousPath = '/<script></script>';
+        $guard = new Guard();
+        $guard->safePath($maliciousPath);
+    }
+
+    public function testHelperFunction()
+    {
+        $this->assertInstanceOf(Guard::class, \NixPHP\guard() );;
+    }
+
 }
