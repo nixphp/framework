@@ -1,6 +1,6 @@
-# Contributing to PHPico
+# Contributing to NixPHP
 
-Thanks for your interest in contributing to **PHPico** – a lightweight PHP microframework built for simplicity and flexibility. 🙌
+Thanks for your interest in contributing to **NixPHP** – a lightweight PHP microframework built for simplicity and flexibility. 🙌
 
 Whether you're reporting a bug, suggesting a feature, or submitting a pull request — you're welcome here.
 
@@ -8,7 +8,7 @@ Whether you're reporting a bug, suggesting a feature, or submitting a pull reque
 
 ## 🧠 Philosophy
 
-PHPico follows a simple rule:
+NixPHPF follows a simple rule:
 
 > **"As simple as possible, as flexible as necessary."**
 
@@ -20,7 +20,7 @@ We want to keep the core minimal, readable, and extensible — without adding un
 ## 💡 Suggestions & Issues
 
 If you have a feature idea or found a bug:
-- Open an issue in [GitHub Issues](https://github.com/fkde/phpico/issues)
+- Open an issue in [GitHub Issues](https://github.com/nixphp/framework/issues)
 - Be as specific as possible
 - Screenshots or code examples help a lot
 
@@ -48,7 +48,6 @@ The framework consists of:
 - `src/Resources/` — internal views and templates
 - `src/Exceptions/` — custom exception classes
 - `functions.php` — globally available general functions
-- `helpers.php` — globally available helper functions
 - `view_helpers.php` — view-specific helper functions
 
 All code is PSR-4 autoloaded via Composer.
@@ -67,5 +66,5 @@ By contributing, you agree that your code will be licensed under the [MIT Licens
 
 ---
 
-Thanks again — you're awesome. 🚀  
+Thanks again - you're awesome. 🚀  
 Let's build something great with PHP.
