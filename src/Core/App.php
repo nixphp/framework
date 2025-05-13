@@ -187,7 +187,7 @@ class App
     {
         $pluginService = $this->container->get('plugin');
 
-        // Try to load configuration order from user
+        // Try to load configuration order from userspace
         $orderedPackages = [];
         $pluginConfigPath = __DIR__ . '/../config/plugins.php';
 
@@ -201,7 +201,7 @@ class App
 
         $finalOrder = array_merge($ordered, $remaining);
 
-        // Lade Plugins in finaler Reihenfolge
+        // Load Plugins in final order
         foreach ($finalOrder as $package) {
             $path = InstalledVersions::getInstallPath($package);
             if (!$path) continue;

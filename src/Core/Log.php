@@ -65,7 +65,7 @@ class Log implements LoggerInterface
 
     private function interpolate(string $message, array $context): string
     {
-        // Platzhalter {key} mit Werten aus $context ersetzen
+        // Placeholder {key} will be replaced by variables in $contexts
         $replace = [];
         foreach ($context as $key => $val) {
             $replace['{' . $key . '}'] = (string) $val;
