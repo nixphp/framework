@@ -27,7 +27,6 @@ use Psr\Http\Message\ServerRequestInterface;
 if (getenv('APP_ENV') !== Environment::TESTING
     && getenv('APP_ENV') !== Environment::PRODUCTION
 ) {
-    //set_exception_handler([ErrorHandler::class, 'handleException']);
     set_error_handler([ErrorHandler::class, 'handleError']);
     ini_set('display_errors', false);
 }
