@@ -8,6 +8,7 @@ if (!defined('NIXPHP_BASE_PATH')) {
     define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
+use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
 use NixPHP\Core\App;
@@ -81,6 +82,11 @@ function request(): ServerRequestInterface
 function response(mixed $content = '', int $status = 200, array $headers = []): ResponseInterface
 {
     return new Response($status, $headers, $content);
+}
+
+function param(): RequestParameter
+{
+    return app()->container()->get('parameter');
 }
 
 function json(mixed $data, int $status = 200, array $headers = []): ResponseInterface

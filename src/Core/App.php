@@ -5,6 +5,7 @@ namespace NixPHP\Core;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
 use Composer\InstalledVersions;
+use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
@@ -30,6 +31,9 @@ class App
         $request = $this->createServerRequest();
         $this->container()->get('event')->dispatch('request.start', $request);
         $this->container()->set('request', $request);
+        $this->container()->set('parameter', function($container) {
+            return new RequestParameter($container->get('request'));
+        });
         $viewPath = $this->getCoreBasePath() . '/src/Resources/views';
 
         try {
