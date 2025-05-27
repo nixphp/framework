@@ -9,6 +9,7 @@ use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
+use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
 use function NixPHP\send_response;
@@ -41,6 +42,12 @@ class App
         try {
             $response = $this->container->get('dispatcher')->forward($request);
         } catch (\Throwable $e) {
+
+            if (env('APP_ENV') === Environment::PRODUCTION) {
+                \NixPHP\log()->error($e);
+                return;
+            }
+
             $statusCode = method_exists($e, 'getStatusCode')
                 ? $e->getStatusCode()
                 : 500;
@@ -95,8 +102,6 @@ class App
         $this->loadServices();
         $this->loadPlugins();
         if (PHP_SAPI !== 'cli') $this->loadRoutes();
-
-
     }
 
     private function loadEnv(string $path = '/.env'): void
