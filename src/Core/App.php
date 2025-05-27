@@ -28,6 +28,8 @@ class App
 
     public function run(): void
     {
+        if (PHP_SAPI === 'cli') return;
+
         $request = $this->createServerRequest();
         $this->container()->get('event')->dispatch('request.start', $request);
         $this->container()->set('request', $request);
@@ -92,7 +94,8 @@ class App
         $this->loadEnv($envFile);
         $this->loadServices();
         $this->loadPlugins();
-        $this->loadRoutes();
+        if (PHP_SAPI !== 'cli') $this->loadRoutes();
+
 
     }
 
