@@ -171,7 +171,7 @@ class App
                 : [];
 
             $pluginConfig = [];
-            foreach (plugin()->getMeta('configPaths') as $file) {
+            foreach (plugin()->getSection('configPaths') as $file) {
                 $pluginConfig = array_replace_recursive($pluginConfig, require $file);
             }
 
@@ -201,7 +201,7 @@ class App
 
         // Try to load configuration order from userspace
         $orderedPackages = [];
-        $pluginConfigPath = __DIR__ . '/../config/plugins.php';
+        $pluginConfigPath = $this->getBasePath() . '/app/plugins.php';
 
         if (file_exists($pluginConfigPath)) {
             $orderedPackages = require $pluginConfigPath;
@@ -219,16 +219,24 @@ class App
             if (!$path) continue;
 
             if (file_exists($path . '/bootstrap.php')) {
-                $pluginService->addMeta('bootstraps', $path . '/bootstrap.php');
+                $pluginService->addMeta($package, 'bootstraps', $path . '/bootstrap.php');
                 require_once $path . '/bootstrap.php';
             }
             if (file_exists($path . '/app/config.php')) {
-                $pluginService->addMeta('configPaths', $path . '/app/config.php');
+                $pluginService->addMeta($package, 'configPaths', $path . '/app/config.php');
             }
             if (is_dir($path . '/app/views')) {
-                $pluginService->addMeta('viewPaths', $path . '/app/views');
+                $pluginService->addMeta($package, 'viewPaths', $path . '/app/views');
             }
         }
+    }
+
+    public function hasPlugin(string $pluginName): bool
+    {
+        /** @var Plugin $pluginService */
+        $pluginService = $this->container->get('plugin');
+        $plugin = $pluginService->getMeta($pluginName);
+        return !empty($plugin);
     }
 
     private function createServerRequest(): ServerRequestInterface
