@@ -197,6 +197,7 @@ class App
 
     private function loadPlugins(): void
     {
+        /* @var Plugin $pluginService */
         $pluginService = $this->container->get('plugin');
 
         // Try to load configuration order from userspace
@@ -207,7 +208,7 @@ class App
             $orderedPackages = require $pluginConfigPath;
         }
 
-        $allPackages = InstalledVersions::getInstalledPackagesByType('nixphp-plugin');
+        $allPackages = array_unique(InstalledVersions::getInstalledPackagesByType('nixphp-plugin'));
         $ordered = array_filter($orderedPackages, fn($name) => in_array($name, $allPackages));
         $remaining = array_diff($allPackages, $ordered);
 
@@ -220,7 +221,6 @@ class App
 
             if (file_exists($path . '/bootstrap.php')) {
                 $pluginService->addMeta($package, 'bootstraps', $path . '/bootstrap.php');
-                require_once $path . '/bootstrap.php';
             }
             if (file_exists($path . '/app/config.php')) {
                 $pluginService->addMeta($package, 'configPaths', $path . '/app/config.php');
@@ -228,6 +228,10 @@ class App
             if (is_dir($path . '/app/views')) {
                 $pluginService->addMeta($package, 'viewPaths', $path . '/app/views');
             }
+
+            echo $package . '<br />';
+
+            $pluginService->bootOnce($package, $path . '/bootstrap.php');
         }
     }
 

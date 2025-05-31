@@ -8,6 +8,7 @@ if (!defined('NIXPHP_BASE_PATH')) {
     define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
+use NixPHP\Support\AppHolder;
 use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
@@ -18,7 +19,6 @@ use NixPHP\Core\ErrorHandler;
 use NixPHP\Core\Event;
 use NixPHP\Core\Log;
 use NixPHP\Core\Route;
-use NixPHP\Core\Container;
 use NixPHP\Exceptions\AbortException;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
@@ -32,17 +32,9 @@ if (getenv('APP_ENV') !== Environment::TESTING
     ini_set('display_errors', false);
 }
 
-global $container;
-$container = new Container();
-
 function app(): App
 {
-    global $container;
-
-    if (!$container->has('app')) {
-        $container->set('app', function($container) { return new App($container); });
-    }
-    return $container->get('app');
+    return AppHolder::get();
 }
 
 function config(?string $key = null, mixed $default = null): mixed

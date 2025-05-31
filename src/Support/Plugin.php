@@ -4,6 +4,7 @@ namespace NixPHP\Support;
 class Plugin
 {
     protected array $meta = [];
+    protected array $booted = [];
 
     public function addMeta(string $package, string $section, string $value): void
     {
@@ -41,5 +42,17 @@ class Plugin
     public function all(): array
     {
         return $this->meta;
+    }
+
+    public function bootOnce(string $package, string $bootstrapPath): void
+    {
+        if (in_array($package, $this->booted, true)) {
+            return;
+        }
+
+        $this->booted[] = $package;
+
+        $this->addMeta($package, 'bootstraps', $bootstrapPath);
+        require_once $bootstrapPath;
     }
 }
