@@ -9,6 +9,7 @@ use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
+use function NixPHP\app;
 use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
@@ -217,6 +218,7 @@ class App
         // Load Plugins in final order
         foreach ($finalOrder as $package) {
             $path = InstalledVersions::getInstallPath($package);
+
             if (!$path) continue;
 
             if (file_exists($path . '/bootstrap.php')) {
@@ -228,11 +230,16 @@ class App
             if (is_dir($path . '/app/views')) {
                 $pluginService->addMeta($package, 'viewPaths', $path . '/app/views');
             }
-
-            echo $package . '<br />';
+            if (file_exists($path . '/src/functions.php')) {
+                require_once $path . '/src/functions.php';
+            }
+            if (file_exists($path . '/src/view_helpers.php')) {
+                require_once $path . '/src/view_helpers.php';
+            }
 
             $pluginService->bootOnce($package, $path . '/bootstrap.php');
         }
+        
     }
 
     public function hasPlugin(string $pluginName): bool
