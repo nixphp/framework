@@ -2,6 +2,7 @@
 
 namespace NixPHP\Core;
 
+use NixPHP\Support\AppHolder;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
 use Composer\InstalledVersions;
@@ -9,7 +10,6 @@ use NixPHP\Support\RequestParameter;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
-use function NixPHP\app;
 use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
@@ -25,6 +25,7 @@ class App
     public function __construct(Container $container)
     {
         $this->container = $container;
+        AppHolder::set($this);
         $this->boot();
     }
 
