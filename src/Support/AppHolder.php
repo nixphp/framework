@@ -16,4 +16,9 @@ class AppHolder
         }
         return self::$instance;
     }
+
+    public static function set(App $app): void
+    {
+        self::$instance = $app;
+    }
 }
