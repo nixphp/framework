@@ -222,9 +222,6 @@ class App
 
             if (!$path) continue;
 
-            if (file_exists($path . '/bootstrap.php')) {
-                $pluginService->addMeta($package, 'bootstraps', $path . '/bootstrap.php');
-            }
             if (file_exists($path . '/app/config.php')) {
                 $pluginService->addMeta($package, 'configPaths', $path . '/app/config.php');
             }
@@ -237,8 +234,11 @@ class App
             if (file_exists($path . '/src/view_helpers.php')) {
                 require_once $path . '/src/view_helpers.php';
             }
+            if (file_exists($path . '/bootstrap.php')) {
+                $pluginService->addMeta($package, 'bootstraps', $path . '/bootstrap.php');
+                $pluginService->bootOnce($package, $path . '/bootstrap.php');
+            }
 
-            $pluginService->bootOnce($package, $path . '/bootstrap.php');
         }
         
     }
