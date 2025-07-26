@@ -218,6 +218,7 @@ class App
 
         // Load Plugins in final order
         foreach ($finalOrder as $package) {
+
             $path = InstalledVersions::getInstallPath($package);
 
             if (!$path) continue;
@@ -235,7 +236,6 @@ class App
                 require_once $path . '/src/view_helpers.php';
             }
             if (file_exists($path . '/bootstrap.php')) {
-                $pluginService->addMeta($package, 'bootstraps', $path . '/bootstrap.php');
                 $pluginService->bootOnce($package, $path . '/bootstrap.php');
             }
 
