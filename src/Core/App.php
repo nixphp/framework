@@ -7,6 +7,7 @@ use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
 use Composer\InstalledVersions;
 use NixPHP\Support\RequestParameter;
+use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,6 +25,7 @@ class App
 
     public function __construct(Container $container)
     {
+        Stopwatch::start('app');
         $this->container = $container;
         AppHolder::set($this);
         $this->boot();
@@ -65,7 +67,6 @@ class App
 
         event()->dispatch('response.sending', $response);
         send_response($response); // This will abort the request as exit(0) is called
-
     }
 
     public function container(): Container

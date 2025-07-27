@@ -10,6 +10,7 @@ if (!defined('NIXPHP_BASE_PATH')) {
 
 use NixPHP\Support\AppHolder;
 use NixPHP\Support\RequestParameter;
+use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7\Stream;
 use NixPHP\Core\App;
@@ -142,7 +143,7 @@ function send_response(ResponseInterface $response): never
 
     echo $response->getBody();
 
-    event()->dispatch('request.end', $response);
+    event()->dispatch('request.end', $response, Stopwatch::stop('app'));
 
     exit(0);
 }
