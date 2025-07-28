@@ -248,10 +248,7 @@ class App
 
     private function loadGuards(): void
     {
-        /** @var Guard $guard */
-        $guard = $this->container->get('guard');
-
-        $guard->register('safePath', function ($path) {
+        $this->guard()->register('safePath', function ($path) {
 
             if (
                 $path === '' ||
@@ -267,7 +264,7 @@ class App
 
         });
 
-        $guard->register('safeOutput', function ($value) {
+        $this->guard()->register('safeOutput', function ($value) {
             if (is_array($value)) {
                 return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
             }
@@ -275,7 +272,7 @@ class App
             return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
         });
 
-        $guard->register('ipBlacklist', function (string $ip, array $list = []) {
+        $this->guard()->register('ipBlacklist', function (string $ip, array $list = []) {
 
             if (empty($list)) {
                 $list = $this->container->get('config')->get('guard:ipBlacklist');
@@ -288,7 +285,7 @@ class App
 
         });
 
-        $guard->register('userAgentBlacklist', function (string $userAgent, array $list = []) {
+        $this->guard()->register('userAgentBlacklist', function (string $userAgent, array $list = []) {
 
             if (empty($list)) {
                 $list = $this->container->get('config')->get('guard:userAgentBlacklist');
