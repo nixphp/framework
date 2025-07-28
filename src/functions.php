@@ -9,6 +9,7 @@ if (!defined('NIXPHP_BASE_PATH')) {
 }
 
 use NixPHP\Support\AppHolder;
+use NixPHP\Support\Guard;
 use NixPHP\Support\RequestParameter;
 use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Response;
@@ -21,7 +22,6 @@ use NixPHP\Core\Event;
 use NixPHP\Core\Log;
 use NixPHP\Core\Route;
 use NixPHP\Exceptions\AbortException;
-use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

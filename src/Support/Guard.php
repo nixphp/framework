@@ -4,28 +4,26 @@ namespace NixPHP\Support;
 
 class Guard
 {
+    protected GuardRegistry $registry;
 
-    public function safePath(string $path): string
+    public function __construct()
     {
-        if (
-            $path === '' ||
-            str_contains($path, '..') ||
-            str_starts_with($path, '/') ||
-            str_contains($path, '://') ||
-            !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)
-        ) {
-            throw new \InvalidArgumentException('Insecure path detected! Please find another solution.');
-        }
-
-        return $path;
+        $this->registry = new GuardRegistry();
     }
 
-    public function safeOutput(string|array $value): string|array
+    public function register(string $name, callable $callback): void
     {
-        if (is_array($value)) {
-            return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
-        }
-        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        $this->registry->register($name, $callback);
+    }
+
+    public function run(string $name, ...$payload): mixed
+    {
+        return $this->registry->run($name, ...$payload);
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        return $this->run($name, ...$arguments);
     }
 
 }

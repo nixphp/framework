@@ -11,6 +11,7 @@ use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
+use function NixPHP\config;
 use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
@@ -105,6 +106,7 @@ class App
         $this->loadServices();
         $this->loadPlugins();
         if (PHP_SAPI !== 'cli') $this->loadRoutes();
+        if (PHP_SAPI !== 'cli') $this->loadGuards();
     }
 
     private function loadEnv(string $path = '/.env'): void
@@ -242,6 +244,64 @@ class App
 
         }
         
+    }
+
+    private function loadGuards(): void
+    {
+        /** @var Guard $guard */
+        $guard = $this->container->get('guard');
+
+        $guard->register('safePath', function ($path) {
+
+            if (
+                $path === '' ||
+                str_contains($path, '..') ||
+                str_starts_with($path, '/') ||
+                str_contains($path, '://') ||
+                !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)
+            ) {
+                throw new \InvalidArgumentException('Insecure path detected! Please find another solution.');
+            }
+
+            return $path;
+
+        });
+
+        $guard->register('safeOutput', function ($value) {
+            if (is_array($value)) {
+                return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
+            }
+
+            return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        });
+
+        $guard->register('ipBlacklist', function (string $ip, array $list = []) {
+
+            if (empty($list)) {
+                $list = $this->container->get('config')->get('guard:ipBlacklist');
+            }
+
+            if (in_array($ip, $list, true)) {
+                throw new \InvalidArgumentException('IP address is blacklisted!');
+            }
+            return true;
+
+        });
+
+        $guard->register('userAgentBlacklist', function (string $userAgent, array $list = []) {
+
+            if (empty($list)) {
+                $list = $this->container->get('config')->get('guard:userAgentBlacklist');
+            }
+
+            if (in_array($userAgent, $list, true)) {
+                throw new \InvalidArgumentException('UserAgent is blacklisted!');
+            }
+
+            return true;
+
+        });
+
     }
 
     public function hasPlugin(string $pluginName): bool
