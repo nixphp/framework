@@ -4,21 +4,35 @@ namespace NixPHP\Support;
 
 class Guard
 {
-    protected GuardRegistry $registry;
+    /**
+     * @var array<string, callable>
+     */
+    protected array $guards = [];
 
-    public function __construct()
+    public function register(string $name, callable $callback): self
     {
-        $this->registry = new GuardRegistry();
+        $this->guards[$name] = $callback;
+        return $this;
     }
 
-    public function register(string $name, callable $callback): void
+    public function unregister(string $name): self
     {
-        $this->registry->register($name, $callback);
+        unset($this->guards[$name]);
+        return $this;
+    }
+
+    public function has(string $name): bool
+    {
+        return isset($this->guards[$name]);
     }
 
     public function run(string $name, ...$payload): mixed
     {
-        return $this->registry->run($name, ...$payload);
+        if (!$this->has($name) || !is_callable($this->guards[$name])) {
+            throw new \RuntimeException('Guard "' . $name . '" not found.');
+        }
+
+        return $this->guards[$name](...$payload);
     }
 
     public function __call(string $name, array $arguments)

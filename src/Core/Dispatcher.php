@@ -18,6 +18,10 @@ class Dispatcher
         $this->route = $route;
     }
 
+    /**
+     * @throws RouteNotFoundException
+     * @throws DispatcherException
+     */
     public function forward(ServerRequestInterface $request): ResponseInterface
     {
         $method = $request->getMethod() ?? 'GET';

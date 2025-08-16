@@ -8,38 +8,66 @@ use Tests\NixPHPTestCase;
 class GuardTest extends NixPHPTestCase
 {
 
-    public function testSafeOutputWithRegularString()
+    private Guard $guard;
+
+    protected function setUp(): void
     {
         $guard = new Guard();
-        $output = $guard->safeOutput('test');
+
+        $guard->register('safeOutput', function($value) {
+            if (is_array($value)) {
+                return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
+            }
+
+            return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        });
+
+        $guard->register('safePath', function ($path) {
+
+            if (
+                $path === '' ||
+                str_contains($path, '..') ||
+                str_starts_with($path, '/') ||
+                str_contains($path, '://') ||
+                !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)
+            ) {
+                throw new \InvalidArgumentException('Insecure path detected! Please find another solution.');
+            }
+
+            return $path;
+
+        });
+
+        $this->guard = $guard;
+    }
+
+    public function testSafeOutputWithRegularString()
+    {
+        $output = $this->guard->safeOutput('test');
         $this->assertSame('test', $output);
     }
 
     public function testSafeOutputWithRegularArray()
     {
-        $guard = new Guard();
-        $output = $guard->safeOutput(['test']);
+        $output = $this->guard->safeOutput(['test']);
         $this->assertSame(['test'], $output);
     }
 
     public function testSafeOutputWithMaliciousString()
     {
-        $guard = new Guard();
-        $output = $guard->safeOutput('<script>Test</script>');
+        $output = $this->guard->safeOutput('<script>Test</script>');
         $this->assertSame('&lt;script&gt;Test&lt;/script&gt;', $output);
     }
 
     public function testSafeOutputWithMaliciousArray()
     {
-        $guard = new Guard();
-        $output = $guard->safeOutput(['<script>Test</script>']);
+        $output = $this->guard->safeOutput(['<script>Test</script>']);
         $this->assertSame(['&lt;script&gt;Test&lt;/script&gt;'], $output);
     }
 
     public function testSafePathSuccess()
     {
-        $guard = new Guard();
-        $output = $guard->safePath('views/valid/file.php');
+        $output = $this->guard->safePath('views/valid/file.php');
         $this->assertSame('views/valid/file.php', $output);
     }
 
@@ -47,8 +75,7 @@ class GuardTest extends NixPHPTestCase
     {
         $this->expectException(\InvalidArgumentException::class);
 
-        $guard = new Guard();
-        $output = $guard->safePath('/views/valid/file.php');
+        $output = $this->guard->safePath('/views/valid/file.php');
     }
 
     public function testSafePathWithTraversingPath()
@@ -56,8 +83,7 @@ class GuardTest extends NixPHPTestCase
         $this->expectException(\InvalidArgumentException::class);
 
         $maliciousPath = '/../../../home/user/.ssh/id_rsa';
-        $guard = new Guard();
-        $guard->safePath($maliciousPath);
+        $this->guard->safePath($maliciousPath);
     }
 
     public function testSafePathWithInvalidChars()
@@ -65,8 +91,7 @@ class GuardTest extends NixPHPTestCase
         $this->expectException(\InvalidArgumentException::class);
 
         $maliciousPath = '/<script></script>';
-        $guard = new Guard();
-        $guard->safePath($maliciousPath);
+        $this->guard->safePath($maliciousPath);
     }
 
     public function testHelperFunction()

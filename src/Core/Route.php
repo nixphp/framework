@@ -9,6 +9,14 @@ class Route
 {
     protected array $routes = [];
 
+    /**
+     * @param string         $method
+     * @param string         $path
+     * @param array|callable $action
+     * @param string|null    $name
+     *
+     * @return $this
+     */
     public function add(string $method, string $path, array|callable $action, ?string $name = null): Route
     {
         if (count($this->routes) > 0 && empty($name)) {
@@ -17,9 +25,10 @@ class Route
 
         $this->routes[$name] = [
             'method' => $method,
-            'path' => $path,
+            'path'   => $path,
             'action' => $action
         ];
+
         return $this;
     }
 
