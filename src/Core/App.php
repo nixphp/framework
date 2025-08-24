@@ -226,11 +226,14 @@ class App
 
             if (!$path) continue;
 
-            if (file_exists($path . '/app/config.php')) {
-                $pluginService->addMeta($package, 'configPaths', $path . '/app/config.php');
+            if (file_exists($path . '/src/config.php')) {
+                $pluginService->addMeta($package, 'configPaths', $path . '/src/config.php');
             }
-            if (is_dir($path . '/app/views')) {
-                $pluginService->addMeta($package, 'viewPaths', $path . '/app/views');
+            if (file_exists($path . '/src/routes.php')) {
+                require_once $path . '/src/routes.php';
+            }
+            if (is_dir($path . '/src/views')) {
+                $pluginService->addMeta($package, 'viewPaths', $path . '/src/views');
             }
             if (file_exists($path . '/src/functions.php')) {
                 require_once $path . '/src/functions.php';

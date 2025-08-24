@@ -74,4 +74,9 @@ class Route
         throw new RouteNotFoundException("Route '{$name}' not found.");
     }
 
+    public function all(): array
+    {
+        return $this->routes;
+    }
+
 }
