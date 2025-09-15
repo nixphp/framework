@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP\Core;
 
@@ -9,18 +10,46 @@ use Psr\Http\Message\ServerRequestInterface;
 use function NixPHP\event;
 use function NixPHP\simple_render;
 
+/**
+ * Core dispatcher that handles HTTP request routing and execution.
+ *
+ * Manages the routing of requests to appropriate handlers and
+ * supports both controller classes and callable actions.
+ */
 class Dispatcher
 {
+    /**
+     * Route instance used for matching requests to handlers.
+     *
+     * @var Route
+     */
     private Route $route;
 
+    /**
+     * Initializes a new dispatcher instance.
+     *
+     * @param Route $route The route instance for matching and handling requests
+     */
     public function __construct(Route $route)
     {
         $this->route = $route;
     }
 
     /**
-     * @throws RouteNotFoundException
-     * @throws DispatcherException
+     * Forwards the HTTP request to its matching route handler.
+     *
+     * Processes the request by:
+     * - Matching the URI and method against registered routes
+     * - Handling special case for root path ('/')
+     * - Executing controller actions or callables
+     * - Dispatching controller lifecycle events
+     * - Validating and returning the response
+     *
+     * @param ServerRequestInterface $request The incoming HTTP request
+     *
+     * @return ResponseInterface Response from the route handler
+     * @throws RouteNotFoundException If no matching route is found
+     * @throws DispatcherException If handler returns invalid response
      */
     public function forward(ServerRequestInterface $request): ResponseInterface
     {
@@ -52,6 +81,7 @@ class Dispatcher
         }
 
         if ($response instanceof ResponseInterface) return $response;
+        if ($response === -1) exit(0);
         throw new DispatcherException('No valid response returned.');
     }
 

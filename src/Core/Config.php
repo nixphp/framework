@@ -1,12 +1,26 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+/**
+ * Configuration management class that handles array-based config with environment variable support
+ */
 class Config
 {
 
+    /**
+     * Internal storage for configuration values
+     *
+     * @var array<string,mixed>
+     */
     private array $config = [];
 
+    /**
+     * Creates a new Config instance with optional configuration array
+     *
+     * @param array<string,mixed> $config Initial configuration array
+     */
     public function __construct(array $config = [])
     {
         $this->config = $this->resolveEnv($config);
@@ -46,7 +60,15 @@ class Config
         return $pointer;
     }
 
-    function resolveEnv(array $config): array
+    /**
+     * Recursively resolves environment variables in configuration values
+     * Environment variables should be prefixed with 'ENV:' in config values
+     *
+     * @param array<string,mixed> $config Configuration array to process
+     *
+     * @return array<string,mixed> Processed configuration with resolved ENV values
+     */
+    private function resolveEnv(array $config): array
     {
         foreach ($config as $key => $value) {
             if (is_array($value)) {

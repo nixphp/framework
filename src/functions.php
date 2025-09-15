@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP;
 
@@ -33,11 +34,22 @@ if (getenv('APP_ENV') !== Environment::TESTING
     ini_set('display_errors', false);
 }
 
+/**
+ * Get the application instance
+ */
 function app(): App
 {
     return AppHolder::get();
 }
 
+/**
+ * Get configuration value by key
+ *
+ * @param string|null $key     Configuration key to retrieve
+ * @param mixed       $default Default value if key not found
+ *
+ * @return mixed Configuration value or entire config if no key provided
+ */
 function config(?string $key = null, mixed $default = null): mixed
 {
     /** @var Config $config */
@@ -50,6 +62,14 @@ function config(?string $key = null, mixed $default = null): mixed
     return $config->get($key, $default);
 }
 
+/**
+ * Get the route instance or generate URL for a named route
+ *
+ * @param string|null $name   Route name
+ * @param array       $params Route parameters
+ *
+ * @return Route|string Route instance or generated URL
+ */
 function route(?string $name = null, array $params = []): Route|string
 {
     /* @var Route $route */
@@ -62,26 +82,49 @@ function route(?string $name = null, array $params = []): Route|string
     return $route->url($name, $params);
 }
 
+/**
+ * Get the plugin manager instance
+ */
 function plugin(): Plugin
 {
     return app()->container()->get('plugin');
 }
 
+/**
+ * Get current request instance
+ */
 function request(): ServerRequestInterface
 {
     return app()->container()->get('request');
 }
 
+/**
+ * Create a new response
+ *
+ * @param mixed $content Response content
+ * @param int   $status  HTTP status code
+ * @param array $headers Response headers
+ */
 function response(mixed $content = '', int $status = 200, array $headers = []): ResponseInterface
 {
     return new Response($status, $headers, $content);
 }
 
+/**
+ * Get request parameter handler instance
+ */
 function param(): RequestParameter
 {
     return app()->container()->get('parameter');
 }
 
+/**
+ * Create JSON response
+ *
+ * @param mixed $data    Data to encode as JSON
+ * @param int   $status  HTTP status code
+ * @param array $headers Response headers
+ */
 function json(mixed $data, int $status = 200, array $headers = []): ResponseInterface
 {
     $body = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -99,6 +142,12 @@ function json(mixed $data, int $status = 200, array $headers = []): ResponseInte
     return response($stream, $status, $headers);
 }
 
+/**
+ * Create a redirect response
+ *
+ * @param string $url    Target URL
+ * @param int    $status HTTP status code
+ */
 function redirect(string $url, int $status = 302): ResponseInterface
 {
     return new Response(
@@ -110,18 +159,34 @@ function redirect(string $url, int $status = 302): ResponseInterface
     );
 }
 
+/**
+ * Create a refresh response redirecting to the current path
+ */
 function refresh(): ResponseInterface
 {
     /** @var ServerRequestInterface $request */
     $request = app()->container()->get('request');
-    return redirect($request->getUri());
+    return redirect($request->getUri()->getPath());
 }
 
+/**
+ * Abort request with status code and message
+ *
+ * @param int    $statusCode HTTP status code
+ * @param string $message    Error message
+ *
+ * @throws AbortException
+ */
 function abort(int $statusCode = 404, string $message = ''): never
 {
     throw new AbortException(htmlspecialchars($message), $statusCode);
 }
 
+/**
+ * Send a response to the client
+ *
+ * @param ResponseInterface $response Response to send
+ */
 function send_response(ResponseInterface $response): never
 {
     while (ob_get_level() > 0) {
@@ -148,6 +213,14 @@ function send_response(ResponseInterface $response): never
     exit(0);
 }
 
+/**
+ * Get environment value
+ *
+ * @param string|null $key     Environment key
+ * @param mixed       $default Default value if key not found
+ *
+ * @return mixed Environment value or entire environment if no key provided
+ */
 function env(?string $key = null, mixed $default = null): mixed
 {
     $env = app()->container()->get('environment');
@@ -159,16 +232,25 @@ function env(?string $key = null, mixed $default = null): mixed
     return $env->get($key, $default);
 }
 
+/**
+ * Get the event dispatcher instance
+ */
 function event(): Event
 {
     return app()->container()->get('event');
 }
 
+/**
+ * Get logger instance
+ */
 function log(): Log
 {
     return app()->container()->get('log');
 }
 
+/**
+ * Get the guard instance
+ */
 function guard(): Guard
 {
     return app()->guard();

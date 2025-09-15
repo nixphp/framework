@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP\Support;
 
@@ -20,7 +21,7 @@ class Stopwatch
         static::$data[$id] = microtime(true);
     }
 
-    public static function stop(?string $id = null): float
+    public static function stop(?string $id = null): string
     {
         $startTime = null;
 
@@ -42,7 +43,7 @@ class Stopwatch
         return static::format($endTime - $startTime);
     }
 
-    private static function format(float $number): float
+    private static function format(float $number): string
     {
         return number_format($number, 5);
     }

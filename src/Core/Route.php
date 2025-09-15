@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP\Core;
 
@@ -10,6 +11,8 @@ class Route
     protected array $routes = [];
 
     /**
+     * Adds a new route.
+     *
      * @param string         $method
      * @param string         $path
      * @param array|callable $action
@@ -33,6 +36,8 @@ class Route
     }
 
     /**
+     * Finds a route matching the given URI and method.
+     *
      * @param string $uri
      * @param string $method
      *
@@ -60,13 +65,22 @@ class Route
         throw new RouteNotFoundException();
     }
 
+    /**
+     * Generates a URL for a given route name and parameters.
+     *
+     * @param string $name
+     * @param array<string, int|string>  $params
+     *
+     * @return string
+     * @throws RouteNotFoundException
+     */
     public function url(string $name, array $params = []): string
     {
         foreach ($this->routes as $routeName => $route) {
             if ($routeName === $name) {
                 $url = $route['path'];
                 foreach ($params as $key => $value) {
-                    $url = str_replace('{' . $key . '}', $value, $url);
+                    $url = str_replace('{' . $key . '}', (string)$value, $url);
                 }
                 return $url;
             }
@@ -74,6 +88,11 @@ class Route
         throw new RouteNotFoundException("Route '{$name}' not found.");
     }
 
+    /**
+     * Retrieves all routes.
+     *
+     * @return array An array of all routes.
+     */
     public function all(): array
     {
         return $this->routes;

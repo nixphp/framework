@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace NixPHP\Core;
 
@@ -11,7 +12,6 @@ use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Http\Message\ServerRequestInterface;
-use function NixPHP\config;
 use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
@@ -24,6 +24,11 @@ class App
 
     private Container $container;
 
+    /**
+     * Initialize the application with a dependency container
+     *
+     * @param Container $container The dependency injection container
+     */
     public function __construct(Container $container)
     {
         Stopwatch::start('app');
@@ -32,6 +37,9 @@ class App
         $this->boot();
     }
 
+    /**
+     * Run the application and handle the HTTP request-response cycle
+     */
     public function run(): void
     {
         if (PHP_SAPI === 'cli') return;
@@ -70,16 +78,31 @@ class App
         send_response($response); // This will abort the request as exit(0) is called
     }
 
+    /**
+     * Get the dependency injection container
+     *
+     * @return Container The container instance
+     */
     public function container(): Container
     {
         return $this->container;
     }
 
+    /**
+     * Get the guard service for security checks
+     *
+     * @return Guard The guard service instance
+     */
     public function guard(): Guard
     {
         return $this->container->get('guard');
     }
 
+    /**
+     * Get the application base path
+     *
+     * @return string|null The base path or null if not defined
+     */
     public function getBasePath():? string
     {
         if (!defined('\BASE_PATH')) {
@@ -88,6 +111,11 @@ class App
         return \BASE_PATH;
     }
 
+    /**
+     * Get the framework core base path
+     *
+     * @return string|null The core base path or null if not defined
+     */
     private function getCoreBasePath():? string
     {
         if (!defined('\NIXPHP_BASE_PATH')) {
@@ -96,6 +124,9 @@ class App
         return \NIXPHP_BASE_PATH;
     }
 
+    /**
+     * Bootstrap the application by loading environment, services, plugins, routes and guards
+     */
     private function boot(): void
     {
         $envFile = file_exists($this->getBasePath() . '/.env.local')
@@ -105,10 +136,15 @@ class App
         $this->loadEnv($envFile);
         $this->loadServices();
         $this->loadPlugins();
-        if (PHP_SAPI !== 'cli') $this->loadRoutes();
+        $this->loadRoutes();
         if (PHP_SAPI !== 'cli') $this->loadGuards();
     }
 
+    /**
+     * Load environment variables from a file
+     *
+     * @param string $path Path to the environment file
+     */
     private function loadEnv(string $path = '/.env'): void
     {
         if (!file_exists($path)) return;
@@ -126,6 +162,9 @@ class App
         }
     }
 
+    /**
+     * Register core services in the container
+     */
     private function loadServices(): void
     {
         $appDir = $this->getBasePath() . '/app';
@@ -194,12 +233,18 @@ class App
         });
     }
 
+    /**
+     * Load application routes from the routes file
+     */
     private function loadRoutes(): void
     {
         $routes = $this->getBasePath() . '/app/routes.php';
         if (file_exists($routes)) require_once $routes;
     }
 
+    /**
+     * Load and initialize installed plugins
+     */
     private function loadPlugins(): void
     {
         /* @var Plugin $pluginService */
@@ -249,6 +294,9 @@ class App
         
     }
 
+    /**
+     * Register security guard rules
+     */
     private function loadGuards(): void
     {
         $this->guard()->register('safePath', function ($path) {
@@ -304,6 +352,13 @@ class App
 
     }
 
+    /**
+     * Check if a plugin is loaded
+     *
+     * @param string $pluginName Name of the plugin to check
+     *
+     * @return bool True if the plugin exists, false otherwise
+     */
     public function hasPlugin(string $pluginName): bool
     {
         /** @var Plugin $pluginService */
@@ -312,6 +367,11 @@ class App
         return !empty($plugin);
     }
 
+    /**
+     * Create a PSR-7 server request from globals
+     *
+     * @return ServerRequestInterface The created server request
+     */
     private function createServerRequest(): ServerRequestInterface
     {
         $psr17Factory = new Psr17Factory();
