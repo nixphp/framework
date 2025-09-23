@@ -11,8 +11,8 @@ use NixPHP\Support\RequestParameter;
 use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use function NixPHP\env;
 use function NixPHP\event;
 use function NixPHP\response;
 use function NixPHP\send_response;
@@ -56,8 +56,18 @@ class App
             $response = $this->container->get('dispatcher')->forward($request);
         } catch (\Throwable $e) {
 
-            if (env('APP_ENV') === Environment::PRODUCTION) {
-                \NixPHP\log()->error($e);
+            $result = event()->dispatch('exception', $e);
+
+            if (!empty($result)) {
+                foreach ($result as $resp) {
+                    if ($resp instanceof ResponseInterface) {
+                        send_response($resp);
+                    }
+                }
+            }
+
+            if (getenv('APP_ENV') === Environment::PRODUCTION) {
+                \NixPHP\log()->error($e->getMessage());
                 return;
             }
 
