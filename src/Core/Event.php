@@ -5,7 +5,6 @@ namespace NixPHP\Core;
 
 class Event
 {
-
     protected array $listeners = [];
 
     /**
@@ -13,12 +12,16 @@ class Event
      *
      * @param string         $event    Name of the event to listen for
      * @param array|callable $listener Listener callback or array containing class and method
+     * @param int            $priority Higher priority = earlier execution (default 0)
      *
      * @return Event Returns this Event instance for chaining
      */
-    public function listen(string $event, array|callable $listener): Event
+    public function listen(string $event, array|callable $listener, int $priority = 0): Event
     {
-        $this->listeners[$event][] = $listener;
+        $this->listeners[$event][] = [
+            'callback' => $listener,
+            'priority' => $priority,
+        ];
         return $this;
     }
 
@@ -35,17 +38,23 @@ class Event
         $responses = [];
 
         if (!empty($this->listeners[$event])) {
+            usort(
+                $this->listeners[$event],
+                fn ($a, $b) => $b['priority'] <=> $a['priority']
+            );
+
             foreach ($this->listeners[$event] as $listener) {
-                if (is_array($listener)) {
-                    [$class, $handle] = $listener;
+                $callback = $listener['callback'];
+
+                if (is_array($callback)) {
+                    [$class, $handle] = $callback;
                     $responses[] = call_user_func([new $class, $handle], ...$payload);
-                } else if (is_callable($listener)) {
-                    $responses[] = $listener(...$payload);
+                } elseif (is_callable($callback)) {
+                    $responses[] = $callback(...$payload);
                 }
             }
         }
 
         return $responses;
     }
-
 }
