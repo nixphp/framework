@@ -9,6 +9,7 @@ use function NixPHP\event;
 class Route
 {
     protected array $routes = [];
+    private ?string $currentName = null;
 
     /**
      * Adds a new route.
@@ -47,7 +48,7 @@ class Route
     public function find(string $uri, string $method): ?array
     {
         event()->dispatch('route.matching', $uri, $method);
-        foreach ($this->routes as $route) {
+        foreach ($this->routes as $name => $route) {
             if ($route['method'] !== strtoupper($method)) {
                 continue;
             }
@@ -57,8 +58,9 @@ class Route
                 array_shift($matches);
                 preg_match_all('#\{([^}]+)\}#', $route['path'], $paramNames);
                 $params = array_combine($paramNames[1], $matches);
+                $this->currentName = $name;
                 event()->dispatch('route.matched', $route);
-                return ['action' => $route['action'], 'params' => $params];
+                return ['action' => $route['action'], 'params' => $params, 'name' => $name,];
             }
         }
         event()->dispatch('route.not_found', $uri, $method);
@@ -96,6 +98,26 @@ class Route
     public function all(): array
     {
         return $this->routes;
+    }
+
+    public function current():? string
+    {
+        return $this->currentName;
+    }
+
+    public function active(string|array $name, string $class = 'active'): string
+    {
+        if ($this->currentName === null) {
+            return '';
+        }
+
+        if (is_array($name) && in_array($this->currentName, $name, true)) {
+            return $class;
+        } else if($this->currentName === $name) {
+            return $class;
+        }
+
+        return '';
     }
 
 }

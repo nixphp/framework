@@ -72,11 +72,11 @@ class Dispatcher
             [$class, $classAction] = $action;
             $class = new $class();
             event()->dispatch('controller.calling', $request, $class, $action);
-            $response = $class->$classAction($route['params'] ?? null);
+            $response = $class->$classAction(...$route['params'] ?? null);
             event()->dispatch('controller.called', $request, $class, $action, $response);
         } else if (is_callable($action)) {
             event()->dispatch('controller.calling', $request, null, $action);
-            $response = $action($route['params'] ?? null);
+            $response = $action(...$route['params'] ?? null);
             event()->dispatch('controller.called', $request, null, $action, $response);
         }
 
