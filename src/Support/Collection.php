@@ -5,6 +5,10 @@ namespace NixPHP\Support;
 
 class Collection
 {
+
+    /** @template T
+     *  @var array<string, T>
+     */
     protected array $items = [];
 
     public function __construct(array $items = [])
@@ -12,24 +16,44 @@ class Collection
         $this->items = $items;
     }
 
+    /**
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->items[$key] ?? $default;
     }
 
+    /**
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return $this
+     */
     public function add(string $key, mixed $value): static
     {
         $this->items[$key] = $value;
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function all(): array
     {
         return $this->items;
     }
 
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
     public function has(string $key): bool
     {
-        return array_key_exists($key, $this->items);
+        return isset($this->items[$key]);
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+use NixPHP\Enum\Events;
 use NixPHP\Support\AppHolder;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
@@ -11,6 +12,7 @@ use NixPHP\Support\RequestParameter;
 use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function NixPHP\event;
@@ -18,6 +20,7 @@ use function NixPHP\response;
 use function NixPHP\send_response;
 use function NixPHP\plugin;
 use function NixPHP\simple_view;
+use function NixPHP\log;
 
 class App
 {
@@ -45,9 +48,9 @@ class App
         if (PHP_SAPI === 'cli') return;
 
         $request = $this->createServerRequest();
-        $this->container()->get('event')->dispatch('request.start', $request);
+        $this->container()->get('event')->dispatch(Events::REQUEST_START->value, $request);
         $this->container()->set('request', $request);
-        $this->container()->set('parameter', function($container) {
+        $this->container()->set('parameter', function(ContainerInterface $container) {
             return new RequestParameter($container->get('request'));
         });
         $viewPath = $this->getCoreBasePath() . '/src/Resources/views';
@@ -56,24 +59,24 @@ class App
             $response = $this->container->get('dispatcher')->forward($request);
         } catch (\Throwable $e) {
 
-            $result = event()->dispatch('exception', $e);
+            $responses = event()->dispatch(Events::EXCEPTION->value, $e);
 
-            if (!empty($result)) {
-                foreach ($result as $resp) {
-                    if ($resp instanceof ResponseInterface) {
-                        send_response($resp);
-                    }
-                }
+            $exceptionResponse = end($responses);
+
+            if ($exceptionResponse instanceof ResponseInterface) {
+                send_response($exceptionResponse);
             }
 
+            log()->error($e->getMessage());
+
             if (getenv('APP_ENV') === Environment::PRODUCTION) {
-                \NixPHP\log()->error($e->getMessage());
                 return;
             }
 
             $statusCode = method_exists($e, 'getStatusCode')
                 ? $e->getStatusCode()
                 : 500;
+
             $response = response(simple_view(
                 $viewPath . '/errors/default.phtml', [
                     'statusCode' => $statusCode,
@@ -84,7 +87,9 @@ class App
 
         }
 
-        event()->dispatch('response.sending', $response);
+        log()->info('Request completed in ' . Stopwatch::stop('app') . 'ms');
+
+        event()->dispatch(Events::RESPONSE_SEND->value, $response);
         send_response($response); // This will abort the request as exit(0) is called
     }
 
@@ -244,7 +249,7 @@ class App
     }
 
     /**
-     * Load application routes from the routes file
+     * Load application routes from the route file
      */
     private function loadRoutes(): void
     {
@@ -309,6 +314,8 @@ class App
      */
     private function loadGuards(): void
     {
+        $config = $this->container->get('config');
+
         $this->guard()->register('safePath', function ($path) {
 
             if (
@@ -318,7 +325,7 @@ class App
                 str_contains($path, '://') ||
                 !preg_match('/^[A-Za-z0-9_\/.-]+$/', $path)
             ) {
-                throw new \InvalidArgumentException('Insecure path detected! Please find another solution.');
+                throw new \InvalidArgumentException('Insecure path detected! Navigation outside of application root is not allowed.');
             }
 
             return $path;
@@ -333,10 +340,10 @@ class App
             return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
         });
 
-        $this->guard()->register('ipBlacklist', function (string $ip, array $list = []) {
+        $this->guard()->register('ipBlacklist', function (string $ip, array $list = []) use ($config) {
 
             if (empty($list)) {
-                $list = $this->container->get('config')->get('guard:ipBlacklist');
+                $list = $config->get('guard:ipBlacklist');
             }
 
             if (in_array($ip, $list, true)) {
@@ -346,10 +353,10 @@ class App
 
         });
 
-        $this->guard()->register('userAgentBlacklist', function (string $userAgent, array $list = []) {
+        $this->guard()->register('userAgentBlacklist', function (string $userAgent, array $list = []) use ($config) {
 
             if (empty($list)) {
-                $list = $this->container->get('config')->get('guard:userAgentBlacklist');
+                $list = $config->get('guard:userAgentBlacklist');
             }
 
             if (in_array($userAgent, $list, true)) {

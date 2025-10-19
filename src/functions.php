@@ -9,6 +9,7 @@ if (!defined('NIXPHP_BASE_PATH')) {
     define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
+use NixPHP\Enum\Events;
 use NixPHP\Support\AppHolder;
 use NixPHP\Support\Guard;
 use NixPHP\Support\RequestParameter;
@@ -193,6 +194,12 @@ function send_response(ResponseInterface $response): never
         ob_end_clean();
     }
 
+    $eventResponses = event()->dispatch(Events::RESPONSE_HEADER->value, $response);
+    $eventResponses = array_filter($eventResponses, fn($response) => $response instanceof ResponseInterface);
+    if (!empty($eventResponses)) {
+        $response = end($eventResponses);
+    }
+
     header(sprintf(
         'HTTP/%s %d %s',
         $response->getProtocolVersion(),
@@ -206,9 +213,11 @@ function send_response(ResponseInterface $response): never
         }
     }
 
+    event()->dispatch(Events::RESPONSE_BODY->value, $response);
+
     echo $response->getBody();
 
-    event()->dispatch('request.end', $response, Stopwatch::stop('app'));
+    event()->dispatch(Events::RESPONSE_END->value, $response, Stopwatch::stop('app'));
 
     exit(0);
 }

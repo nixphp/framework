@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+use NixPHP\Enum\Events;
 use NixPHP\Exceptions\DispatcherException;
 use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
@@ -40,7 +41,7 @@ class Dispatcher
      *
      * Processes the request by:
      * - Matching the URI and method against registered routes
-     * - Handling special case for root path ('/')
+     * - Handling special case for a root path ('/')
      * - Executing controller actions or callables
      * - Dispatching controller lifecycle events
      * - Validating and returning the response
@@ -71,13 +72,13 @@ class Dispatcher
         if (is_array($action)) {
             [$class, $classAction] = $action;
             $class = new $class();
-            event()->dispatch('controller.calling', $request, $class, $action);
+            event()->dispatch(Events::CONTROLLER_CALLING->value, $request, $class, $action);
             $response = $class->$classAction(...$route['params'] ?? null);
-            event()->dispatch('controller.called', $request, $class, $action, $response);
+            event()->dispatch(Events::CONTROLLER_CALLED->value, $request, $class, $action, $response);
         } else if (is_callable($action)) {
-            event()->dispatch('controller.calling', $request, null, $action);
+            event()->dispatch(Events::CONTROLLER_CALLING->value, $request, null, $action);
             $response = $action(...$route['params'] ?? null);
-            event()->dispatch('controller.called', $request, null, $action, $response);
+            event()->dispatch(Events::CONTROLLER_CALLED->value, $request, null, $action, $response);
         }
 
         if ($response instanceof ResponseInterface) return $response;
