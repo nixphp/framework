@@ -7,28 +7,41 @@ use Tests\NixPHPTestCase;
 
 class PluginTest extends NixPHPTestCase
 {
-
-    public function testPluginInternals()
+    public function testPluginStoresPathsCorrectly()
     {
-        $plugin = new Plugin();
-        $plugin->addMeta('test/package', 'viewPaths', 'testViewPaths');
-        $plugin->addMeta('test/package', 'configPaths', 'testConfigPaths');
-        $plugin->addMeta('test/package', 'bootstraps', 'testBootstraps');
+        $plugin = new Plugin('test/package');
 
-        $this->assertSame([
-            'test/package' => [
-                'viewPaths' => [0 => 'testViewPaths'],
-                'configPaths' => [0 => 'testConfigPaths'],
-                'bootstraps' => [0 => 'testBootstraps']
-            ]
-        ], $plugin->all());
+        $plugin->addConfigPath('/path/to/config.php');
+        $plugin->addViewPath('/path/to/views');
+        $plugin->addRouteFile('/path/to/routes.php');
+        $plugin->addFunctionFile('/path/to/functions.php');
+        $plugin->addViewHelperFile('/path/to/view_helpers.php');
+
+        $this->assertSame(['/path/to/config.php'], $plugin->getConfigPaths());
+        $this->assertSame(['/path/to/views'], $plugin->getViewPaths());
+        $this->assertSame(['/path/to/routes.php'], $plugin->getRouteFiles());
+        $this->assertSame(['/path/to/functions.php'], $plugin->getFunctionsFiles());
+        $this->assertSame(['/path/to/view_helpers.php'], $plugin->getViewHelpersFiles());
     }
 
-    public function testCustomMeta()
+    public function testPluginBootsOnlyOnce()
     {
-        $plugin = new Plugin();
-        $plugin->addMeta('test/package', 'customModule', 'customTest');
-        $this->assertSame(['customModule' => [0 => 'customTest']], $plugin->getMeta('test/package'));
-    }
+        $plugin = new Plugin('test/package');
 
+        $tmpFile = tempnam(sys_get_temp_dir(), 'plugin_');
+        file_put_contents($tmpFile, '<?php $GLOBALS["booted"] = ($GLOBALS["booted"] ?? 0) + 1;');
+
+        // Bootstrap
+        $plugin->setBootstrapFile($tmpFile);
+
+        // Call boot multiple times
+        $plugin->boot();
+        $plugin->boot();
+
+        // Assert
+        $this->assertEquals(1, $GLOBALS['booted']);
+
+        // Cleanup
+        unlink($tmpFile);
+    }
 }

@@ -34,7 +34,7 @@ class ConfigTest extends NixPHPTestCase
     public function testHelperFunction()
     {
         $config = new Config(['foo' => 'bar']);
-        app()->container()->set('config', function () use ($config) {
+        app()->container()->set(Config::class, function () use ($config) {
             return $config;
         });
 
@@ -45,7 +45,7 @@ class ConfigTest extends NixPHPTestCase
     public function testTypeIsFalse()
     {
         $config = new Config(['foo' => false]);
-        app()->container()->set('config', function () use ($config) {
+        app()->container()->set(Config::class, function () use ($config) {
             return $config;
         });
 
@@ -57,7 +57,7 @@ class ConfigTest extends NixPHPTestCase
     public function testTypeIsTrue()
     {
         $config = new Config(['foo' => true]);
-        app()->container()->set('config', function () use ($config) {
+        app()->container()->set(Config::class, function () use ($config) {
             return $config;
         });
 

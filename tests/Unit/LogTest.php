@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use NixPHP\Core\Log;
+use Psr\Log\LoggerInterface;
 use Tests\NixPHPTestCase;
 use function NixPHP\app;
 
@@ -114,7 +115,7 @@ class LogTest extends NixPHPTestCase
     public function testHelperFunction()
     {
         $log = new Log(static::TEST_LOG_FILE);
-        app()->container()->set('log', $log);
+        app()->container()->set(LoggerInterface::class, $log);
 
         \NixPHP\log()->debug('Helper Test');
         $this->assertStringContainsString('Helper Test', file_get_contents(static::TEST_LOG_FILE));

@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\Events;
+use NixPHP\Enum\EnvironmentInterface;
+use NixPHP\Enum\Event;
 use NixPHP\Support\AppHolder;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
@@ -13,8 +14,11 @@ use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use NixPHP\Enum\Environment;
 use function NixPHP\event;
 use function NixPHP\response;
 use function NixPHP\send_response;
@@ -24,8 +28,8 @@ use function NixPHP\log;
 
 class App
 {
-
     private Container $container;
+    private array $plugins = [];
 
     /**
      * Initialize the application with a dependency container
@@ -48,18 +52,19 @@ class App
         if (PHP_SAPI === 'cli') return;
 
         $request = $this->createServerRequest();
-        $this->container()->get('event')->dispatch(Events::REQUEST_START->value, $request);
-        $this->container()->set('request', $request);
-        $this->container()->set('parameter', function(ContainerInterface $container) {
-            return new RequestParameter($container->get('request'));
+        $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
+        $this->container()->set(RequestInterface::class, $request);
+        $this->container()->set(RequestParameter::class, function(ContainerInterface $container) {
+            return new RequestParameter($container->get(RequestInterface::class));
         });
+
         $viewPath = $this->getCoreBasePath() . '/src/Resources/views';
 
         try {
-            $response = $this->container->get('dispatcher')->forward($request);
+            $response = $this->container->get(Dispatcher::class)->forward($request);
         } catch (\Throwable $e) {
 
-            $responses = event()->dispatch(Events::EXCEPTION->value, $e);
+            $responses = event()->dispatch(Event::EXCEPTION, $e);
 
             $exceptionResponse = end($responses);
 
@@ -69,7 +74,7 @@ class App
 
             log()->error($e->getMessage());
 
-            if (getenv('APP_ENV') === Environment::PRODUCTION) {
+            if ($this->container->get(EnvironmentInterface::class) === Environment::PROD) {
                 return;
             }
 
@@ -89,7 +94,7 @@ class App
 
         log()->info('Request completed in ' . Stopwatch::stop('app') . 'ms');
 
-        event()->dispatch(Events::RESPONSE_SEND->value, $response);
+        event()->dispatch(Event::RESPONSE_SEND, $response);
         send_response($response); // This will abort the request as exit(0) is called
     }
 
@@ -110,7 +115,7 @@ class App
      */
     public function guard(): Guard
     {
-        return $this->container->get('guard');
+        return $this->container->get(Guard::class);
     }
 
     /**
@@ -185,19 +190,15 @@ class App
         $appDir = $this->getBasePath() . '/app';
         $coreDir = $this->getCoreBasePath() . '/src';
 
-        $this->container->set('guard', function() {
+        $this->container->set(Guard::class, function() {
             return new Guard();
         });
 
-        $this->container->set('environment', function() {
-            return new Environment($_ENV['APP_ENV'] ?? getenv('APP_ENV'));
+        $this->container->set(EnvironmentInterface::class, function() {
+            return Environment::tryFrom($_ENV['APP_ENV'] ?? getenv('APP_ENV'));
         });
 
-        $this->container->set('plugin', function() {
-            return new Plugin();
-        });
-
-        $this->container->set('log', function() {
+        $this->container->set(LoggerInterface::class, function() {
 
             $logFile   = $this->getBasePath() . '/logs/app.log';
             $directory = dirname($logFile);
@@ -215,11 +216,11 @@ class App
 
         });
 
-        $this->container->set('event', function() {
-            return new Event();
+        $this->container->set(EventManager::class, function() {
+            return new EventManager();
         });
 
-        $this->container->set('config', function() use ($appDir, $coreDir) {
+        $this->container->set(Config::class, function() use ($appDir, $coreDir) {
 
             $appConfig = file_exists($appDir . '/config.php')
                 ? require $appDir . '/config.php'
@@ -230,7 +231,11 @@ class App
                 : [];
 
             $pluginConfig = [];
-            foreach (plugin()->getSection('configPaths') as $file) {
+
+            $configPaths = plugin()->getFromAll('configPaths');
+
+            foreach ($configPaths as $file) {
+                if (!file_exists($file)) continue;
                 $pluginConfig = array_replace_recursive($pluginConfig, require $file);
             }
 
@@ -239,12 +244,12 @@ class App
             return new Config($merged);
         });
 
-        $this->container->set('route', function() {
+        $this->container->set(Route::class, function() {
             return new Route();
         });
 
-        $this->container->set('dispatcher', function($container) {
-            return new Dispatcher($container->get('route'));
+        $this->container->set(Dispatcher::class, function($container) {
+            return new Dispatcher($container->get(Route::class));
         });
     }
 
@@ -263,7 +268,7 @@ class App
     private function loadPlugins(): void
     {
         /* @var Plugin $pluginService */
-        $pluginService = $this->container->get('plugin');
+        //$pluginService = $this->container->get('plugin');
 
         // Try to load configuration order from userspace
         $orderedPackages = [];
@@ -286,24 +291,54 @@ class App
 
             if (!$path) continue;
 
-            if (file_exists($path . '/src/config.php')) {
-                $pluginService->addMeta($package, 'configPaths', $path . '/src/config.php');
-            }
-            if (file_exists($path . '/src/routes.php')) {
-                require_once $path . '/src/routes.php';
-            }
-            if (is_dir($path . '/src/views')) {
-                $pluginService->addMeta($package, 'viewPaths', $path . '/src/views');
-            }
-            if (file_exists($path . '/src/functions.php')) {
-                require_once $path . '/src/functions.php';
-            }
-            if (file_exists($path . '/src/view_helpers.php')) {
-                require_once $path . '/src/view_helpers.php';
-            }
-            if (file_exists($path . '/bootstrap.php')) {
-                $pluginService->bootOnce($package, $path . '/bootstrap.php');
-            }
+//            if (file_exists($path . '/src/config.php')) {
+//                $pluginService->addMeta($package, 'configPaths', $path . '/src/config.php');
+//            }
+//            if (file_exists($path . '/src/routes.php')) {
+//                require_once $path . '/src/routes.php';
+//            }
+//            if (is_dir($path . '/src/views')) {
+//                $pluginService->addMeta($package, 'viewPaths', $path . '/src/views');
+//            }
+//            if (file_exists($path . '/src/functions.php')) {
+//                require_once $path . '/src/functions.php';
+//            }
+//            if (file_exists($path . '/src/view_helpers.php')) {
+//                require_once $path . '/src/view_helpers.php';
+//            }
+//            if (file_exists($path . '/bootstrap.php')) {
+//                $pluginService->bootOnce($package, $path . '/bootstrap.php');
+//            }
+
+            $plugin = new Plugin($package);
+
+            $plugin->addConfigPath(
+                $path . '/src/config.php'
+            );
+
+            $plugin->addRouteFile(
+                $path . '/src/routes.php'
+            );
+
+            $plugin->addViewPath(
+                $path . '/src/views'
+            );
+
+            $plugin->addFunctionFile(
+                $path . '/src/functions.php'
+            );
+
+            $plugin->addViewHelperFile(
+                $path . '/src/view_helpers.php'
+            );
+
+            $plugin->setBootstrapFile(
+                $path . '/bootstrap.php'
+            );
+
+            $plugin->boot();
+
+            $this->plugins[$package] = $plugin;
 
         }
         
@@ -314,7 +349,7 @@ class App
      */
     private function loadGuards(): void
     {
-        $config = $this->container->get('config');
+        $config = $this->container->get(Config::class);
 
         $this->guard()->register('safePath', function ($path) {
 
@@ -370,6 +405,16 @@ class App
     }
 
     /**
+     * @template T
+     *
+     * @return array
+     */
+    public function getPlugins(): array
+    {
+        return $this->plugins;
+    }
+
+    /**
      * Check if a plugin is loaded
      *
      * @param string $pluginName Name of the plugin to check
@@ -378,10 +423,12 @@ class App
      */
     public function hasPlugin(string $pluginName): bool
     {
-        /** @var Plugin $pluginService */
-        $pluginService = $this->container->get('plugin');
-        $plugin = $pluginService->getMeta($pluginName);
-        return !empty($plugin);
+        return isset($this->plugins[$pluginName]);
+    }
+
+    public function getPlugin(string $pluginName): Plugin
+    {
+        return $this->plugins[$pluginName];
     }
 
     /**
