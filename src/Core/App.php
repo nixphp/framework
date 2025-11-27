@@ -1,14 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\EnvironmentInterface;
-use NixPHP\Enum\Event;
+use Composer\InstalledVersions;
 use NixPHP\Support\AppHolder;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
-use Composer\InstalledVersions;
 use NixPHP\Support\RequestParameter;
 use NixPHP\Support\Stopwatch;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -18,13 +17,12 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use NixPHP\Enum\Environment;
 use function NixPHP\event;
+use function NixPHP\log;
+use function NixPHP\plugin;
 use function NixPHP\response;
 use function NixPHP\send_response;
-use function NixPHP\plugin;
 use function NixPHP\simple_view;
-use function NixPHP\log;
 
 class App
 {
@@ -74,9 +72,7 @@ class App
 
             log()->error($e->getMessage());
 
-            if ($this->container->get(EnvironmentInterface::class) === Environment::PROD) {
-                return;
-            }
+            if ($this->container->get('env') === Environment::PROD) return;
 
             $statusCode = method_exists($e, 'getStatusCode')
                 ? $e->getStatusCode()
@@ -95,6 +91,7 @@ class App
         log()->info('Request completed in ' . Stopwatch::stop('app') . 'ms');
 
         event()->dispatch(Event::RESPONSE_SEND, $response);
+
         send_response($response); // This will abort the request as exit(0) is called
     }
 
@@ -128,6 +125,7 @@ class App
         if (!defined('\BASE_PATH')) {
             return null;
         }
+
         return \BASE_PATH;
     }
 
@@ -141,6 +139,7 @@ class App
         if (!defined('\NIXPHP_BASE_PATH')) {
             return null;
         }
+
         return \NIXPHP_BASE_PATH;
     }
 
@@ -170,15 +169,19 @@ class App
         if (!file_exists($path)) return;
 
         foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+
             if (str_starts_with(trim($line), '#')) continue;
+
             [$key, $value] = explode('=', $line, 2);
-            $key = trim($key);
+
+            $key   = trim($key);
             $value = trim($value);
 
             if (!array_key_exists($key, $_ENV)) {
                 $_ENV[$key] = $value;
                 putenv("$key=$value");
             }
+
         }
     }
 
@@ -187,38 +190,18 @@ class App
      */
     private function loadServices(): void
     {
-        $appDir = $this->getBasePath() . '/app';
+        $appDir  = $this->getBasePath() . '/app';
         $coreDir = $this->getCoreBasePath() . '/src';
 
-        $this->container->set(Guard::class, function() {
-            return new Guard();
-        });
+        $this->container->set('env', fn() => $_ENV['APP_ENV'] ?? getenv('APP_ENV'));
 
-        $this->container->set(EnvironmentInterface::class, function() {
-            return Environment::tryFrom($_ENV['APP_ENV'] ?? getenv('APP_ENV'));
-        });
+        $this->container->set(Guard::class, fn() => new Guard());
 
-        $this->container->set(LoggerInterface::class, function() {
+        $this->container->set(Route::class, fn() => new Route());
 
-            $logFile   = $this->getBasePath() . '/logs/app.log';
-            $directory = dirname($logFile);
+        $this->container->set(Dispatcher::class, fn($container) => new Dispatcher($container->get(Route::class)));
 
-            if (!is_dir($directory)) {
-                mkdir($directory, 0775, true);
-            }
-
-            if (!file_exists($logFile)) {
-                touch($logFile);
-                chmod($logFile, 0664);
-            }
-
-            return new Log($logFile);
-
-        });
-
-        $this->container->set(EventManager::class, function() {
-            return new EventManager();
-        });
+        $this->container->set(EventManager::class, fn() =>new EventManager());
 
         $this->container->set(Config::class, function() use ($appDir, $coreDir) {
 
@@ -242,15 +225,27 @@ class App
             $merged = array_replace_recursive($coreConfig, $pluginConfig, $appConfig);
 
             return new Config($merged);
+
         });
 
-        $this->container->set(Route::class, function() {
-            return new Route();
+        $this->container->set(LoggerInterface::class, function() {
+
+            $logFile   = $this->getBasePath() . '/logs/app.log';
+            $directory = dirname($logFile);
+
+            if (!is_dir($directory)) {
+                mkdir($directory, 0775, true);
+            }
+
+            if (!file_exists($logFile)) {
+                touch($logFile);
+                chmod($logFile, 0664);
+            }
+
+            return new Log($logFile);
+
         });
 
-        $this->container->set(Dispatcher::class, function($container) {
-            return new Dispatcher($container->get(Route::class));
-        });
     }
 
     /**
@@ -267,9 +262,6 @@ class App
      */
     private function loadPlugins(): void
     {
-        /* @var Plugin $pluginService */
-        //$pluginService = $this->container->get('plugin');
-
         // Try to load configuration order from userspace
         $orderedPackages = [];
         $pluginConfigPath = $this->getBasePath() . '/app/plugins.php';
@@ -290,25 +282,6 @@ class App
             $path = InstalledVersions::getInstallPath($package);
 
             if (!$path) continue;
-
-//            if (file_exists($path . '/src/config.php')) {
-//                $pluginService->addMeta($package, 'configPaths', $path . '/src/config.php');
-//            }
-//            if (file_exists($path . '/src/routes.php')) {
-//                require_once $path . '/src/routes.php';
-//            }
-//            if (is_dir($path . '/src/views')) {
-//                $pluginService->addMeta($package, 'viewPaths', $path . '/src/views');
-//            }
-//            if (file_exists($path . '/src/functions.php')) {
-//                require_once $path . '/src/functions.php';
-//            }
-//            if (file_exists($path . '/src/view_helpers.php')) {
-//                require_once $path . '/src/view_helpers.php';
-//            }
-//            if (file_exists($path . '/bootstrap.php')) {
-//                $pluginService->bootOnce($package, $path . '/bootstrap.php');
-//            }
 
             $plugin = new Plugin($package);
 
@@ -368,15 +341,16 @@ class App
         });
 
         $this->guard()->register('safeOutput', function ($value) {
+
             if (is_array($value)) {
                 return array_map(fn($v) => htmlspecialchars($v, ENT_QUOTES, 'UTF-8'), $value);
             }
 
             return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+
         });
 
         $this->guard()->register('ipBlacklist', function (string $ip, array $list = []) use ($config) {
-
             if (empty($list)) {
                 $list = $config->get('guard:ipBlacklist');
             }
@@ -384,6 +358,7 @@ class App
             if (in_array($ip, $list, true)) {
                 throw new \InvalidArgumentException('IP address is blacklisted!');
             }
+
             return true;
 
         });

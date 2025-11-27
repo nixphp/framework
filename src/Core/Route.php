@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\Event;
 use NixPHP\Exceptions\RouteNotFoundException;
 use function NixPHP\event;
 

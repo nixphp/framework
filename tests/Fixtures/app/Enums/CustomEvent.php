@@ -2,9 +2,9 @@
 
 namespace Fixtures\Enums;
 
-use NixPHP\Enum\EventInterface;
+use NixPHP\Core\Event;
 
-enum CustomEvent: string implements EventInterface
+class CustomEvent extends Event
 {
-    case TEST_EVENT = 'test.event';
+    const string TEST_EVENT = 'test.event';
 }

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\Event;
 use NixPHP\Exceptions\DispatcherException;
 use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;

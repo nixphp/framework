@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\EventInterface;
-
 class EventManager
 {
     protected array $listeners = [];
@@ -13,15 +11,15 @@ class EventManager
     /**
      * Register a listener for a specific event
      *
-     * @param EventInterface $event    Name of the event to listen for
+     * @param string<Event>  $event    Name of the event to listen for
      * @param array|callable $listener Listener callback or array containing class and method
      * @param int            $priority Higher priority = earlier execution (default 0)
      *
      * @return EventManager Returns this EventManager instance for chaining
      */
-    public function listen(EventInterface $event, array|callable $listener, int $priority = 0): EventManager
+    public function listen(string $event, array|callable $listener, int $priority = 0): EventManager
     {
-        $this->listeners[$event->value][] = [
+        $this->listeners[$event][] = [
             'callback' => $listener,
             'priority' => $priority,
         ];
@@ -32,22 +30,22 @@ class EventManager
     /**
      * Dispatch an event to all registered listeners
      *
-     * @param EventInterface $event Name of the event to dispatch
-     * @param mixed ...$payload   Variable number of arguments to pass to the listeners
+     * @param string<Event> $event Name of the event to dispatch
+     * @param mixed         ...$payload Variable number of arguments to pass to the listeners
      *
      * @return array Array of responses from all listeners
      */
-    public function dispatch(EventInterface $event, mixed ...$payload): array
+    public function dispatch(string $event, mixed ...$payload): array
     {
         $responses = [];
 
-        if (!empty($this->listeners[$event->value])) {
+        if (!empty($this->listeners[$event])) {
             usort(
-                $this->listeners[$event->value],
+                $this->listeners[$event],
                 fn ($a, $b) => $b['priority'] <=> $a['priority']
             );
 
-            foreach ($this->listeners[$event->value] as $listener) {
+            foreach ($this->listeners[$event] as $listener) {
                 $callback = $listener['callback'];
 
                 if (is_array($callback)) {

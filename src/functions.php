@@ -3,36 +3,32 @@ declare(strict_types=1);
 
 namespace NixPHP;
 
-ob_start();
-
 if (!defined('NIXPHP_BASE_PATH')) {
     define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
-use NixPHP\Enum\Environment;
-use NixPHP\Enum\EnvironmentInterface;
-use NixPHP\Enum\Event;
-use NixPHP\Support\AppHolder;
-use NixPHP\Support\Guard;
-use NixPHP\Support\RequestParameter;
-use NixPHP\Support\Stopwatch;
-use Nyholm\Psr7\Response;
-use Nyholm\Psr7\Stream;
 use NixPHP\Core\App;
 use NixPHP\Core\Config;
 use NixPHP\Core\ErrorHandler;
+use NixPHP\Core\Event;
 use NixPHP\Core\EventManager;
 use NixPHP\Core\Route;
+use NixPHP\Core\Environment;
 use NixPHP\Exceptions\AbortException;
+use NixPHP\Support\AppHolder;
+use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
+use NixPHP\Support\RequestParameter;
+use Nyholm\Psr7\Response;
+use Nyholm\Psr7\Stream;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use stdClass;
 
-if (getenv('APP_ENV') !== Environment::TEST->value
-    && getenv('APP_ENV') !== Environment::PROD->value
+if (getenv('APP_ENV') !== Environment::TEST
+    && getenv('APP_ENV') !== Environment::PROD
 ) {
     set_error_handler([ErrorHandler::class, 'handleError']);
     ini_set('display_errors', false);
@@ -251,11 +247,11 @@ function send_response(ResponseInterface $response): never
 /**
  * Get the current environment
  *
- * @return EnvironmentInterface
+ * @return string
  */
-function env(): EnvironmentInterface
+function env(): string
 {
-    return app()->container()->get(EnvironmentInterface::class);
+    return app()->container()->get('env');
 }
 
 /**

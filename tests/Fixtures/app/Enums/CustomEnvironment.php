@@ -2,9 +2,9 @@
 
 namespace Fixtures\Enums;
 
-use NixPHP\Enum\EnvironmentInterface;
+use NixPHP\Core\Event;
 
-enum CustomEnvironment: string implements EnvironmentInterface
+class CustomEnvironment extends Event
 {
-    case TEST = 'test';
+    const string TEST = 'test';
 }

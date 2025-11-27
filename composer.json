@@ -1,6 +1,6 @@
 {
   "name": "nixphp/framework",
-  "description": "NixPHP – the ultra-light, functional PHP framework for fast microservices and APIs.",
+  "description": "NixPHP - the ultra-light, functional PHP framework for fast microservices and APIs.",
   "minimum-stability": "stable",
   "license": "MIT",
   "type": "library",

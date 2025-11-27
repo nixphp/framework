@@ -14,7 +14,7 @@ class Container implements ContainerInterface
 
     /**
      * @template T
-     * @param class-string<T> $id
+     * @param string<T> $id
      *
      * @return T
      *
