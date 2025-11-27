@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\Events;
 use NixPHP\Exceptions\DispatcherException;
 use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
@@ -72,13 +71,13 @@ class Dispatcher
         if (is_array($action)) {
             [$class, $classAction] = $action;
             $class = new $class();
-            event()->dispatch(Events::CONTROLLER_CALLING->value, $request, $class, $action);
+            event()->dispatch(Event::CONTROLLER_CALLING, $request, $class, $action);
             $response = $class->$classAction(...$route['params'] ?? null);
-            event()->dispatch(Events::CONTROLLER_CALLED->value, $request, $class, $action, $response);
+            event()->dispatch(Event::CONTROLLER_CALLED, $request, $class, $action, $response);
         } else if (is_callable($action)) {
-            event()->dispatch(Events::CONTROLLER_CALLING->value, $request, null, $action);
+            event()->dispatch(Event::CONTROLLER_CALLING, $request, null, $action);
             $response = $action(...$route['params'] ?? null);
-            event()->dispatch(Events::CONTROLLER_CALLED->value, $request, null, $action, $response);
+            event()->dispatch(Event::CONTROLLER_CALLED, $request, null, $action, $response);
         }
 
         if ($response instanceof ResponseInterface) return $response;

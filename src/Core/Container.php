@@ -13,13 +13,15 @@ class Container implements ContainerInterface
     private array $services = [];
 
     /**
-     * @param string $id
-     * @return mixed
+     * @template T
+     * @param class-string<T> $id
+     *
+     * @return T|string
      *
      * @throws ServiceNotFoundException
      * @throws ContainerException
      */
-    public function get(string $id): mixed
+    public function get(string $id)
     {
         if (!isset($this->services[$id])) {
             throw new ServiceNotFoundException("Service '$id' not found.");

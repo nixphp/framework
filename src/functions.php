@@ -3,33 +3,32 @@ declare(strict_types=1);
 
 namespace NixPHP;
 
-ob_start();
-
 if (!defined('NIXPHP_BASE_PATH')) {
     define('NIXPHP_BASE_PATH', dirname(__DIR__));
 }
 
-use NixPHP\Enum\Events;
-use NixPHP\Support\AppHolder;
-use NixPHP\Support\Guard;
-use NixPHP\Support\RequestParameter;
-use NixPHP\Support\Stopwatch;
-use Nyholm\Psr7\Response;
-use Nyholm\Psr7\Stream;
 use NixPHP\Core\App;
 use NixPHP\Core\Config;
-use NixPHP\Core\Environment;
 use NixPHP\Core\ErrorHandler;
 use NixPHP\Core\Event;
-use NixPHP\Core\Log;
+use NixPHP\Core\EventManager;
 use NixPHP\Core\Route;
+use NixPHP\Core\Environment;
 use NixPHP\Exceptions\AbortException;
+use NixPHP\Support\AppHolder;
+use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
+use NixPHP\Support\RequestParameter;
+use Nyholm\Psr7\Response;
+use Nyholm\Psr7\Stream;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use stdClass;
 
-if (getenv('APP_ENV') !== Environment::TESTING
-    && getenv('APP_ENV') !== Environment::PRODUCTION
+if (getenv('APP_ENV') !== Environment::TEST
+    && getenv('APP_ENV') !== Environment::PROD
 ) {
     set_error_handler([ErrorHandler::class, 'handleError']);
     ini_set('display_errors', false);
@@ -53,8 +52,7 @@ function app(): App
  */
 function config(?string $key = null, mixed $default = null): mixed
 {
-    /** @var Config $config */
-    $config = app()->container()->get('config');
+    $config = app()->container()->get(Config::class);
 
     if (empty($key)) {
         return $config->all();
@@ -73,8 +71,7 @@ function config(?string $key = null, mixed $default = null): mixed
  */
 function route(?string $name = null, array $params = []): Route|string
 {
-    /* @var Route $route */
-    $route = app()->container()->get('route');
+    $route = app()->container()->get(Route::class);
 
     if (null === $name) {
         return $route;
@@ -84,19 +81,25 @@ function route(?string $name = null, array $params = []): Route|string
 }
 
 /**
- * Get the plugin manager instance
+ * Get a specific plugin, or all when no argument is given
+ *
+ * @return Plugin|Plugin[]
  */
-function plugin(): Plugin
+function plugin(?string $name = null): Plugin|array
 {
-    return app()->container()->get('plugin');
+    if ($name) {
+        return app()->getPlugin($name);
+    }
+
+    return app()->getPlugins();
 }
 
 /**
  * Get current request instance
  */
-function request(): ServerRequestInterface
+function request(): ServerRequestInterface|RequestInterface
 {
-    return app()->container()->get('request');
+    return app()->container()->get(RequestInterface::class);
 }
 
 /**
@@ -116,7 +119,7 @@ function response(mixed $content = '', int $status = 200, array $headers = []): 
  */
 function param(): RequestParameter
 {
-    return app()->container()->get('parameter');
+    return app()->container()->get(RequestParameter::class);
 }
 
 /**
@@ -155,7 +158,7 @@ function redirect(string $url, int $status = 302): ResponseInterface
         $status,
         ['Location' => $url],
         null,
-        '1.1',
+        '2',
         $status === 301 ? 'Moved permanently' : 'Found'
     );
 }
@@ -165,8 +168,7 @@ function redirect(string $url, int $status = 302): ResponseInterface
  */
 function refresh(): ResponseInterface
 {
-    /** @var ServerRequestInterface $request */
-    $request = app()->container()->get('request');
+    $request = app()->container()->get(RequestInterface::class);
     return redirect($request->getUri()->getPath());
 }
 
@@ -194,7 +196,7 @@ function send_response(ResponseInterface $response): never
         ob_end_clean();
     }
 
-    $eventResponses = event()->dispatch(Events::RESPONSE_HEADER->value, $response);
+    $eventResponses = event()->dispatch(Event::RESPONSE_HEADER, $response);
     $eventResponses = array_filter($eventResponses, fn($response) => $response instanceof ResponseInterface);
     if (!empty($eventResponses)) {
         $response = end($eventResponses);
@@ -213,48 +215,39 @@ function send_response(ResponseInterface $response): never
         }
     }
 
-    event()->dispatch(Events::RESPONSE_BODY->value, $response);
+    event()->dispatch(Event::RESPONSE_BODY, $response);
 
     echo $response->getBody();
 
-    event()->dispatch(Events::RESPONSE_END->value, $response, Stopwatch::stop('app'));
+    event()->dispatch(Event::RESPONSE_END, $response);
 
     exit(0);
 }
 
 /**
- * Get environment value
+ * Get the current environment
  *
- * @param string|null $key     Environment key
- * @param mixed       $default Default value if key not found
- *
- * @return mixed Environment value or entire environment if no key provided
+ * @return string
  */
-function env(?string $key = null, mixed $default = null): mixed
+function env(): string
 {
-    $env = app()->container()->get('environment');
-
-    if (empty($key)) {
-        return $env;
-    }
-
-    return $env->get($key, $default);
+    return app()->container()->get(Environment::class);
 }
 
 /**
  * Get the event dispatcher instance
  */
-function event(): Event
+function event(): EventManager
 {
-    return app()->container()->get('event');
+    return app()->container()->get(EventManager::class);
 }
 
 /**
  * Get logger instance
  */
-function log(): Log
+function log(): LoggerInterface
 {
-    return app()->container()->get('log');
+    return app()->container()->get(LoggerInterface::class);
 }
 
 /**

@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NixPHP\Core;
 
-use NixPHP\Enum\Events;
 use NixPHP\Exceptions\RouteNotFoundException;
 use function NixPHP\event;
 
@@ -48,7 +48,7 @@ class Route
      */
     public function find(string $uri, string $method): ?array
     {
-        event()->dispatch(Events::ROUTE_MATCHING->value, $uri, $method);
+        event()->dispatch(Event::ROUTE_MATCHING, $uri, $method);
         foreach ($this->routes as $name => $route) {
             if ($route['method'] !== strtoupper($method)) {
                 continue;
@@ -60,11 +60,11 @@ class Route
                 preg_match_all('#\{([^}]+)\}#', $route['path'], $paramNames);
                 $params = array_combine($paramNames[1], $matches);
                 $this->currentName = $name;
-                event()->dispatch(Events::ROUTE_MATCHED->value, $route);
+                event()->dispatch(Event::ROUTE_MATCHED, $route);
                 return ['action' => $route['action'], 'params' => $params, 'name' => $name,];
             }
         }
-        event()->dispatch(Events::ROUTE_NOT_FOUND->value, $uri, $method);
+        event()->dispatch(Event::ROUTE_NOT_FOUND, $uri, $method);
         throw new RouteNotFoundException();
     }
 

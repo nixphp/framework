@@ -1,59 +1,110 @@
 <?php
+
 declare(strict_types=1);
+
 namespace NixPHP\Support;
 
 class Plugin
 {
-    protected array $meta = [];
-    protected array $booted = [];
+    protected string $name;
+    protected array $configPaths = [];
+    protected array $viewPaths   = [];
+    protected array $routeFiles  = [];
+    protected array $functionsFiles   = [];
+    protected array $viewHelpersFiles = [];
+    protected ?string $bootstrap = null;
+    private bool $booted = false;
 
-    public function addMeta(string $package, string $section, string $value): void
+    public function __construct(string $name)
     {
-        if (!isset($this->meta[$package])) {
-            $this->meta[$package] = [];
-        }
-
-        if (!isset($this->meta[$package][$section])) {
-            $this->meta[$package][$section] = [];
-        }
-
-        if (!in_array($value, $this->meta[$package][$section], true)) {
-            $this->meta[$package][$section][] = $value;
-        }
+        $this->name = $name;
     }
 
-    public function getMeta(string $package): array
+    public function addConfigPath(string $path): void
     {
-        return $this->meta[$package] ?? [];
+        $this->configPaths[] = $path;
     }
 
-    public function getSection(string $section): array
+    public function addViewPath(string $path): void
     {
-        $result = [];
-
-        foreach ($this->meta as $package => $sections) {
-            if (!empty($sections[$section])) {
-                $result = array_merge($result, $sections[$section]);
-            }
-        }
-
-        return $result;
+        $this->viewPaths[] = $path;
     }
 
-    public function all(): array
+    public function addRouteFile(string $path): void
     {
-        return $this->meta;
+        $this->routeFiles[] = $path;
     }
 
-    public function bootOnce(string $package, string $bootstrapPath): void
+    public function addFunctionFile(string $path): void
     {
-        if (in_array($package, $this->booted, true)) {
+        $this->functionsFiles[] = $path;
+    }
+
+    public function addViewHelperFile(string $path): void
+    {
+        $this->viewHelpersFiles[] = $path;
+    }
+
+    public function setBootstrapFile(string $path): void
+    {
+        $this->bootstrap = $path;
+    }
+
+    public function boot(): void
+    {
+        if ($this->booted) {
             return;
         }
 
-        $this->booted[] = $package;
+        foreach ($this->configPaths as $configPath) {
+            if (!file_exists($configPath)) continue;
+            require_once $configPath;
+        }
 
-        $this->addMeta($package, 'bootstraps', $bootstrapPath);
-        require_once $bootstrapPath;
+        foreach ($this->routeFiles as $routeFile) {
+            if (!file_exists($routeFile)) continue;
+            require_once $routeFile;
+        }
+
+        foreach ($this->functionsFiles as $functionFile) {
+            if (!file_exists($functionFile)) continue;
+            require_once $functionFile;
+        }
+
+        foreach ($this->viewHelpersFiles as $viewHelperFile) {
+            if (!file_exists($viewHelperFile)) continue;
+            require_once $viewHelperFile;
+        }
+
+        if ($this->bootstrap !== null && file_exists($this->bootstrap)) {
+            require_once $this->bootstrap;
+        }
+
+        $this->booted = true;
+    }
+
+    public function getConfigPaths(): array
+    {
+        return $this->configPaths;
+    }
+
+    public function getViewPaths(): array
+    {
+        return $this->viewPaths;
+    }
+
+    public function getRouteFiles(): array
+    {
+        return $this->routeFiles;
+    }
+
+    public function getFunctionsFiles(): array
+    {
+        return $this->functionsFiles;
+    }
+
+    public function getViewHelpersFiles(): array
+    {
+        return $this->viewHelpersFiles;
     }
 }

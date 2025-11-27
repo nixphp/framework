@@ -22,7 +22,7 @@ class FunctionsTest extends NixPHPTestCase
 
     public function testFunctionRequest()
     {
-        app()->container()->set('request', function() { return new ServerRequest('GET', '/test'); });
+        app()->container()->set(RequestInterface::class, function() { return new ServerRequest('GET', '/test'); });
         $this->assertInstanceOf(ServerRequestInterface::class, request());
     }
     
@@ -49,7 +49,7 @@ class FunctionsTest extends NixPHPTestCase
 
     public function testRefresh()
     {
-        app()->container()->set('request', function() { return new Request('GET', '/test'); });
+        app()->container()->set(RequestInterface::class, function() { return new Request('GET', '/test'); });
         $response = refresh();
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame(302, $response->getStatusCode());

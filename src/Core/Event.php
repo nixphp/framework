@@ -1,60 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+/**
+ * This class is meant to be extended by the user to define custom events, but it is not required.
+ */
 class Event
 {
-    protected array $listeners = [];
-
-    /**
-     * Register a listener for a specific event
-     *
-     * @param string         $event    Name of the event to listen for
-     * @param array|callable $listener Listener callback or array containing class and method
-     * @param int            $priority Higher priority = earlier execution (default 0)
-     *
-     * @return Event Returns this Event instance for chaining
-     */
-    public function listen(string $event, array|callable $listener, int $priority = 0): Event
-    {
-        $this->listeners[$event][] = [
-            'callback' => $listener,
-            'priority' => $priority,
-        ];
-        return $this;
-    }
-
-    /**
-     * Dispatch an event to all registered listeners
-     *
-     * @param string $event      Name of the event to dispatch
-     * @param mixed  ...$payload Variable number of arguments to pass to the listeners
-     *
-     * @return array Array of responses from all listeners
-     */
-    public function dispatch(string $event, mixed ...$payload): array
-    {
-        $responses = [];
-
-        if (!empty($this->listeners[$event])) {
-            usort(
-                $this->listeners[$event],
-                fn ($a, $b) => $b['priority'] <=> $a['priority']
-            );
-
-            foreach ($this->listeners[$event] as $listener) {
-                $callback = $listener['callback'];
-
-                if (is_array($callback)) {
-                    [$class, $handle] = $callback;
-                    $responses[] = call_user_func([new $class, $handle], ...$payload);
-                } elseif (is_callable($callback)) {
-                    $responses[] = $callback(...$payload);
-                }
-            }
-        }
-
-        return $responses;
-    }
+    const string CONTROLLER_CALLING = 'controller.calling'; // Before the controller is called
+    const string CONTROLLER_CALLED = 'controller.called';   // After the controller is called
+    const string ROUTE_MATCHING = 'route.matching';         // Route is about to match or not
+    const string ROUTE_MATCHED = 'route.matched';           // Route has matched
+    const string ROUTE_NOT_FOUND = 'route.not_found';       // Route not found
+    const string REQUEST_START = 'request.start';           // Before the app starts to handle the request
+    const string REQUEST_BODY = 'request.body';             // Before the body is parsed
+    const string REQUEST_END = 'request.end';               // Not in use yet
+    const string RESPONSE_SEND = 'response.send';           // Before the app starts to send a response
+    const string RESPONSE_BODY = 'response.body';           // Before the body is sent to the client
+    const string RESPONSE_HEADER = 'response.header';       // Before the headers are sent to the client
+    const string RESPONSE_END = 'response.end';             // Before the app shuts down
+    const string EXCEPTION = 'exception';                   // When somewhere in the app, an exception is thrown
 }
