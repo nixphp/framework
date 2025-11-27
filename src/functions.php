@@ -91,12 +91,7 @@ function plugin(?string $name = null): Plugin|array
         return app()->getPlugin($name);
     }
 
-    try {
-
-        return app()->collectPluginResources($name);
-    } catch (\InvalidArgumentException $e) {
-        return app()->getPlugins();
-    }
+    return app()->getPlugins();
 }
 
 /**

@@ -146,7 +146,7 @@ class App
      */
     public function collectPluginResources(string $resource): array
     {
-        if (!in_array($resource, ['configPaths', 'viewPaths', 'routeFiles', 'functionFiles', 'viewHelperFiles'])) {
+        if (!in_array($resource, ['configPaths', 'viewPaths', 'routeFiles', 'functionsFiles', 'viewHelpersFiles'])) {
             throw new \InvalidArgumentException('Invalid plugin property type: ' . $resource);
         }
 
@@ -263,8 +263,8 @@ class App
                 ? require $appDir . '/config.php'
                 : [];
 
-            $coreConfig = file_exists($coreDir.'/src/config.php')
-                ? require $coreDir . '/src/config.php'
+            $coreConfig = file_exists($coreDir.'/config.php')
+                ? require $coreDir . '/config.php'
                 : [];
 
             $pluginConfig = [];
