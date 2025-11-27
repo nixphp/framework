@@ -7,7 +7,6 @@ namespace NixPHP\Support;
 class Plugin
 {
     protected string $name;
-    protected string $path;
     protected array $configPaths = [];
     protected array $viewPaths   = [];
     protected array $routeFiles  = [];
@@ -77,7 +76,7 @@ class Plugin
             require_once $viewHelperFile;
         }
 
-        if (file_exists($this->bootstrap)) {
+        if ($this->bootstrap !== null && file_exists($this->bootstrap)) {
             require_once $this->bootstrap;
         }
 

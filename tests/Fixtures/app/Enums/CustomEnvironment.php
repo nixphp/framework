@@ -2,9 +2,9 @@
 
 namespace Fixtures\Enums;
 
-use NixPHP\Core\Event;
+use NixPHP\Core\Environment;
 
-class CustomEnvironment extends Event
+class CustomEnvironment extends Environment
 {
     const string TEST = 'test';
 }

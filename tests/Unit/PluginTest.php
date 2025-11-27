@@ -31,17 +31,13 @@ class PluginTest extends NixPHPTestCase
         $tmpFile = tempnam(sys_get_temp_dir(), 'plugin_');
         file_put_contents($tmpFile, '<?php $GLOBALS["booted"] = ($GLOBALS["booted"] ?? 0) + 1;');
 
-        // Bootstrap
-        $plugin->setBootstrapFile($tmpFile);
-
-        // Call boot multiple times
-        $plugin->boot();
-        $plugin->boot();
-
-        // Assert
-        $this->assertEquals(1, $GLOBALS['booted']);
-
-        // Cleanup
-        unlink($tmpFile);
+        try {
+            $plugin->setBootstrapFile($tmpFile);
+            $plugin->boot();
+            $plugin->boot();
+            $this->assertEquals(1, $GLOBALS['booted']);
+        } finally {
+            unlink($tmpFile);
+        }
     }
 }

@@ -72,7 +72,7 @@ class App
 
             log()->error($e->getMessage());
 
-            if ($this->container->get('env') === Environment::PROD) return;
+            if ($this->container->get(Environment::class) === Environment::PROD) return;
 
             $statusCode = method_exists($e, 'getStatusCode')
                 ? $e->getStatusCode()
@@ -113,6 +113,60 @@ class App
     public function guard(): Guard
     {
         return $this->container->get(Guard::class);
+    }
+
+    /**
+     * Returns an array of all loaded plugins
+     *
+     * @return Plugin[]
+     */
+    public function getPlugins(): array
+    {
+        return $this->plugins;
+    }
+
+    public function hasPlugin(string $name): bool
+    {
+        return isset($this->plugins[$name]);
+    }
+
+    public function getPlugin(string $name): Plugin
+    {
+        if (!$this->hasPlugin($name)) {
+            throw new \InvalidArgumentException('Plugin not found: ' . $name);
+        }
+
+        return $this->plugins[$name];
+    }
+
+    /**
+     * @param string $resource
+     *
+     * @return array
+     */
+    public function collectPluginResources(string $resource): array
+    {
+        if (!in_array($resource, ['configPaths', 'viewPaths', 'routeFiles', 'functionFiles', 'viewHelperFiles'])) {
+            throw new \InvalidArgumentException('Invalid plugin property type: ' . $resource);
+        }
+
+        $result = [];
+        $getter = 'get' . ucfirst($resource);
+
+        foreach ($this->getPlugins() as $plugin) {
+
+            $resp = $plugin->$getter();
+
+            if (is_array($resp)) {
+                $result = array_merge($result, $resp);
+                continue;
+            }
+
+            $result[] = $resp;
+
+        }
+
+        return $result;
     }
 
     /**
@@ -193,7 +247,7 @@ class App
         $appDir  = $this->getBasePath() . '/app';
         $coreDir = $this->getCoreBasePath() . '/src';
 
-        $this->container->set('env', fn() => $_ENV['APP_ENV'] ?? getenv('APP_ENV'));
+        $this->container->set(Environment::class, fn() => $_ENV['APP_ENV'] ?? getenv('APP_ENV'));
 
         $this->container->set(Guard::class, fn() => new Guard());
 
@@ -201,7 +255,7 @@ class App
 
         $this->container->set(Dispatcher::class, fn($container) => new Dispatcher($container->get(Route::class)));
 
-        $this->container->set(EventManager::class, fn() =>new EventManager());
+        $this->container->set(EventManager::class, fn() => new EventManager());
 
         $this->container->set(Config::class, function() use ($appDir, $coreDir) {
 
@@ -215,7 +269,7 @@ class App
 
             $pluginConfig = [];
 
-            $configPaths = plugin()->getFromAll('configPaths');
+            $configPaths = $this->collectPluginResources('configPaths');
 
             foreach ($configPaths as $file) {
                 if (!file_exists($file)) continue;
@@ -351,6 +405,7 @@ class App
         });
 
         $this->guard()->register('ipBlacklist', function (string $ip, array $list = []) use ($config) {
+
             if (empty($list)) {
                 $list = $config->get('guard:ipBlacklist');
             }
@@ -377,33 +432,6 @@ class App
 
         });
 
-    }
-
-    /**
-     * @template T
-     *
-     * @return array
-     */
-    public function getPlugins(): array
-    {
-        return $this->plugins;
-    }
-
-    /**
-     * Check if a plugin is loaded
-     *
-     * @param string $pluginName Name of the plugin to check
-     *
-     * @return bool True if the plugin exists, false otherwise
-     */
-    public function hasPlugin(string $pluginName): bool
-    {
-        return isset($this->plugins[$pluginName]);
-    }
-
-    public function getPlugin(string $pluginName): Plugin
-    {
-        return $this->plugins[$pluginName];
     }
 
     /**

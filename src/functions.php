@@ -81,37 +81,22 @@ function route(?string $name = null, array $params = []): Route|string
 }
 
 /**
- * Get all plugins or one specific
+ * Get a specific plugin, or all when no argument is given
  *
- * @method getFromAll()
+ * @return Plugin|Plugin[]
  */
-function plugin(?string $name = null): Plugin|stdClass
+function plugin(?string $name = null): Plugin|array
 {
     if ($name) {
         return app()->getPlugin($name);
     }
 
-    return new class extends stdClass {
+    try {
 
-        public function getFromAll(string $type)
-        {
-            $all = app()->getPlugins();
-            $getter = 'get' . ucfirst($type);
-            $result = [];
-            foreach ($all as $plugin) {
-                $resp = $plugin->$getter();
-
-                if (is_array($resp)) {
-                    $result = array_merge($result, $resp);
-                    continue;
-                }
-
-                $result[] = $resp;
-            }
-            return $result;
-        }
-
-    };
+        return app()->collectPluginResources($name);
+    } catch (\InvalidArgumentException $e) {
+        return app()->getPlugins();
+    }
 }
 
 /**
@@ -251,7 +236,7 @@ function send_response(ResponseInterface $response): never
  */
 function env(): string
 {
-    return app()->container()->get('env');
+    return app()->container()->get(Environment::class);
 }
 
 /**
