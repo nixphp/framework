@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+use NixPHP\Decorators\AutoResolvingContainer;
+use function NixPHP\app;
+
 class EventManager
 {
     protected array $listeners = [];
@@ -51,7 +54,14 @@ class EventManager
 
                 if (is_array($callback)) {
                     [$class, $handle] = $callback;
-                    $responses[] = call_user_func([new $class, $handle], ...$payload);
+                    $container = app()->container();
+                    if ($container instanceof AutoResolvingContainer) {
+                        $obj = app()->container()->make($class);
+                    } else {
+                        $obj = new $class();
+                    }
+
+                    $responses[] = call_user_func([$obj, $handle], ...$payload);
                 } elseif (is_callable($callback)) {
                     $responses[] = $callback(...$payload);
                 }

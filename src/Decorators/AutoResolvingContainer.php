@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace NixPHP\Decorators;
 
-use Closure;
 use NixPHP\Exceptions\ContainerException;
 use NixPHP\Exceptions\ServiceNotFoundException;
 use Psr\Container\ContainerExceptionInterface;
@@ -114,12 +113,13 @@ class AutoResolvingContainer implements ContainerInterface
      *
      * @template T
      * @param class-string<T> $className Fully qualified class name
+     * @param array $parameters Optional constructor parameters (by name or position)
      * @param bool $singleton If true, instance will be stored in container
      * @return T
      * @throws ContainerException
      * @throws ServiceNotFoundException
      */
-    public function make(string $className, bool $singleton = false)
+    public function make(string $className, array $parameters = [], bool $singleton = false)
     {
         // If singleton requested and already exists
         if ($singleton && isset($this->instances[$className])) {
@@ -148,7 +148,7 @@ class AutoResolvingContainer implements ContainerInterface
             if ($constructor === null || $constructor->getNumberOfParameters() === 0) {
                 $instance = $reflection->newInstance();
             } else {
-                $args = $this->resolveParameters($constructor->getParameters(), $className);
+                $args = $this->resolveParameters($constructor->getParameters(), $className, $parameters);
                 $instance = $reflection->newInstanceArgs($args);
             }
 
@@ -189,18 +189,35 @@ class AutoResolvingContainer implements ContainerInterface
      *
      * @param ReflectionParameter[] $parameters ReflectionParameter array
      * @param string $context Class name for error messages
+     * @param array $explicitParams User-provided parameters (by name or position)
+     *
      * @return array Resolved parameter values
      * @throws ContainerException
-     * @throws ServiceNotFoundException
+     * @throws ServiceNotFoundException|ContainerExceptionInterface
      */
-    private function resolveParameters(array $parameters, string $context): array
+    private function resolveParameters(array $parameters, string $context, array $explicitParams = []): array
     {
         $args = [];
 
-        foreach ($parameters as $param) {
+        foreach ($parameters as $index => $param) {
+            $paramName = $param->getName();
+
+            // PRIORITY 1: Explicitly provided by parameter name
+            if (array_key_exists($paramName, $explicitParams)) {
+                $args[] = $explicitParams[$paramName];
+                continue;
+            }
+
+            // PRIORITY 2: Explicitly provided by position
+            if (array_key_exists($index, $explicitParams)) {
+                $args[] = $explicitParams[$index];
+                continue;
+            }
+
+            // PRIORITY 3: Try autowiring
             $type = $param->getType();
 
-            // No type or built-in type
+            // Scalar/builtin type without explicit value
             if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
                 $args[] = $this->resolveScalarParameter($param, $context);
                 continue;
@@ -220,7 +237,7 @@ class AutoResolvingContainer implements ContainerInterface
 
                 // Try auto-resolving if it's a concrete class
                 if ($this->canAutoResolve($dependencyId)) {
-                    $args[] = $this->make($dependencyId, false);
+                    $args[] = $this->make($dependencyId);
                     continue;
                 }
 
