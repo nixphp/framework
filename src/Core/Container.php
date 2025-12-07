@@ -1,15 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+use Closure;
 use NixPHP\Exceptions\ContainerException;
 use NixPHP\Exceptions\ServiceNotFoundException;
 use Psr\Container\ContainerInterface;
 
 class Container implements ContainerInterface
 {
-
     private array $services = [];
 
     /**
@@ -27,7 +28,7 @@ class Container implements ContainerInterface
             throw new ServiceNotFoundException("Service '$id' not found.");
         }
 
-        if ($this->services[$id] instanceof \Closure) {
+        if ($this->services[$id] instanceof Closure) {
             try {
                 $this->services[$id] = call_user_func($this->services[$id], $this);
             } catch (\Throwable $e) {

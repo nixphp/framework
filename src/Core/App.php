@@ -19,22 +19,21 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use function NixPHP\event;
 use function NixPHP\log;
-use function NixPHP\plugin;
 use function NixPHP\response;
 use function NixPHP\send_response;
 use function NixPHP\simple_view;
 
 class App
 {
-    private Container $container;
+    private ContainerInterface $container;
     private array $plugins = [];
 
     /**
      * Initialize the application with a dependency container
      *
-     * @param Container $container The dependency injection container
+     * @param ContainerInterface $container The dependency injection container
      */
-    public function __construct(Container $container)
+    public function __construct(ContainerInterface $container)
     {
         Stopwatch::start('app');
         $this->container = $container;
@@ -100,7 +99,7 @@ class App
      *
      * @return Container The container instance
      */
-    public function container(): Container
+    public function container(): ContainerInterface
     {
         return $this->container;
     }

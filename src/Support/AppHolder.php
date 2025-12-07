@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace NixPHP\Support;
 
 use NixPHP\Core\App;
+use NixPHP\Decorators\AutoResolvingContainer;
 use NixPHP\Core\Container;
 
 class AppHolder
@@ -13,7 +14,7 @@ class AppHolder
     public static function get(): App
     {
         if (self::$instance === null) {
-            self::$instance = new App(new Container());
+            self::$instance = new App(new AutoResolvingContainer(new Container()));
         }
         return self::$instance;
     }

@@ -33,7 +33,7 @@ class Collection
      *
      * @return $this
      */
-    public function add(string $key, mixed $value): static
+    public function add(string $key, mixed $value = null): static
     {
         $this->items[$key] = $value;
         return $this;
