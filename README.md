@@ -1,4 +1,3 @@
-
 <div align="center" style="text-align: center">
 
 ![Logo](https://nixphp.github.io/docs/assets/nixphp-logo-small-square.png)
@@ -36,27 +35,26 @@ It builds on native PHP features and lets you stay in control:
 
 ---
 
-## 📦 Core Features
+## Core Features
 
-- **✅ Plugin System**: Add reusable features via Composer
-- **✅ Lightweight Routing**: Define routes with `[Controller::class, 'method']`
-- **✅ Smart Dispatcher**: Automatic parameter and controller resolution
-- **✅ PSR-3 Logging** (lightweight logger ready to use)
-- **✅ PSR-4 Autoloading** (Composer)
-- **✅ PSR-7 Request/Response Handling**
-- **✅ PSR-11 Dependency Container** (for flexible dependency injection)
-- **✅ PSR-18 HTTP Client** (via `nixphp/client`)
-- **✅ Minimalist View System**: Block-based templating (via `nixphp/view`)
-- **✅ PDO Database Connection** (via `nixphp/database`)
-- **✅ Session Handling** (via `nixphp/session`)
-- **✅ Form Memory Helpers** (via `nixphp/form`)
-- **✅ Output Buffering** (centralized, better debugging)
-- **✅ JSON Response Helper** (for easy API responses)
-- **✅ Composer-Ready**: Easy installation and dependency management
+- **Plugin System**: Add reusable features via Composer
+- **Lightweight Routing**: Define routes with `[Controller::class, 'method']`
+- **Smart Dispatcher**: Automatic parameter and controller resolution
+- **Dependency Container (PSR-11)**: Service registry with built-in autowiring
+- **PSR-3 Logging** (lightweight logger ready to use)
+- **PSR-4 Autoloading** (Composer)
+- **PSR-7 Request/Response Handling**
+- **PSR-18 HTTP Client** (via `nixphp/client`)
+- **Minimalist View System**: Block-based templating (via `nixphp/view`)
+- **PDO Database Connection** (via `nixphp/database`)
+- **Session Handling** (via `nixphp/session`)
+- **Form Memory Helpers** (via `nixphp/form`)
+- **JSON Response Helper** (for easy API responses)
+- **Composer-Ready**: Easy installation and dependency management
 
 ---
 
-## 📚 PSR Compliance Overview
+## PSR Compliance Overview
 
 | PSR | Description | Status                             |
 |:---|:---|:---------------------------------------------|
@@ -71,7 +69,7 @@ It builds on native PHP features and lets you stay in control:
 
 ## ❓ Why not just use Laravel or Symfony?
 
-Frameworks like Laravel and Symfony are fantastic — but they often come with a heavy stack of features, conventions, and dependencies you may not always need.
+Frameworks like Laravel and Symfony are fantastic, but they often come with a heavy stack of features, conventions, and dependencies you may not always need.
 
 **NixPHP** offers a different approach:
 
@@ -88,12 +86,11 @@ If you want full control without fighting against a "big framework" structure,
 # 📢 Installation
 
 ## Install via Composer
-
 ```bash
 composer require nixphp/framework
 ```
 
-This installs the **NixPHP core** — a minimal routing and dispatch layer.  
+This installs the **NixPHP core**, a minimal routing and dispatch layer.  
 For additional features like views, forms or sessions, just install the corresponding plugins.
 
 ---
@@ -102,7 +99,6 @@ For additional features like views, forms or sessions, just install the correspo
 
 NixPHP leaves the project organization completely up to you.  
 A typical structure could look like this:
-
 ```
 /app
     /Controllers
@@ -131,7 +127,6 @@ You typically...
 - Create a `public/index.php` as your web entry point (which includes bootstrap.php)
 
 1. **Fill bootstrap.php**
-
 ```php
 // /bootstrap.php
 
@@ -145,7 +140,6 @@ app()->run(); // Start the application
 ```
 
 2. **Create a route**
-
 ```php
 //File: app/routes.php
 
@@ -153,7 +147,6 @@ router()->add('GET', '/hello', [HelloController::class, 'index']);
 ```
 
 3. **Create a controller**
-
 ```php
 //File: app/Controllers/HelloController.php
 
@@ -169,7 +162,6 @@ class HelloController
 ```
 
 4. **Create a view**
-
 ```php
 //File: app/views/hello.phtml
 
@@ -186,10 +178,99 @@ http://your-app.local/hello
 ```
 
 You should see:
-
 ```
 Hello, World!
 ```
+
+---
+
+## 🔧 Dependency Injection & Autowiring
+
+NixPHP includes a **PSR-11 compliant container** with **automatic dependency resolution** built-in.  
+No configuration needed, it just works.
+
+### Registering Services
+
+Register your core services (interfaces, databases, loggers) in the container:
+```php
+use function NixPHP\app;
+
+// Register interfaces (required for autowiring)
+app()->container()->set(LoggerInterface::class, fn() => new FileLogger());
+app()->container()->set(DatabaseInterface::class, fn() => new MySQLDatabase());
+```
+
+### Automatic Dependency Resolution
+
+Controllers and services automatically receive their dependencies:
+```php
+class UserService {
+    public function __construct(
+        private LoggerInterface $logger  // ✅ Automatically injected
+    ) {}
+}
+
+class UserController {
+    public function __construct(
+        private UserService $service,    // ✅ Auto-built and injected
+        private LoggerInterface $logger  // ✅ Retrieved from container
+    ) {}
+}
+
+// No manual wiring needed - the dispatcher handles it automatically!
+router()->add('GET', '/users', [UserController::class, 'index']);
+```
+
+### How It Works
+
+NixPHP's autowiring follows these simple rules:
+
+1. **Interfaces must be registered** - tell the container which implementation to use
+2. **Concrete classes are auto-built** - no registration needed
+3. **Dependencies are resolved recursively** - the entire dependency tree is handled
+
+### Building Instances Manually
+
+Sometimes you need to build instances directly (e.g., Commands):
+```php
+// Build a fresh instance
+$command = app()->container()->make(MigrateCommand::class);
+
+// Build with custom parameters
+$handler = app()->container()->make(RequestHandler::class, [
+    'timeout' => 30,
+    'retries' => 3
+]);
+
+// Build as singleton (stored in container for reuse)
+$service = app()->container()->make(CacheService::class, singleton: true);
+```
+
+### Features
+
+- ✅ **Zero configuration** - autowiring works out of the box
+- ✅ **Interfaces must be registered** - explicit and clear
+- ✅ **Concrete classes auto-resolve** - less boilerplate
+- ✅ **Circular dependency detection** - prevents infinite loops
+- ✅ **Nullable dependencies** - handled gracefully
+- ✅ **Optional parameters** - with default values supported
+- ✅ **Custom parameters** - pass explicit values when needed
+
+### Best Practices
+
+| What to Register | Why |
+|:-----------------|:----|
+| Interfaces (e.g., `LoggerInterface`) | Required for autowiring |
+| Database connections | Singleton configuration |
+| Third-party services | Complex initialization |
+| Configuration objects | Share across application |
+
+| What NOT to Register | Why |
+|:--------------------|:----|
+| Controllers | Auto-built by dispatcher |
+| Simple services | Auto-resolved on demand |
+| Value objects | Created as needed |
+| Commands | Built via `make()` |
 
 ---
 
@@ -198,7 +279,6 @@ Hello, World!
 NixPHP includes a clean plugin system that allows you to extend your app modularly — without configuration.
 
 Just install a plugin via Composer (e.g. `composer require vendor/my-plugin`) and it is automatically detected if it uses the correct package type:
-
 ```json
 {
   "type": "nixphp-plugin"
@@ -206,7 +286,6 @@ Just install a plugin via Composer (e.g. `composer require vendor/my-plugin`) an
 ```
 
 A typical plugin might look like this:
-
 ```
 my-plugin/
 ├── app/
@@ -225,13 +304,8 @@ You can build plugins exactly like you build an app — with full access to rout
 
 > For example plugins, see the [Plugin Documentation](https://nixphp.github.io/docs/plugins/)
 
-# 🔥 Ready to build?
-
-Welcome to **NixPHP** —  
-your minimalist, modern PHP playground. 🚀
-
 ---
 
-# 🙌 License
+# License
 
 MIT License.

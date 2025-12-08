@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace NixPHP\Core;
 
+use NixPHP\Decorators\AutoResolvingContainer;
 use NixPHP\Exceptions\DispatcherException;
 use NixPHP\Exceptions\RouteNotFoundException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use function NixPHP\app;
 use function NixPHP\event;
 use function NixPHP\simple_render;
 
@@ -70,10 +72,15 @@ class Dispatcher
 
         if (is_array($action)) {
             [$class, $classAction] = $action;
-            $class = new $class();
-            event()->dispatch(Event::CONTROLLER_CALLING, $request, $class, $action);
-            $response = $class->$classAction(...$route['params'] ?? null);
-            event()->dispatch(Event::CONTROLLER_CALLED, $request, $class, $action, $response);
+            $container = app()->container();
+            if ($container instanceof AutoResolvingContainer) {
+                $controller = $container->make($class);
+            } else {
+                $controller = new $class();
+            }
+            event()->dispatch(Event::CONTROLLER_CALLING, $request, $controller, $action);
+            $response = $controller->$classAction(...$route['params'] ?? null);
+            event()->dispatch(Event::CONTROLLER_CALLED, $request, $controller, $action, $response);
         } else if (is_callable($action)) {
             event()->dispatch(Event::CONTROLLER_CALLING, $request, null, $action);
             $response = $action(...$route['params'] ?? null);

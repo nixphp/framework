@@ -77,12 +77,14 @@ class App
                 ? $e->getStatusCode()
                 : 500;
 
-            $response = response(simple_view(
-                $viewPath . '/errors/default.phtml', [
-                    'statusCode' => $statusCode,
-                    'message' => $e->getMessage(),
-                    'stackTrace' => $e->getTraceAsString(),
-                ]
+            $response = response(
+                simple_view(
+                    $viewPath . '/errors/default.phtml',
+                    [
+                        'statusCode' => $statusCode,
+                        'message'    => $e->getMessage(),
+                        'stackTrace' => $e->getTraceAsString(),
+                    ]
             ), $statusCode);
 
         }
