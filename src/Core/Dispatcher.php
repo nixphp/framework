@@ -74,13 +74,13 @@ class Dispatcher
             [$class, $classAction] = $action;
             $container = app()->container();
             if ($container instanceof AutoResolvingContainer) {
-                $class = $container->make($class);
+                $controller = $container->make($class);
             } else {
-                $class = new $class();
+                $controller = new $class();
             }
-            event()->dispatch(Event::CONTROLLER_CALLING, $request, $class, $action);
-            $response = $class->$classAction(...$route['params'] ?? null);
-            event()->dispatch(Event::CONTROLLER_CALLED, $request, $class, $action, $response);
+            event()->dispatch(Event::CONTROLLER_CALLING, $request, $controller, $action);
+            $response = $controller->$classAction(...$route['params'] ?? null);
+            event()->dispatch(Event::CONTROLLER_CALLED, $request, $controller, $action, $response);
         } else if (is_callable($action)) {
             event()->dispatch(Event::CONTROLLER_CALLING, $request, null, $action);
             $response = $action(...$route['params'] ?? null);

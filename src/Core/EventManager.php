@@ -56,12 +56,12 @@ class EventManager
                     [$class, $handle] = $callback;
                     $container = app()->container();
                     if ($container instanceof AutoResolvingContainer) {
-                        $obj = app()->container()->make($class);
+                        $obj = $container->make($class);
                     } else {
                         $obj = new $class();
                     }
 
-                    $responses[] = call_user_func([$obj, $handle], ...$payload);
+                    $responses[] = $obj->$handle(...$payload);
                 } elseif (is_callable($callback)) {
                     $responses[] = $callback(...$payload);
                 }
