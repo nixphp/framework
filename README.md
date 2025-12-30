@@ -225,9 +225,9 @@ router()->add('GET', '/users', [UserController::class, 'index']);
 
 NixPHP's autowiring follows these simple rules:
 
-1. **Interfaces must be registered** - tell the container which implementation to use
-2. **Concrete classes are auto-built** - no registration needed
-3. **Dependencies are resolved recursively** - the entire dependency tree is handled
+1. **Interfaces must be registered**: tell the container which implementation to use
+2. **Concrete classes are auto-built**: no registration needed
+3. **Dependencies are resolved recursively*: the entire dependency tree is handled
 
 ### Building Instances Manually
 
@@ -242,19 +242,18 @@ $handler = app()->container()->make(RequestHandler::class, [
     'retries' => 3
 ]);
 
-// Build as singleton (stored in container for reuse)
+// Build as a singleton (stored in the container for reuse)
 $service = app()->container()->make(CacheService::class, singleton: true);
 ```
 
 ### Features
 
-- ✅ **Zero configuration** - autowiring works out of the box
-- ✅ **Interfaces must be registered** - explicit and clear
-- ✅ **Concrete classes auto-resolve** - less boilerplate
-- ✅ **Circular dependency detection** - prevents infinite loops
-- ✅ **Nullable dependencies** - handled gracefully
-- ✅ **Optional parameters** - with default values supported
-- ✅ **Custom parameters** - pass explicit values when needed
+- **Zero configuration**: autowiring works out of the box
+- **Concrete classes auto-resolve**: less boilerplate
+- **Circular dependency detection**: prevents infinite loops
+- **Nullable dependencies**: handled gracefully
+- **Optional parameters**: with default values supported
+- **Custom parameters**: pass explicit values when needed
 
 ### Best Practices
 
@@ -288,7 +287,7 @@ Just install a plugin via Composer (e.g. `composer require vendor/my-plugin`) an
 A typical plugin might look like this:
 ```
 my-plugin/
-├── app/
+├── src/
 │   ├── config.php
 │   └── views/
 │       └── errors/404.phtml
@@ -300,9 +299,9 @@ my-plugin/
 - `views/` are added to the view search path.
 - `bootstrap.php` runs automatically to register routes, events, etc.
 
-You can build plugins exactly like you build an app — with full access to routing, events, and controllers.
+You can build plugins exactly like you build an app, with full access to routing, events, and controllers.
 
-> For example plugins, see the [Plugin Documentation](https://nixphp.github.io/docs/plugins/)
+> For plugin examples, see the [Plugin Documentation](https://nixphp.github.io/docs/plugins/)
 
 ---
 

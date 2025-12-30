@@ -22,6 +22,14 @@ class Log implements LoggerInterface
     }
 
     /**
+     * @return string
+     */
+    public function getLogDir(): string
+    {
+        return dirname($this->logFile);
+    }
+
+    /**
      * System is unusable.
      *
      * @param mixed                $message

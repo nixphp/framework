@@ -42,7 +42,7 @@ class Dispatcher
      *
      * Processes the request by:
      * - Matching the URI and method against registered routes
-     * - Handling special case for a root path ('/')
+     * - Handling a special case for a root path ('/')
      * - Executing controller actions or callables
      * - Dispatching controller lifecycle events
      * - Validating and returning the response
@@ -73,11 +73,11 @@ class Dispatcher
         if (is_array($action)) {
             [$class, $classAction] = $action;
             $container = app()->container();
-            if ($container instanceof AutoResolvingContainer) {
-                $controller = $container->make($class);
-            } else {
-                $controller = new $class();
-            }
+
+            $controller = $container instanceof AutoResolvingContainer
+                ? $container->make($class)
+                : new $class();
+
             event()->dispatch(Event::CONTROLLER_CALLING, $request, $controller, $action);
             $response = $controller->$classAction(...$route['params'] ?? null);
             event()->dispatch(Event::CONTROLLER_CALLED, $request, $controller, $action, $response);
