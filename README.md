@@ -223,11 +223,11 @@ router()->add('GET', '/users', [UserController::class, 'index']);
 
 ### How It Works
 
-NixPHP's autowiring follows these simple rules:
+NixPHP's autowiring follows these basic rules:
 
 1. **Interfaces must be registered**: tell the container which implementation to use
 2. **Concrete classes are auto-built**: no registration needed
-3. **Dependencies are resolved recursively*: the entire dependency tree is handled
+3. **Dependencies are resolved recursively**: the entire dependency tree is handled
 
 ### Building Instances Manually
 
