@@ -114,7 +114,7 @@ class AutoResolvingContainer implements ContainerInterface
      * @template T
      * @param class-string<T> $className Fully qualified class name
      * @param array $parameters Optional constructor parameters (by name or position)
-     * @param bool $singleton If true, instance will be stored in container
+     * @param bool $singleton If true, the instance will be stored in container for re-usage
      * @return T
      * @throws ContainerException
      * @throws ServiceNotFoundException
@@ -219,7 +219,7 @@ class AutoResolvingContainer implements ContainerInterface
 
             // Scalar/builtin type without explicit value
             if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
-                $args[] = $this->resolveScalarParameter($param, $context);
+                $args[] = $this->resolveScalarParameter($param, $context, $explicitParams);
                 continue;
             }
 
@@ -277,11 +277,12 @@ class AutoResolvingContainer implements ContainerInterface
      * Handles scalar/built-in type parameters
      *
      * @param ReflectionParameter $param
-     * @param string $context Class name for error messages
+     * @param string              $context Class name for error messages
+     * @param array               $explicitParams
+     *
      * @return mixed Parameter value (default value or null)
-     * @throws ContainerException
      */
-    private function resolveScalarParameter(ReflectionParameter $param, string $context): mixed
+    private function resolveScalarParameter(ReflectionParameter $param, string $context, array $explicitParams = []): mixed
     {
         if ($param->isDefaultValueAvailable()) {
             return $param->getDefaultValue();
@@ -289,6 +290,26 @@ class AutoResolvingContainer implements ContainerInterface
 
         if ($param->allowsNull()) {
             return null;
+        }
+
+        if (!empty($explicitParams)) {
+            $type = $param->getType();
+
+            if ($type instanceof ReflectionNamedType) {
+                $typeName = $type->getName();
+
+                if ($typeName === 'array') {
+                    return $explicitParams;
+                }
+
+                if (count($explicitParams) === 1) {
+                    return reset($explicitParams);
+                }
+            }
+
+            if (!$type) {
+                return count($explicitParams) === 1 ? reset($explicitParams) : $explicitParams;
+            }
         }
 
         throw new ContainerException(
