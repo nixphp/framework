@@ -145,10 +145,45 @@ class Log implements LoggerInterface
         // Placeholder {key} will be replaced by variables in $contexts
         $replace = [];
         foreach ($context as $key => $val) {
-            $replace['{' . $key . '}'] = (string) $val;
+            $replace['{' . $key . '}'] = $this->formatValue($val);
         }
 
         return strtr($message, $replace);
+    }
+
+    private function formatValue(mixed $value): string
+    {
+        if (is_null($value)) {
+            return 'null';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (is_array($value)) {
+            $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return $json !== false ? $json : '[]';
+        }
+
+        if (is_object($value)) {
+            if (method_exists($value, '__toString')) {
+                return (string) $value;
+            }
+
+            if ($value instanceof \JsonSerializable) {
+                $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                return $json !== false ? $json : get_class($value);
+            }
+
+            return get_class($value);
+        }
+
+        if (is_resource($value)) {
+            return get_resource_type($value);
+        }
+
+        return (string) $value;
     }
 
 }
