@@ -14,6 +14,7 @@ class Plugin
     protected array $viewHelpersFiles = [];
     protected ?string $bootstrap = null;
     private bool $booted = false;
+    private ?string $version = null;
 
     public function __construct(string $name)
     {
@@ -106,5 +107,71 @@ class Plugin
     public function getViewHelpersFiles(): array
     {
         return $this->viewHelpersFiles;
+    }
+
+    public function setVersion(?string $version): void
+    {
+        $this->version = self::normalizeVersion($version);
+    }
+
+    public function getVersion(): ?string
+    {
+        return $this->version;
+    }
+
+    public function satisfiesVersionConstraint(?string $constraint): bool
+    {
+        if ($constraint === null) {
+            return true;
+        }
+
+        if ($this->version === null) {
+            return false;
+        }
+
+        [$operator, $targetVersion] = self::parseVersionConstraint($constraint);
+
+        if ($targetVersion === null || $targetVersion === '') {
+            return false;
+        }
+
+        return version_compare($this->version, $targetVersion, $operator);
+    }
+
+    public static function splitRequirement(string $requirement): array
+    {
+        if (!str_contains($requirement, ':')) {
+            return [$requirement, null];
+        }
+
+        [$package, $constraint] = explode(':', $requirement, 2);
+        $package = trim($package);
+        $constraint = trim($constraint);
+
+        return [
+            $package,
+            $constraint === '' ? null : $constraint,
+        ];
+    }
+
+    private static function parseVersionConstraint(string $constraint): array
+    {
+        if (preg_match('/^(>=|<=|>|<|=)?\s*(.+)$/', trim($constraint), $matches)) {
+            $operator = $matches[1] ?: '==';
+            $version = self::normalizeVersion($matches[2]);
+
+            return [$operator, $version];
+        }
+
+        return ['==', self::normalizeVersion($constraint)];
+    }
+
+    public static function normalizeVersion(?string $version): ?string
+    {
+        if ($version === null) {
+            return null;
+        }
+
+        return ltrim(trim($version), 'vV');
     }
 }

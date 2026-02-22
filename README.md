@@ -13,14 +13,14 @@
 > **"As simple as possible, as flexible as necessary."**
 
 **NixPHP** is a modern, lightweight PHP microframework designed for real-world projects:  
-fast, minimal, extendable — and now fully embracing modern PHP standards like PSR-3, PSR-4, PSR-7, PSR-11 and PSR-18.
+fast, minimal, extendable, and now fully embracing modern PHP standards like PSR-3, PSR-4, PSR-7, PSR-11, and PSR-18.
 
 It builds on native PHP features and lets you stay in control:  
-**Use only what you need — and extend freely when you want.**
+**Use only what you need, and extend freely when you want.**
 
 > 🧩 NixPHP provides a minimal core with a clean plugin architecture.  
-> Everything beyond routing and dispatching — such as sessions, views, forms, or database — is handled by optional plugins.  
-> You get full control over what your app includes — and nothing more.
+> Everything beyond routing and dispatching, such as sessions, views, forms, or database, is handled by optional plugins.  
+> You get full control over what your app includes, and nothing more.
 
 ---
 
@@ -91,7 +91,7 @@ composer require nixphp/framework
 ```
 
 This installs the **NixPHP core**, a minimal routing and dispatch layer.  
-For additional features like views, forms or sessions, just install the corresponding plugins.
+For additional features like views, forms, or sessions, just install the corresponding plugins.
 
 ---
 
@@ -298,6 +298,10 @@ my-plugin/
 - `config.php` is automatically merged.
 - `views/` are added to the view search path.
 - `bootstrap.php` runs automatically to register routes, events, etc.
+
+### Plugin availability checks
+
+Use `app()->hasPlugin('vendor/name')` to gate functionality on optional plugins. Version hints like `vendor/name:>=0.1.2` or `vendor/name:<0.2.0` are also supported — the constraint is compared against the plugin version that Composer registers when the plugin loads. This makes it easy to only enable code when a specific plugin version is present, without having to interrogate `InstalledVersions` manually.
 
 You can build plugins exactly like you build an app, with full access to routing, events, and controllers.
 
