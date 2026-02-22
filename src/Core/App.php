@@ -130,7 +130,7 @@ class App
 
     public function getPlugin(string $name): Plugin
     {
-        [$package, $constraint] = Plugin::splitRequirement($name);
+        [$package] = Plugin::splitRequirement($name);
 
         if (!$this->hasPlugin($name)) {
             throw new \InvalidArgumentException('Plugin not found: ' . $name);
@@ -381,7 +381,7 @@ class App
             return null;
         }
 
-        return Plugin::normalizeVersion($version);
+        return $version;
     }
 
     /**
