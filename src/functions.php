@@ -198,7 +198,7 @@ function send_response(ResponseInterface $response): never
 
     if (headers_sent()) {
         echo $response->getBody();
-        exit();
+        exit(0);
     }
 
     $eventResponses = event()->dispatch(Event::RESPONSE_HEADER, $response);

@@ -163,7 +163,11 @@ class Log implements LoggerInterface
 
         if (is_array($value)) {
             $json = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            return $json !== false ? $json : '[]';
+            if ($json !== false) {
+                return $json;
+            }
+
+            return '[unserializable array: ' . json_last_error_msg() . ']';
         }
 
         if (is_object($value)) {

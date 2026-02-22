@@ -43,7 +43,7 @@ $highlightLine = function (string $value) use ($escape, $pattern): string {
         $result .= $escape(substr($value, $offset, $matchPos - $offset));
 
         foreach (['string', 'comment', 'keyword', 'constant', 'number', 'variable', 'operator'] as $token) {
-            if (!empty($matches[$token][0])) {
+            if (isset($matches[$token][0]) && $matches[$token][0] !== '') {
                 $result .= sprintf(
                     '<span class="token-%s">%s</span>',
                     $token,

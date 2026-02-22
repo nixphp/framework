@@ -14,6 +14,7 @@ class ErrorHandler
 {
 
     private const string DEFAULT_TEMPLATE = __DIR__ . '/../Resources/views/errors/default.phtml';
+    private const string SANITIZED_TEMPLATE = __DIR__ . '/../Resources/views/errors/minimal.phtml';
 
 
     /**
@@ -57,8 +58,6 @@ class ErrorHandler
             E_COMPILE_ERROR,
             E_USER_ERROR,
             E_RECOVERABLE_ERROR,
-            E_COMPILE_WARNING,
-            E_CORE_WARNING,
         ];
 
         if (!in_array($error['type'], $fatalTypes, true)) {
@@ -76,8 +75,30 @@ class ErrorHandler
         self::handleException($exception);
     }
 
+    /**
+     * Renders an HTTP response for an exception.
+     *
+     * The detailed template is only rendered for non-production/test environments.
+     *
+     * @param \Throwable $exception
+     * @param int        $statusCode
+     * @param string|null $template
+     *
+     * @return ResponseInterface
+     * @internal Keep this logic tied to the framework error handling contract to avoid leaking sensitive information.
+     */
     public static function renderResponse(\Throwable $exception, int $statusCode, ?string $template = null): ResponseInterface
     {
+        if (!self::shouldRenderDetailedView()) {
+            return response(
+                simple_view(
+                    self::SANITIZED_TEMPLATE,
+                    self::buildSanitizedViewData($statusCode)
+                ),
+                $statusCode
+            );
+        }
+
         $template = $template ?? self::DEFAULT_TEMPLATE;
 
         return response(
@@ -97,12 +118,40 @@ class ErrorHandler
      * @param string $errfile The file where the error occurred
      * @param int    $errline The line number where the error occurred
      *
-     * @return ErrorException The converted error exception
+     * @return never
      * @throws ErrorException Always throws the error as an exception
      */
-    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): ErrorException
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): never
     {
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+    }
+
+    private static function shouldRenderDetailedView(): bool
+    {
+        $environment = self::getEnvironment();
+
+        if ($environment === null) {
+            return true;
+        }
+
+        return $environment !== Environment::PROD && $environment !== Environment::TEST;
+    }
+
+    private static function getEnvironment(): ?string
+    {
+        if (isset($_ENV['APP_ENV'])) {
+            return $_ENV['APP_ENV'];
+        }
+
+        $value = getenv('APP_ENV');
+        return $value === false ? null : $value;
+    }
+
+    private static function buildSanitizedViewData(int $statusCode): array
+    {
+        return [
+            'statusCode' => $statusCode,
+        ];
     }
 
     private static function buildViewData(\Throwable $exception, int $statusCode): array
