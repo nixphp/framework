@@ -25,7 +25,7 @@ $keywords = [
     'interface', 'trait', 'abstract', 'global', 'isset', 'unset', 'empty'
 ];
 $keywordPattern = '(?:' . implode('|', array_map('preg_quote', $keywords)) . ')';
-$stringPattern = '"[^"\n]*"|\'[^\'\n]*\'';
+$stringPattern = '"(?:\\\\.|[^"\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\n])*\'';
 $commentPattern = '\/\/[^\n]*';
 $constantPattern = '(?:true|false|null)';
 $numberPattern = '\\b\\d+(?:\\.\\d+)?\\b';
@@ -355,7 +355,7 @@ $heroTitle = $heroMessage !== '' ? $heroMessage : 'Something went wrong';
                     <?php foreach ($exceptionSnippet as $line) : ?>
                         <?php $isActive = $line['number'] === ($exceptionLine ?? null); ?>
                         <div class="code-line<?= $isActive ? ' is-active' : '' ?>">
-                            <span class="line-number"><?= $line['number'] ?></span>
+                            <span class="line-number"><?= $escape($line['number']) ?></span>
                             <span class="line-content"><?= $renderLine($line['content']) ?></span>
                         </div>
                     <?php endforeach; ?>
@@ -391,7 +391,7 @@ $heroTitle = $heroMessage !== '' ? $heroMessage : 'Something went wrong';
                                 <?php foreach ($frame['snippet'] as $line) : ?>
                                     <?php $isActive = $line['number'] === ($frame['line'] ?? null); ?>
                                     <div class="code-line<?= $isActive ? ' is-active' : '' ?>">
-                                        <span class="line-number"><?= $line['number'] ?></span>
+                                        <span class="line-number"><?= $escape($line['number']) ?></span>
                                         <span class="line-content"><?= $renderLine($line['content']) ?></span>
                                     </div>
                                 <?php endforeach; ?>

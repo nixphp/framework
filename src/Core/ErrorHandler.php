@@ -29,11 +29,16 @@ class ErrorHandler
      */
     public static function handleException(\Throwable $e): void
     {
-        $statusCode = method_exists($e, 'getStatusCode')
-            ? $e->getStatusCode()
-            : 500;
+        $statusCode = self::resolveStatusCode($e);
 
         send_response(self::renderResponse($e, $statusCode));
+    }
+
+    public static function resolveStatusCode(\Throwable $exception): int
+    {
+        return method_exists($exception, 'getStatusCode')
+            ? $exception->getStatusCode()
+            : 500;
     }
 
     public static function register(): void
@@ -131,7 +136,8 @@ class ErrorHandler
         $environment = self::getEnvironment();
 
         if ($environment === null) {
-            return true;
+            self::logMissingEnvironmentWarning();
+            return false;
         }
 
         return $environment !== Environment::PROD && $environment !== Environment::TEST;
@@ -145,6 +151,28 @@ class ErrorHandler
 
         $value = getenv('APP_ENV');
         return $value === false ? null : $value;
+    }
+
+    private static function logMissingEnvironmentWarning(): void
+    {
+        static $hasWarned = false;
+
+        if ($hasWarned) {
+            return;
+        }
+
+        $hasWarned = true;
+
+        if (function_exists('NixPHP\\log')) {
+            try {
+                \NixPHP\log()->warning('APP_ENV is not set; defaulting to sanitized error output.');
+                return;
+            } catch (\Throwable) {
+                // fallback to trigger_error below
+            }
+        }
+
+        trigger_error('APP_ENV is not set; defaulting to sanitized error output.', E_USER_WARNING);
     }
 
     private static function buildSanitizedViewData(int $statusCode): array
@@ -229,11 +257,11 @@ class ErrorHandler
 
     private static function resolveBasePath(): ?string
     {
-        if (!defined('NIXPHP_BASE_PATH')) {
+        if (!defined('\NIXPHP_BASE_PATH')) {
             return null;
         }
 
-        $path = realpath(NIXPHP_BASE_PATH);
+        $path = realpath(\NIXPHP_BASE_PATH);
         return $path ?: null;
     }
 

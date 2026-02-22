@@ -19,7 +19,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use function NixPHP\event;
 use function NixPHP\log;
-use function NixPHP\response;
 use function NixPHP\send_response;
 
 class App
@@ -68,13 +67,7 @@ class App
 
             log()->error($e->getMessage());
 
-            $statusCode = method_exists($e, 'getStatusCode')
-                ? $e->getStatusCode()
-                : 500;
-
-            if ($this->container->get(Environment::class) === Environment::PROD) {
-                send_response(response('Internal Server Error', 500));
-            }
+            $statusCode = ErrorHandler::resolveStatusCode($e);
 
             $response = ErrorHandler::renderResponse($e, $statusCode);
 
