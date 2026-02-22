@@ -67,6 +67,10 @@ class App
 
             log()->error($e->getMessage());
 
+            if ($this->container->get(Environment::class) === Environment::PROD) {
+                return;
+            }
+
             $statusCode = ErrorHandler::resolveStatusCode($e);
 
             $response = ErrorHandler::renderResponse($e, $statusCode);
