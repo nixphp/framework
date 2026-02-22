@@ -15,6 +15,7 @@ class ErrorHandler
 
     private const string DEFAULT_TEMPLATE = __DIR__ . '/../Resources/views/errors/default.phtml';
     private const string SANITIZED_TEMPLATE = __DIR__ . '/../Resources/views/errors/minimal.phtml';
+    private static bool $shutdownRegistered = false;
 
 
     /**
@@ -45,7 +46,10 @@ class ErrorHandler
     {
         set_error_handler([self::class, 'handleError']);
         set_exception_handler([self::class, 'handleException']);
-        register_shutdown_function([self::class, 'handleShutdown']);
+        if (!self::$shutdownRegistered) {
+            register_shutdown_function([self::class, 'handleShutdown']);
+            self::$shutdownRegistered = true;
+        }
     }
 
     public static function handleShutdown(): void
@@ -77,7 +81,11 @@ class ErrorHandler
             $error['line']
         );
 
-        self::handleException($exception);
+        try {
+            self::handleException($exception);
+        } catch (\Throwable $shutdownException) {
+            self::sendShutdownFallback($shutdownException);
+        }
     }
 
     /**
@@ -126,7 +134,7 @@ class ErrorHandler
      * @return bool False when the error was silenced via @, otherwise never returns because it throws.
      * @throws ErrorException Always throws the error as an exception when not suppressed.
      */
-    public static function handleError(int $errno, string $errstr, string $errfile, int $errline)
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
     {
         if ((error_reporting() & $errno) === 0) {
             return false;
@@ -266,6 +274,24 @@ class ErrorHandler
 
         $path = realpath(\NIXPHP_BASE_PATH);
         return $path ?: null;
+    }
+
+    private static function sendShutdownFallback(\Throwable $exception): void
+    {
+        if (!headers_sent()) {
+            header('Content-Type: text/html; charset=utf-8');
+            header('HTTP/1.1 500 Internal Server Error');
+        }
+
+        $message = htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+
+        echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Error</title></head><body>';
+        echo '<h1>Application Error</h1>';
+        echo '<p>A fatal error occurred during shutdown.</p>';
+        echo '<p>' . $message . '</p>';
+        echo '</body></html>';
+
+        exit(1);
     }
 
 }
