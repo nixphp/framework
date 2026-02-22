@@ -80,7 +80,7 @@ class App
 
         }
 
-        log()->info('Request completed in ' . Stopwatch::stop('app') . 'ms');
+        log()->info('Request completed in ' . Stopwatch::stop('app') . 's');
 
         event()->dispatch(Event::RESPONSE_SEND, $response);
 
@@ -130,11 +130,13 @@ class App
 
     public function getPlugin(string $name): Plugin
     {
+        [$package, $constraint] = Plugin::splitRequirement($name);
+
         if (!$this->hasPlugin($name)) {
             throw new \InvalidArgumentException('Plugin not found: ' . $name);
         }
 
-        return $this->plugins[$name];
+        return $this->plugins[$package];
     }
 
     /**
@@ -373,10 +375,6 @@ class App
 
     private function resolvePluginVersion(string $package): ?string
     {
-        if (!class_exists(InstalledVersions::class)) {
-            return null;
-        }
-
         try {
             $version = InstalledVersions::getPrettyVersion($package) ?? InstalledVersions::getVersion($package);
         } catch (\OutOfBoundsException) {

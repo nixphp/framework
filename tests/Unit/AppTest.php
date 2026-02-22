@@ -21,26 +21,28 @@ class AppTest extends NixPHPTestCase
         $_ENV['APP_ENV'] = Environment::PROD;
         putenv('APP_ENV=' . Environment::PROD);
 
-        $app = new App(new Container());
-        $container = $app->container();
+        try {
+            $app = new App(new Container());
+            $container = $app->container();
 
-        $container->set(Dispatcher::class, fn($container) => new class {
-            public function forward(ServerRequestInterface $request)
-            {
-                throw new RuntimeException('boom');
+            $container->set(Dispatcher::class, fn($container) => new class {
+                public function forward(ServerRequestInterface $request)
+                {
+                    throw new RuntimeException('boom');
+                }
+            });
+
+            $app->run();
+
+            $this->assertTrue(true); // reached only when send_response is skipped
+        } finally {
+            if ($previousEnv === null) {
+                unset($_ENV['APP_ENV']);
+                putenv('APP_ENV');
+            } else {
+                $_ENV['APP_ENV'] = $previousEnv;
+                putenv('APP_ENV=' . $previousEnv);
             }
-        });
-
-        $app->run();
-
-        $this->assertTrue(true); // reached only when send_response is skipped
-
-        if ($previousEnv === null) {
-            unset($_ENV['APP_ENV']);
-            putenv('APP_ENV');
-        } else {
-            $_ENV['APP_ENV'] = $previousEnv;
-            putenv('APP_ENV=' . $previousEnv);
         }
     }
 
@@ -63,8 +65,10 @@ class AppTest extends NixPHPTestCase
             $this->assertTrue($app->hasPlugin('nixphp/database:0.1.2'));
             $this->assertTrue($app->hasPlugin('nixphp/database:>=0.1.2'));
             $this->assertTrue($app->hasPlugin('nixphp/database:>0.1.1'));
+            $this->assertTrue($app->hasPlugin('nixphp/database:<=0.1.2'));
             $this->assertFalse($app->hasPlugin('nixphp/database:>0.1.2'));
             $this->assertFalse($app->hasPlugin('nixphp/database:<0.1.2'));
+            $this->assertFalse($app->hasPlugin('nixphp/nonexistent:>=1.0.0'));
         } finally {
             Stopwatch::stop('app');
         }
