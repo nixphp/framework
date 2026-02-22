@@ -116,18 +116,22 @@ class ErrorHandler
     }
 
     /**
-     * Converts PHP errors to ErrorException instances
+     * Converts PHP errors to ErrorException instances unless the error was suppressed.
      *
      * @param int    $errno   The error reporting level
      * @param string $errstr  The error message
      * @param string $errfile The file where the error occurred
      * @param int    $errline The line number where the error occurred
      *
-     * @return never
-     * @throws ErrorException Always throws the error as an exception
+     * @return bool False when the error was silenced via @, otherwise never returns because it throws.
+     * @throws ErrorException Always throws the error as an exception when not suppressed.
      */
-    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): never
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline)
     {
+        if ((error_reporting() & $errno) === 0) {
+            return false;
+        }
+
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 
@@ -168,11 +172,10 @@ class ErrorHandler
                 \NixPHP\log()->warning('APP_ENV is not set; defaulting to sanitized error output.');
                 return;
             } catch (\Throwable) {
-                // fallback to trigger_error below
             }
         }
 
-        trigger_error('APP_ENV is not set; defaulting to sanitized error output.', E_USER_WARNING);
+        error_log('APP_ENV is not set; defaulting to sanitized error output.');
     }
 
     private static function buildSanitizedViewData(int $statusCode): array
