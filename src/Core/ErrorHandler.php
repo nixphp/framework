@@ -283,12 +283,15 @@ class ErrorHandler
             header('HTTP/1.1 500 Internal Server Error');
         }
 
-        $message = htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+        $showDetails = self::shouldRenderDetailedView();
+        $localizedMessage = $showDetails
+            ? '<p>' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>'
+            : '<p>An unexpected internal error occurred. Please try again later.</p>';
 
         echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Error</title></head><body>';
         echo '<h1>Application Error</h1>';
         echo '<p>A fatal error occurred during shutdown.</p>';
-        echo '<p>' . $message . '</p>';
+        echo $localizedMessage;
         echo '</body></html>';
 
         exit(1);
