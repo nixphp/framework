@@ -1,118 +1,407 @@
 <?php
-use function NixPHP\s;
+$basePath = isset($basePath) ? rtrim($basePath, '/\\') : null;
+$frameCount = isset($frames) ? count($frames) : 0;
+$relativePath = function (?string $path) use ($basePath): string {
+    if (!is_string($path) || $path === '') {
+        return 'n/a';
+    }
+
+    if ($basePath && str_starts_with($path, $basePath)) {
+        $relative = substr($path, strlen($basePath));
+        $relative = ltrim(str_replace('\\', '/', $relative), '/');
+        if ($relative !== '') {
+            return $relative;
+        }
+    }
+
+    return str_replace('\\', '/', $path);
+};
+$escape = fn($value) => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+$keywords = [
+    'function', 'return', 'throw', 'new', 'public', 'protected', 'private', 'const',
+    'class', 'extends', 'implements', 'namespace', 'use', 'if', 'else', 'elseif',
+    'try', 'catch', 'finally', 'switch', 'case', 'default', 'foreach', 'as',
+    'while', 'do', 'for', 'break', 'continue', 'static', 'var', 'yield', 'final',
+    'interface', 'trait', 'abstract', 'global', 'isset', 'unset', 'empty'
+];
+$keywordPattern = '(?:' . implode('|', array_map('preg_quote', $keywords)) . ')';
+$stringPattern = '"(?:\\\\.|[^"\\\\\n])*"|\'(?:\\\\.|[^\'\\\\\n])*\'';
+$commentPattern = '\/\/[^\n]*';
+$constantPattern = '(?:true|false|null)';
+$numberPattern = '\\b\\d+(?:\\.\\d+)?\\b';
+$variablePattern = '\\$[A-Za-z_][A-Za-z0-9_]*';
+$operatorPattern = '=>|->|===|==|!==|!=|<=|>=|\+\+|--|&&|\|\||\+|-|\*|\/|%';
+$pattern = '/(?P<string>' . $stringPattern . ')|(?P<comment>' . $commentPattern . ')|(?P<keyword>\\b' . $keywordPattern . '\\b)|(?P<constant>\\b' . $constantPattern . '\\b)|(?P<number>' . $numberPattern . ')|(?P<variable>' . $variablePattern . ')|(?P<operator>' . $operatorPattern . ')/i';
+$highlightLine = function (string $value) use ($escape, $pattern): string {
+    $result = '';
+    $offset = 0;
+
+    while (preg_match($pattern, $value, $matches, PREG_OFFSET_CAPTURE, $offset)) {
+        $match = $matches[0];
+        $matchValue = $match[0];
+        $matchPos = $match[1];
+        $result .= $escape(substr($value, $offset, $matchPos - $offset));
+
+        foreach (['string', 'comment', 'keyword', 'constant', 'number', 'variable', 'operator'] as $token) {
+            if (isset($matches[$token][0]) && $matches[$token][0] !== '') {
+                $result .= sprintf(
+                    '<span class="token-%s">%s</span>',
+                    $token,
+                    $escape($matches[$token][0])
+                );
+                break;
+            }
+        }
+
+        $offset = $matchPos + strlen($matchValue);
+    }
+
+    $result .= $escape(substr($value, $offset));
+    return $result;
+};
+$renderLine = fn(string $value) => $value === '' ? '&nbsp;' : $highlightLine($value);
+$heroMessage = trim((string)($message ?? ''));
+$heroTitle = $heroMessage !== '' ? $heroMessage : 'Something went wrong';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Error</title>
+    <title>Error <?= $escape($statusCode ?? '500') ?></title>
     <style>
         :root {
-            --container-width: min-content;
+            --bg: #0a0a0d;
+            --panel: #16161b;
+            --panel-contrast: #1f1f28;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #8a7cff;
+            --muted: #8a8a99;
         }
 
-        html, body {
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
             margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #202020;
-            color: #DDD;
-        }
-
-        .box {
-            width: var(--container-width);
-            height: auto;
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            min-height: 100vh;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top, rgba(138, 124, 255, 0.35), transparent 32%),
+                radial-gradient(circle at bottom, rgba(66, 182, 255, 0.25), transparent 35%),
+                var(--bg);
+            color: #ececec;
+            display: flex;
+            justify-content: center;
             padding: 2rem;
-            box-sizing: border-box;
-            background-color: #303030;
-            color: #AAA;
-            border-radius: .5rem;
         }
 
-        h1 {
-            font-family: "Arial Black", sans-serif;
-            font-weight: 900;
-            font-size: 20pt;
-            color: #DDD;
-            padding: 0;
+        main {
+            width: min(1200px, 100%);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(138, 124, 255, 0.18), rgba(255, 255, 255, 0.02));
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1rem 0 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .hero h1 {
             margin: 0;
+            font-size: clamp(2rem, 3vw, 2.8rem);
+            color: #fff;
         }
 
-        h2 {
-            font-family: "Arial", sans-serif;
-            font-weight: 600;
-            font-size: 11pt;
-            color: #606060;
+        .hero p {
+            margin: 0.3rem 0 0;
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .hero-content {
+            padding: 0 2rem;
+        }
+
+        .hero .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.9rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            margin: .5rem 0;
-            padding: 0;
+            color: var(--accent);
+            margin-top: 1rem;
         }
 
-        .code {
-            display: block;
-            padding: .5rem 1rem;
-            box-sizing: border-box;
-            background-color: #252525;
-            width: 100%;
-            border-radius: .5rem;
+        .hero .primary-panel {
+            margin: 1.4rem 0 0;
+            background: var(--panel);
+            border-radius: 0 0 1rem 1rem;
+            padding: 1.25rem 1.5rem 1.5rem;
+            border: 1px solid var(--border);
+            border-top: none;
+            box-shadow: none;
         }
 
-        hr {
-            border: none;
-            border-top: 1px solid #505050;
-            margin: 1.5rem 0;
+        .panel {
+            margin-top: 1.5rem;
+            background: var(--panel);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
         }
 
-        .text-center {
-            text-align: center;
-        }
-
-        .font-primary {
-            color: #9872cc;
-        }
-
-        .footer {
+        .panel header,
+        .hero .primary-panel header {
             display: flex;
-            gap: .6rem;
-            justify-content: end;
-            font-family: Verdana, sans-serif;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
         }
 
-        a {
-            font-size: 8pt;
-            color: #DDD;
-            text-decoration: underline;
+        .panel header .metadata,
+        .hero .primary-panel header .metadata {
+            font-size: 0.95rem;
+            color: var(--muted);
         }
 
-        a:hover {
-            text-decoration: none;
+        .panel header .metadata strong,
+        .hero .primary-panel header .metadata strong {
+            color: #fff;
         }
 
-        .font-light {
-            color: #EEE;
+        .tag {
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
         }
 
-        .flex {
+        .code-block {
+            position: relative;
+            background: #05060a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.9rem;
+            padding: 0.75rem 0;
+            overflow: auto;
+            font-family: "Fira Code", "JetBrains Mono", Consolas, monospace;
+            font-size: 0.85rem;
+            line-height: 1.15;
+            max-height: 320px;
+            scrollbar-width: none;
+        }
+
+        .code-block::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .code-block--compact {
+            max-height: 220px;
+        }
+
+        .code-line {
+            display: grid;
+            grid-template-columns: 3rem 1fr;
+            gap: 0.4rem;
+            align-items: center;
+            padding: 0.05rem 0;
+            color: #c8c8d0;
+        }
+
+        .line-number {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-align: right;
+        }
+
+        .line-content {
+            white-space: pre;
+        }
+
+        .code-line.is-active {
+            background: rgba(138, 124, 255, 0.12);
+            border-radius: 0.4rem;
+            color: #fff;
+        }
+
+        .token-keyword {
+            color: #8ab4ff;
+            font-weight: 600;
+        }
+
+        .token-string {
+            color: #f9a66c;
+        }
+
+        .token-comment {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .token-constant {
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+
+        .token-number {
+            color: #f37f75;
+        }
+
+        .token-variable {
+            color: #54d1c8;
+        }
+
+        .token-operator {
+            color: #c792ea;
+        }
+
+        .stack-panel header {
+            font-size: 1rem;
+            font-weight: 600;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 1rem;
+        }
+
+        .stack-list {
             display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .stack-frame {
+            padding: 1rem;
+            border-radius: 0.9rem;
+            background: var(--panel-contrast);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .frame-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .frame-name {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            word-break: break-word;
+        }
+
+        .frame-path {
+            margin: 0.4rem 0 0;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            color: var(--muted);
+        }
+
+        .frame-path.muted {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .frame-line {
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .hero, .panel {
+                padding: 1.25rem;
+            }
+
+            .code-block {
+                max-height: 260px;
+            }
         }
     </style>
 </head>
 <body>
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <span class="badge">Error <?= $escape($statusCode ?? '500') ?></span>
+            <h1><?= $escape($heroTitle) ?></h1>
+        </div>
+        <div class="primary-panel">
+            <header>
+                <div class="metadata">
+                    <span class="tag">Primary location</span>
+                    <div>
+                        Thrown in <strong><?= $escape($relativePath($exceptionFile ?? 'unknown')) ?></strong>
+                        <span class="metadata">line <?= $escape($exceptionLine ?? '??') ?></span>
+                    </div>
+                </div>
+                <span class="frame-line">line <?= $escape($exceptionLine ?? '??') ?></span>
+            </header>
+            <?php if (!empty($exceptionSnippet)) : ?>
+                <div class="code-block">
+                    <?php foreach ($exceptionSnippet as $line) : ?>
+                        <?php $isActive = $line['number'] === ($exceptionLine ?? null); ?>
+                        <div class="code-line<?= $isActive ? ' is-active' : '' ?>">
+                            <span class="line-number"><?= $escape($line['number']) ?></span>
+                            <span class="line-content"><?= $renderLine($line['content']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
 
-<div class="box">
-    <h1 class="text-center">Error <?= $statusCode ?></h1>
-    <p class="text-center" style="margin-bottom: .2rem; margin-top: .8rem;"><?= $message ?></p>
-    <?php if (isset($stackTrace)) : ?>
-    <hr />
-    <pre><?= $stackTrace ?></pre>
+    <?php if ($frameCount > 0) : ?>
+        <section class="panel stack-panel">
+            <header>
+                Stack trace · <?= $frameCount ?> frame<?= $frameCount === 1 ? '' : 's' ?>
+            </header>
+            <div class="stack-list">
+                <?php foreach ($frames as $frame) : ?>
+                    <article class="stack-frame">
+                        <div class="frame-title">
+                            <div>
+                                <p class="frame-name"><?= $escape($frame['function'] ?? 'Unknown') ?></p>
+                                <?php if (!empty($frame['file'])) : ?>
+                                    <p class="frame-path"><?= $escape($relativePath($frame['file'])) ?>:<?= $escape($frame['line'] ?? '??') ?></p>
+                                <?php else : ?>
+                                    <p class="frame-path muted">internal frame</p>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($frame['line'] !== null) : ?>
+                                <span class="frame-line">line <?= $escape($frame['line']) ?></span>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if (!empty($frame['snippet'])) : ?>
+                            <div class="code-block code-block--compact">
+                                <?php foreach ($frame['snippet'] as $line) : ?>
+                                    <?php $isActive = $line['number'] === ($frame['line'] ?? null); ?>
+                                    <div class="code-line<?= $isActive ? ' is-active' : '' ?>">
+                                        <span class="line-number"><?= $escape($line['number']) ?></span>
+                                        <span class="line-content"><?= $renderLine($line['content']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        </section>
     <?php endif; ?>
-</div>
-
+</main>
 </body>
 </html>
-

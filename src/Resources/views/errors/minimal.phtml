@@ -1,0 +1,102 @@
+<?php
+$escape = fn($value) => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+$statusCode = $statusCode ?? 500;
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error <?= $escape($statusCode) ?></title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top, rgba(138, 124, 255, 0.25), transparent 40%),
+                radial-gradient(circle at bottom, rgba(66, 182, 255, 0.2), transparent 45%),
+                #05060a;
+            color: #ececec;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .card {
+            width: min(640px, 100%);
+            padding: 2.5rem;
+            border-radius: 1.25rem;
+            background: rgba(13, 13, 18, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .status {
+            font-size: 0.9rem;
+            letter-spacing: 0.45em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 0.5rem;
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            font-size: clamp(2rem, 3vw, 2.6rem);
+        }
+
+        p {
+            margin: 0 0 1.25rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.9rem 1.5rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: linear-gradient(135deg, #8a7cff, #5fd2ff);
+            color: #05060a;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(138, 124, 255, 0.4);
+        }
+
+        .muted {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 1.25rem;
+            }
+
+            .card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="status">Error <?= $escape($statusCode) ?></div>
+        <h1>Something unexpected happened</h1>
+        <p>We're looking into it. Try refreshing the page or come back in a moment, our team has already been notified.</p>
+        <a class="cta" href="/">Back to safety</a>
+        <p class="muted">If the issue persists, contact support and mention the error code <?= $escape($statusCode) ?></p>
+    </div>
+</body>
+</html>

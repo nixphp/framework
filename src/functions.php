@@ -30,7 +30,7 @@ use stdClass;
 if (getenv('APP_ENV') !== Environment::TEST
     && getenv('APP_ENV') !== Environment::PROD
 ) {
-    set_error_handler([ErrorHandler::class, 'handleError']);
+    ErrorHandler::register();
     ini_set('display_errors', false);
 }
 
@@ -194,6 +194,11 @@ function send_response(ResponseInterface $response): never
 {
     while (ob_get_level() > 0) {
         ob_end_clean();
+    }
+
+    if (headers_sent()) {
+        echo $response->getBody();
+        exit(0);
     }
 
     $eventResponses = event()->dispatch(Event::RESPONSE_HEADER, $response);

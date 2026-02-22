@@ -19,9 +19,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use function NixPHP\event;
 use function NixPHP\log;
-use function NixPHP\response;
 use function NixPHP\send_response;
-use function NixPHP\simple_view;
 
 class App
 {
@@ -55,8 +53,6 @@ class App
             return new RequestParameter($container->get(RequestInterface::class));
         });
 
-        $viewPath = $this->getCoreBasePath() . '/src/Resources/views';
-
         try {
             $response = $this->container->get(Dispatcher::class)->forward($request);
         } catch (\Throwable $e) {
@@ -71,21 +67,9 @@ class App
 
             log()->error($e->getMessage());
 
-            if ($this->container->get(Environment::class) === Environment::PROD) return;
+            $statusCode = ErrorHandler::resolveStatusCode($e);
 
-            $statusCode = method_exists($e, 'getStatusCode')
-                ? $e->getStatusCode()
-                : 500;
-
-            $response = response(
-                simple_view(
-                    $viewPath . '/errors/default.phtml',
-                    [
-                        'statusCode' => $statusCode,
-                        'message'    => $e->getMessage(),
-                        'stackTrace' => $e->getTraceAsString(),
-                    ]
-            ), $statusCode);
+            $response = ErrorHandler::renderResponse($e, $statusCode);
 
         }
 
