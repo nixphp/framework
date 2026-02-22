@@ -24,6 +24,8 @@ use function NixPHP\send_response;
 class App
 {
     private ContainerInterface $container;
+
+    /** @var Plugin[] */
     private array $plugins = [];
 
     /**
@@ -67,13 +69,18 @@ class App
 
             log()->error($e->getMessage());
 
+            if ($this->container->get(Environment::class) === Environment::PROD) {
+                Stopwatch::stop('app');
+                return;
+            }
+
             $statusCode = ErrorHandler::resolveStatusCode($e);
 
             $response = ErrorHandler::renderResponse($e, $statusCode);
 
         }
 
-        log()->info('Request completed in ' . Stopwatch::stop('app') . 'ms');
+        log()->info('Request completed in ' . Stopwatch::stop('app') . 's');
 
         event()->dispatch(Event::RESPONSE_SEND, $response);
 
@@ -112,16 +119,24 @@ class App
 
     public function hasPlugin(string $name): bool
     {
-        return isset($this->plugins[$name]);
+        [$package, $constraint] = Plugin::splitRequirement($name);
+
+        if (!isset($this->plugins[$package])) {
+            return false;
+        }
+
+        return $this->plugins[$package]->satisfiesVersionConstraint($constraint);
     }
 
     public function getPlugin(string $name): Plugin
     {
+        [$package] = Plugin::splitRequirement($name);
+
         if (!$this->hasPlugin($name)) {
             throw new \InvalidArgumentException('Plugin not found: ' . $name);
         }
 
-        return $this->plugins[$name];
+        return $this->plugins[$package];
     }
 
     /**
@@ -350,10 +365,23 @@ class App
 
             $plugin->boot();
 
+            $plugin->setVersion($this->resolvePluginVersion($package));
+
             $this->plugins[$package] = $plugin;
 
         }
         
+    }
+
+    private function resolvePluginVersion(string $package): ?string
+    {
+        try {
+            $version = InstalledVersions::getPrettyVersion($package) ?? InstalledVersions::getVersion($package);
+        } catch (\OutOfBoundsException) {
+            return null;
+        }
+
+        return $version;
     }
 
     /**
