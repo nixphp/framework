@@ -53,7 +53,7 @@ class App
         $this->container()->set(RequestInterface::class, $request);
         $this->container()->set(ServerRequestInterface::class, $request);
         $this->container()->set(RequestParameter::class, function(ContainerInterface $container) {
-            return new RequestParameter($container->get(RequestInterface::class));
+            return new RequestParameter($container->get(ServerRequestInterface::class));
         });
 
         $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
