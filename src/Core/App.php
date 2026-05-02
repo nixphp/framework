@@ -49,11 +49,14 @@ class App
         if (PHP_SAPI === 'cli') return;
 
         $request = $this->createServerRequest();
-        $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
+
         $this->container()->set(RequestInterface::class, $request);
+        $this->container()->set(ServerRequestInterface::class, $request);
         $this->container()->set(RequestParameter::class, function(ContainerInterface $container) {
-            return new RequestParameter($container->get(RequestInterface::class));
+            return new RequestParameter($container->get(ServerRequestInterface::class));
         });
+
+        $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
 
         try {
             $response = $this->container->get(Dispatcher::class)->forward($request);
