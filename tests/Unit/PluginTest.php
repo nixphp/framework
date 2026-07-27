@@ -24,6 +24,17 @@ class PluginTest extends NixPHPTestCase
         $this->assertSame(['/path/to/view_helpers.php'], $plugin->getViewHelpersFiles());
     }
 
+    public function testPluginReportsWhetherItHasBooted()
+    {
+        $plugin = new Plugin('test/package');
+
+        $this->assertFalse($plugin->isBooted());
+
+        $plugin->boot();
+
+        $this->assertTrue($plugin->isBooted());
+    }
+
     public function testPluginBootsOnlyOnce()
     {
         $plugin = new Plugin('test/package');

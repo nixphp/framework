@@ -6,6 +6,7 @@ namespace NixPHP\Core;
 
 use Composer\InstalledVersions;
 use NixPHP\Support\AppHolder;
+use NixPHP\Support\CoreFileLoader;
 use NixPHP\Support\Guard;
 use NixPHP\Support\Plugin;
 use NixPHP\Support\RequestParameter;
@@ -17,9 +18,9 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
+use Throwable;
 use function NixPHP\event;
 use function NixPHP\log;
-use function NixPHP\send_response;
 
 class App
 {
@@ -48,46 +49,68 @@ class App
     {
         if (PHP_SAPI === 'cli') return;
 
-        $request = $this->createServerRequest();
+        try {
+            $request = $this->createServerRequest();
+            $this->registerRequest($request);
 
+            $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
+            $response = $this->container->get(Dispatcher::class)->forward($request);
+        } catch (Throwable $e) {
+            $response = $this->handleThrowable($e);
+        }
+
+        $this->finalizeResponse($response);
+
+        ResponseEmitter::send($response); // This will abort the request as exit(0) is called
+    }
+
+    private function registerRequest(ServerRequestInterface $request): void
+    {
         $this->container()->set(RequestInterface::class, $request);
         $this->container()->set(ServerRequestInterface::class, $request);
         $this->container()->set(RequestParameter::class, function(ContainerInterface $container) {
             return new RequestParameter($container->get(ServerRequestInterface::class));
         });
+    }
 
-        $this->container()->get(EventManager::class)->dispatch(Event::REQUEST_START, $request);
-
+    private function handleThrowable(Throwable $e): ResponseInterface
+    {
         try {
-            $response = $this->container->get(Dispatcher::class)->forward($request);
-        } catch (\Throwable $e) {
+            $exceptionResponse = event()->dispatchForResponse(Event::EXCEPTION, $e);
 
-            $responses = event()->dispatch(Event::EXCEPTION, $e);
-
-            $exceptionResponse = end($responses);
-
-            if ($exceptionResponse instanceof ResponseInterface) {
-                send_response($exceptionResponse);
+            if ($exceptionResponse !== null) {
+                return $exceptionResponse;
             }
-
-            log()->error($e->getMessage());
-
-            if ($this->container->get(Environment::class) === Environment::PROD) {
-                Stopwatch::stop('app');
-                return;
-            }
-
-            $statusCode = ErrorHandler::resolveStatusCode($e);
-
-            $response = ErrorHandler::renderResponse($e, $statusCode);
-
+        } catch (Throwable $listenerException) {
+            log()->error(sprintf(
+                'Exception listener failed while handling %s: %s',
+                $e::class,
+                $listenerException->getMessage()
+            ));
         }
 
-        log()->info('Request completed in ' . Stopwatch::stop('app') . 's');
+        log()->error($e->getMessage());
 
-        event()->dispatch(Event::RESPONSE_SEND, $response);
+        $statusCode = ErrorHandler::resolveStatusCode($e);
+        return ErrorHandler::renderResponse($e, $statusCode);
+    }
 
-        send_response($response); // This will abort the request as exit(0) is called
+    /**
+     * Log the request timing and let listeners see the final response
+     *
+     * Failures here must not replace an already rendered response, so they are
+     * logged instead of bubbling out of run().
+     *
+     * @param ResponseInterface $response The response about to be sent
+     */
+    private function finalizeResponse(ResponseInterface $response): void
+    {
+        try {
+            log()->info('Request completed in ' . Stopwatch::stop('app') . 's');
+            event()->dispatch(Event::RESPONSE_SEND, $response);
+        } catch (Throwable $e) {
+            log()->error('Response finalisation failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -247,8 +270,8 @@ class App
      */
     private function loadServices(): void
     {
-        $appDir  = $this->getBasePath() . '/app';
-        $coreDir = $this->getCoreBasePath() . '/src';
+        $appConfigFile = CoreFileLoader::file($this->getBasePath(), CoreFileLoader::CONFIG_FILES);
+        $coreDir       = $this->getCoreBasePath() . '/src';
 
         $this->container->set(Environment::class, fn() => $_ENV['APP_ENV'] ?? getenv('APP_ENV'));
 
@@ -260,23 +283,17 @@ class App
 
         $this->container->set(EventManager::class, fn() => new EventManager());
 
-        $this->container->set(Config::class, function() use ($appDir, $coreDir) {
+        $this->container->set(Config::class, function() use ($appConfigFile, $coreDir) {
 
-            $appConfig = file_exists($appDir . '/config.php')
-                ? require $appDir . '/config.php'
-                : [];
-
-            $coreConfig = file_exists($coreDir.'/config.php')
-                ? require $coreDir . '/config.php'
-                : [];
+            $appConfig  = self::requireConfig($appConfigFile);
+            $coreConfig = self::requireConfig($coreDir . '/config.php');
 
             $pluginConfig = [];
 
             $configPaths = $this->collectPluginResources('configPaths');
 
             foreach ($configPaths as $file) {
-                if (!file_exists($file)) continue;
-                $pluginConfig = array_replace_recursive($pluginConfig, require $file);
+                $pluginConfig = array_replace_recursive($pluginConfig, self::requireConfig($file));
             }
 
             $merged = array_replace_recursive($coreConfig, $pluginConfig, $appConfig);
@@ -310,8 +327,30 @@ class App
      */
     private function loadRoutes(): void
     {
-        $routes = $this->getBasePath() . '/app/routes.php';
-        if (file_exists($routes)) require_once $routes;
+        $routes = CoreFileLoader::file($this->getBasePath(), CoreFileLoader::ROUTE_FILES);
+        if ($routes !== null) require_once $routes;
+    }
+
+    /**
+     * Read a config file that is expected to return an array
+     *
+     * A file without a `return` statement evaluates to int(1), which would
+     * blow up the merge further down. Treat anything that is not an array as
+     * an empty config instead.
+     *
+     * @param string|null $file Absolute path, or null when the file is unknown
+     *
+     * @return array The returned config, or an empty array
+     */
+    private static function requireConfig(?string $file): array
+    {
+        if ($file === null || !is_file($file)) {
+            return [];
+        }
+
+        $config = require $file;
+
+        return is_array($config) ? $config : [];
     }
 
     /**
@@ -321,10 +360,11 @@ class App
     {
         // Try to load configuration order from userspace
         $orderedPackages = [];
-        $pluginConfigPath = $this->getBasePath() . '/app/plugins.php';
+        $pluginConfigPath = CoreFileLoader::file($this->getBasePath(), CoreFileLoader::PLUGIN_FILES);
 
-        if (file_exists($pluginConfigPath)) {
-            $orderedPackages = require $pluginConfigPath;
+        if ($pluginConfigPath !== null) {
+            $configured = require $pluginConfigPath;
+            $orderedPackages = is_array($configured) ? $configured : [];
         }
 
         $allPackages = array_unique(InstalledVersions::getInstalledPackagesByType('nixphp-plugin'));
@@ -333,47 +373,38 @@ class App
 
         $finalOrder = array_merge($ordered, $remaining);
 
-        // Load Plugins in final order
+        // Register every plugin before booting any of them. Booting runs
+        // userland code that may call config(), and the Config service caches
+        // itself on first access: if the registry were still filling up at
+        // that point, the config of every plugin after it would be lost.
         foreach ($finalOrder as $package) {
 
             $path = InstalledVersions::getInstallPath($package);
 
             if (!$path) continue;
 
-            $plugin = new Plugin($package);
-
-            $plugin->addConfigPath(
-                $path . '/src/config.php'
-            );
-
-            $plugin->addRouteFile(
-                $path . '/src/routes.php'
-            );
-
-            $plugin->addViewPath(
-                $path . '/src/views'
-            );
-
-            $plugin->addFunctionFile(
-                $path . '/src/functions.php'
-            );
-
-            $plugin->addViewHelperFile(
-                $path . '/src/view_helpers.php'
-            );
-
-            $plugin->setBootstrapFile(
-                $path . '/bootstrap.php'
-            );
-
-            $plugin->boot();
-
+            $plugin = CoreFileLoader::createPlugin($package, $path);
             $plugin->setVersion($this->resolvePluginVersion($package));
 
             $this->plugins[$package] = $plugin;
 
         }
-        
+
+        $this->bootPlugins();
+
+    }
+
+    /**
+     * Boot every registered plugin, in registration order
+     *
+     * Split from the registration loop so that userland code running during
+     * boot always sees the complete plugin registry.
+     */
+    private function bootPlugins(): void
+    {
+        foreach ($this->plugins as $plugin) {
+            $plugin->boot();
+        }
     }
 
     private function resolvePluginVersion(string $package): ?string

@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use Fixtures\Enums\CustomEvent;
 use Fixtures\Events\TestEventListener;
 use NixPHP\Core\EventManager;
+use Nyholm\Psr7\Response;
 use Tests\NixPHPTestCase;
 
 class EventTest extends NixPHPTestCase
@@ -38,6 +39,37 @@ class EventTest extends NixPHPTestCase
             ['high priority', 'default priority', 'low priority'],
             $responses
         );
+    }
+
+    public function testDispatchForResponseReturnsNullWithoutListeners()
+    {
+        $event = new EventManager();
+
+        $this->assertNull($event->dispatchForResponse(CustomEvent::TEST_EVENT));
+    }
+
+    public function testDispatchForResponseIgnoresNonResponseReturnValues()
+    {
+        $event = new EventManager();
+        $response = new Response(418);
+
+        $event->listen(CustomEvent::TEST_EVENT, fn () => $response);
+        $event->listen(CustomEvent::TEST_EVENT, fn () => null);
+        $event->listen(CustomEvent::TEST_EVENT, fn () => 'not a response');
+
+        $this->assertSame($response, $event->dispatchForResponse(CustomEvent::TEST_EVENT));
+    }
+
+    public function testDispatchForResponseReturnsTheLastResponse()
+    {
+        $event = new EventManager();
+        $first = new Response(418);
+        $last  = new Response(503);
+
+        $event->listen(CustomEvent::TEST_EVENT, fn () => $first, priority: 10);
+        $event->listen(CustomEvent::TEST_EVENT, fn () => $last, priority: 0);
+
+        $this->assertSame($last, $event->dispatchForResponse(CustomEvent::TEST_EVENT));
     }
 
 }

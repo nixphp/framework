@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NixPHP\Core;
 
 use NixPHP\Decorators\AutoResolvingContainer;
+use Psr\Http\Message\ResponseInterface;
 use function NixPHP\app;
 
 class EventManager
@@ -69,5 +70,27 @@ class EventManager
         }
 
         return $responses;
+    }
+
+    /**
+     * Dispatch an event and return the last response a listener produced
+     *
+     * Listeners that return something other than a response are ignored, so a
+     * listener registered after the one that answered cannot discard its result
+     * by returning null.
+     *
+     * @param string $event      Name of the event to dispatch (use Event::* constants)
+     * @param mixed  ...$payload Variable number of arguments to pass to the listeners
+     *
+     * @return ResponseInterface|null The last response returned by a listener, or null
+     */
+    public function dispatchForResponse(string $event, mixed ...$payload): ?ResponseInterface
+    {
+        $responses = array_filter(
+            $this->dispatch($event, ...$payload),
+            static fn(mixed $response) => $response instanceof ResponseInterface
+        );
+
+        return empty($responses) ? null : end($responses);
     }
 }

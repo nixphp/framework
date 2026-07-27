@@ -6,7 +6,6 @@ namespace NixPHP\Core;
 
 use ErrorException;
 use Psr\Http\Message\ResponseInterface;
-use function NixPHP\send_response;
 use function NixPHP\simple_view;
 use function NixPHP\response;
 
@@ -30,9 +29,45 @@ class ErrorHandler
      */
     public static function handleException(\Throwable $e): void
     {
+        if (PHP_SAPI === 'cli') {
+            self::renderConsole($e);
+        }
+
         $statusCode = self::resolveStatusCode($e);
 
-        send_response(self::renderResponse($e, $statusCode));
+        ResponseEmitter::emit(self::renderResponse($e, $statusCode));
+    }
+
+    /**
+     * Report an exception on the console and abort with a failing exit code
+     *
+     * The message and origin are always shown because the audience is the
+     * operator running the command, not a visitor. The stack trace follows the
+     * same rule as the HTTP output and stays hidden outside development.
+     *
+     * @param \Throwable $e The uncaught exception to report
+     */
+    private static function renderConsole(\Throwable $e): never
+    {
+        ResponseEmitter::clearOutputBuffers();
+
+        $report = sprintf(
+            "%s: %s%sin %s:%d%s",
+            $e::class,
+            $e->getMessage(),
+            PHP_EOL,
+            $e->getFile(),
+            $e->getLine(),
+            PHP_EOL
+        );
+
+        if (self::shouldRenderDetailedView()) {
+            $report .= PHP_EOL . $e->getTraceAsString() . PHP_EOL;
+        }
+
+        fwrite(STDERR, $report);
+
+        exit(1);
     }
 
     public static function resolveStatusCode(\Throwable $exception): int
@@ -278,12 +313,23 @@ class ErrorHandler
 
     private static function sendShutdownFallback(\Throwable $exception): void
     {
+        // Whatever was buffered belongs to the request that just died; keep it
+        // from being flushed in front of the fallback output.
+        ResponseEmitter::clearOutputBuffers();
+
+        $showDetails = self::shouldRenderDetailedView();
+
+        if (PHP_SAPI === 'cli') {
+            fwrite(STDERR, 'A fatal error occurred during shutdown.' . PHP_EOL);
+            fwrite(STDERR, ($showDetails ? $exception->getMessage() : 'An unexpected internal error occurred.') . PHP_EOL);
+            exit(1);
+        }
+
         if (!headers_sent()) {
             header('Content-Type: text/html; charset=utf-8');
             header('HTTP/1.1 500 Internal Server Error');
         }
 
-        $showDetails = self::shouldRenderDetailedView();
         $localizedMessage = $showDetails
             ? '<p>' . htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8') . '</p>'
             : '<p>An unexpected internal error occurred. Please try again later.</p>';
