@@ -288,9 +288,9 @@ A typical plugin might look like this:
 ```
 my-plugin/
 ├── src/
-│   ├── config.php
-│   └── views/
-│       └── errors/404.phtml
+│   └── config.php
+├── views/
+│   └── errors/404.phtml
 ├── bootstrap.php
 └── composer.json
 ```
@@ -298,6 +298,26 @@ my-plugin/
 - `config.php` is automatically merged.
 - `views/` are added to the view search path.
 - `bootstrap.php` runs automatically to register routes, events, etc.
+
+### Layout conventions
+
+Both the `app/` and the `src/` spelling are accepted, for plugins and for your
+application alike. Views may additionally live in a top-level `views/`
+directory, which keeps template files out of your PSR-4 source root:
+
+| Resource       | Looked up in order                             |
+|----------------|------------------------------------------------|
+| `config.php`   | `app/`, `src/`                                  |
+| `routes.php`   | `app/`, `src/`                                  |
+| `plugins.php`  | `app/`, `src/`                                  |
+| `functions.php`| `app/`, `src/`                                  |
+| `view_helpers.php` | `app/`, `src/`                              |
+| views          | `src/views`, `views`, `app/views`               |
+| `bootstrap.php`| package root                                    |
+
+The first existing candidate wins and the rest are ignored, so a package should
+never ship two of them at once. Resources that do not exist are not registered
+at all — `getViewPaths()` and friends only ever return real paths.
 
 ### Plugin availability checks
 

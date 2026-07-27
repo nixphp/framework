@@ -10,7 +10,6 @@ if (!defined('NIXPHP_BASE_PATH')) {
 use NixPHP\Core\App;
 use NixPHP\Core\Config;
 use NixPHP\Core\ErrorHandler;
-use NixPHP\Core\Event;
 use NixPHP\Core\EventManager;
 use NixPHP\Core\Route;
 use NixPHP\Core\Environment;
@@ -25,7 +24,6 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
-use stdClass;
 
 if (getenv('APP_ENV') !== Environment::TEST
     && getenv('APP_ENV') !== Environment::PROD
@@ -185,49 +183,6 @@ function abort(int $statusCode = 404, string $message = ''): never
     throw new AbortException(htmlspecialchars($message), $statusCode);
 }
 
-/**
- * Send a response to the client
- *
- * @param ResponseInterface $response Response to send
- */
-function send_response(ResponseInterface $response): never
-{
-    while (ob_get_level() > 0) {
-        ob_end_clean();
-    }
-
-    if (headers_sent()) {
-        echo $response->getBody();
-        exit(0);
-    }
-
-    $eventResponses = event()->dispatch(Event::RESPONSE_HEADER, $response);
-    $eventResponses = array_filter($eventResponses, fn($response) => $response instanceof ResponseInterface);
-    if (!empty($eventResponses)) {
-        $response = end($eventResponses);
-    }
-
-    header(sprintf(
-        'HTTP/%s %d %s',
-        $response->getProtocolVersion(),
-        $response->getStatusCode(),
-        $response->getReasonPhrase()
-    ));
-
-    foreach ($response->getHeaders() as $name => $values) {
-        foreach ($values as $value) {
-            header("$name: $value", false);
-        }
-    }
-
-    event()->dispatch(Event::RESPONSE_BODY, $response);
-
-    echo $response->getBody();
-
-    event()->dispatch(Event::RESPONSE_END, $response);
-
-    exit(0);
-}
 
 /**
  * Get the current environment
