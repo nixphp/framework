@@ -7,9 +7,10 @@ use Tests\NixPHPTestCase;
 
 class CoreFileLoaderTest extends NixPHPTestCase
 {
-    private const string LEGACY = BASE_PATH . '/plugins/legacy-layout';
-    private const string MODERN = BASE_PATH . '/plugins/modern-layout';
-    private const string BARE   = BASE_PATH . '/plugins/bare-layout';
+    private const string LEGACY    = BASE_PATH . '/plugins/legacy-layout';
+    private const string MODERN    = BASE_PATH . '/plugins/modern-layout';
+    private const string BARE      = BASE_PATH . '/plugins/bare-layout';
+    private const string COLLISION = BASE_PATH . '/plugins/collision-layout';
 
     public function testFileResolvesTheFirstExistingCandidate()
     {
@@ -22,6 +23,35 @@ class CoreFileLoaderTest extends NixPHPTestCase
             self::MODERN . '/app/config.php',
             CoreFileLoader::file(self::MODERN, CoreFileLoader::CONFIG_FILES)
         );
+    }
+
+    public function testFirstCandidateWinsWhenBothSpellingsExist()
+    {
+        $this->assertSame(
+            self::COLLISION . '/app/config.php',
+            CoreFileLoader::file(self::COLLISION, CoreFileLoader::CONFIG_FILES)
+        );
+
+        $this->assertSame(
+            self::COLLISION . '/app/routes.php',
+            CoreFileLoader::file(self::COLLISION, CoreFileLoader::ROUTE_FILES)
+        );
+
+        // Views deliberately keep src/views in front, so an installed plugin
+        // that already shipped one is not silently repointed.
+        $this->assertSame(
+            self::COLLISION . '/src/views',
+            CoreFileLoader::directory(self::COLLISION, CoreFileLoader::VIEW_PATHS)
+        );
+    }
+
+    public function testCollidingLayoutRegistersEachResourceOnlyOnce()
+    {
+        $plugin = CoreFileLoader::createPlugin('test/collision', self::COLLISION);
+
+        $this->assertSame([self::COLLISION . '/app/config.php'], $plugin->getConfigPaths());
+        $this->assertSame([self::COLLISION . '/app/routes.php'], $plugin->getRouteFiles());
+        $this->assertSame([self::COLLISION . '/src/views'], $plugin->getViewPaths());
     }
 
     public function testFileReturnsNullWhenNoCandidateExists()
@@ -63,6 +93,7 @@ class CoreFileLoaderTest extends NixPHPTestCase
         $this->assertSame([self::LEGACY . '/src/views'], $plugin->getViewPaths());
         $this->assertSame([self::LEGACY . '/src/functions.php'], $plugin->getFunctionsFiles());
         $this->assertSame([self::LEGACY . '/src/view_helpers.php'], $plugin->getViewHelpersFiles());
+        $this->assertSame(self::LEGACY . '/bootstrap.php', $plugin->getBootstrapFile());
     }
 
     public function testPluginIsBuiltFromTheModernLayout()
@@ -83,6 +114,7 @@ class CoreFileLoaderTest extends NixPHPTestCase
         $this->assertSame([], $plugin->getViewPaths());
         $this->assertSame([], $plugin->getFunctionsFiles());
         $this->assertSame([], $plugin->getViewHelpersFiles());
+        $this->assertNull($plugin->getBootstrapFile());
     }
 
     public function testModernPluginRegistersNoViewHelpersWhenAbsent()

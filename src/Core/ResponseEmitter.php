@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace NixPHP\Core;
 
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 use function NixPHP\event;
+use function NixPHP\log;
 
 /**
  * Writes a PSR-7 response to the client.
@@ -32,17 +34,37 @@ final class ResponseEmitter
             exit(0);
         }
 
+        // Before the head is written a failing listener can still be reported
+        // normally, so this dispatch is allowed to throw.
         $response = event()->dispatchForResponse(Event::RESPONSE_HEADER, $response) ?? $response;
 
         self::writeHead($response);
 
-        event()->dispatch(Event::RESPONSE_BODY, $response);
+        // From here on the response is already on the wire. An escaping
+        // exception would reach the global error handler, which would append a
+        // second, complete error page to the body the client is receiving.
+        self::dispatchQuietly(Event::RESPONSE_BODY, $response);
 
         echo $response->getBody();
 
-        event()->dispatch(Event::RESPONSE_END, $response);
+        self::dispatchQuietly(Event::RESPONSE_END, $response);
 
         exit(0);
+    }
+
+    /**
+     * Dispatch an event whose listeners must not be able to break the response
+     *
+     * @param string            $event    Event name (use Event::* constants)
+     * @param ResponseInterface $response Response passed to the listeners
+     */
+    private static function dispatchQuietly(string $event, ResponseInterface $response): void
+    {
+        try {
+            event()->dispatch($event, $response);
+        } catch (Throwable $e) {
+            log()->error(sprintf('Listener for %s failed: %s', $event, $e->getMessage()));
+        }
     }
 
     /**
@@ -83,7 +105,13 @@ final class ResponseEmitter
         }
     }
 
-    private static function clearOutputBuffers(): void
+    /**
+     * Discard everything buffered so far
+     *
+     * Shared with the error handler so that a failure never appends its output
+     * to a half-rendered page.
+     */
+    public static function clearOutputBuffers(): void
     {
         while (ob_get_level() > 0) {
             ob_end_clean();

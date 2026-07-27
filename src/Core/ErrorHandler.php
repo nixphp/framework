@@ -49,9 +49,7 @@ class ErrorHandler
      */
     private static function renderConsole(\Throwable $e): never
     {
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
+        ResponseEmitter::clearOutputBuffers();
 
         $report = sprintf(
             "%s: %s%sin %s:%d%s",
@@ -315,6 +313,10 @@ class ErrorHandler
 
     private static function sendShutdownFallback(\Throwable $exception): void
     {
+        // Whatever was buffered belongs to the request that just died; keep it
+        // from being flushed in front of the fallback output.
+        ResponseEmitter::clearOutputBuffers();
+
         $showDetails = self::shouldRenderDetailedView();
 
         if (PHP_SAPI === 'cli') {

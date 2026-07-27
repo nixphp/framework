@@ -51,6 +51,17 @@ class Plugin
         $this->bootstrap = $path;
     }
 
+    /**
+     * Whether boot() has already run for this plugin
+     *
+     * Plugins are registered before any of them boots, so during the boot
+     * phase the registry can contain plugins that have not run yet.
+     */
+    public function isBooted(): bool
+    {
+        return $this->booted;
+    }
+
     public function boot(): void
     {
         if ($this->booted) {
@@ -107,6 +118,11 @@ class Plugin
     public function getViewHelpersFiles(): array
     {
         return $this->viewHelpersFiles;
+    }
+
+    public function getBootstrapFile(): ?string
+    {
+        return $this->bootstrap;
     }
 
     public function setVersion(?string $version): void

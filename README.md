@@ -301,23 +301,31 @@ my-plugin/
 
 ### Layout conventions
 
-Both the `app/` and the `src/` spelling are accepted, for plugins and for your
-application alike. Views may additionally live in a top-level `views/`
-directory, which keeps template files out of your PSR-4 source root:
+Wherever a resource is looked up, both the `app/` and the `src/` spelling are
+accepted. Views may additionally live in a top-level `views/` directory, which
+keeps template files out of your PSR-4 source root.
 
-| Resource       | Looked up in order                             |
-|----------------|------------------------------------------------|
-| `config.php`   | `app/`, `src/`                                  |
-| `routes.php`   | `app/`, `src/`                                  |
-| `plugins.php`  | `app/`, `src/`                                  |
-| `functions.php`| `app/`, `src/`                                  |
-| `view_helpers.php` | `app/`, `src/`                              |
-| views          | `src/views`, `views`, `app/views`               |
-| `bootstrap.php`| package root                                    |
+Which resources exist differs between a plugin and your application:
+
+| Resource           | In a plugin                       | In your application |
+|--------------------|-----------------------------------|---------------------|
+| `config.php`       | `app/`, `src/`                    | `app/`, `src/`      |
+| `routes.php`       | `app/`, `src/`                    | `app/`, `src/`      |
+| `plugins.php`      | —                                 | `app/`, `src/`      |
+| `functions.php`    | `app/`, `src/`                    | —                   |
+| `view_helpers.php` | `app/`, `src/`                    | —                   |
+| views              | `src/views`, `views`, `app/views` | `views`, `app/views` |
+| `bootstrap.php`    | package root only                 | —                   |
+
+`bootstrap.php` is the one exception to the two spellings: it is always read
+from the package root, never from `app/` or `src/`.
 
 The first existing candidate wins and the rest are ignored, so a package should
 never ship two of them at once. Resources that do not exist are not registered
 at all — `getViewPaths()` and friends only ever return real paths.
+
+Application view paths are resolved by `nixphp/view` and are configurable via
+`view.paths`; the other application resources are loaded by the core.
 
 ### Plugin availability checks
 

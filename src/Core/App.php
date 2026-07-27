@@ -285,21 +285,15 @@ class App
 
         $this->container->set(Config::class, function() use ($appConfigFile, $coreDir) {
 
-            $appConfig = $appConfigFile !== null
-                ? require $appConfigFile
-                : [];
-
-            $coreConfig = file_exists($coreDir.'/config.php')
-                ? require $coreDir . '/config.php'
-                : [];
+            $appConfig  = self::requireConfig($appConfigFile);
+            $coreConfig = self::requireConfig($coreDir . '/config.php');
 
             $pluginConfig = [];
 
             $configPaths = $this->collectPluginResources('configPaths');
 
             foreach ($configPaths as $file) {
-                if (!file_exists($file)) continue;
-                $pluginConfig = array_replace_recursive($pluginConfig, require $file);
+                $pluginConfig = array_replace_recursive($pluginConfig, self::requireConfig($file));
             }
 
             $merged = array_replace_recursive($coreConfig, $pluginConfig, $appConfig);
@@ -338,6 +332,28 @@ class App
     }
 
     /**
+     * Read a config file that is expected to return an array
+     *
+     * A file without a `return` statement evaluates to int(1), which would
+     * blow up the merge further down. Treat anything that is not an array as
+     * an empty config instead.
+     *
+     * @param string|null $file Absolute path, or null when the file is unknown
+     *
+     * @return array The returned config, or an empty array
+     */
+    private static function requireConfig(?string $file): array
+    {
+        if ($file === null || !is_file($file)) {
+            return [];
+        }
+
+        $config = require $file;
+
+        return is_array($config) ? $config : [];
+    }
+
+    /**
      * Load and initialize installed plugins
      */
     private function loadPlugins(): void
@@ -357,7 +373,10 @@ class App
 
         $finalOrder = array_merge($ordered, $remaining);
 
-        // Load Plugins in final order
+        // Register every plugin before booting any of them. Booting runs
+        // userland code that may call config(), and the Config service caches
+        // itself on first access: if the registry were still filling up at
+        // that point, the config of every plugin after it would be lost.
         foreach ($finalOrder as $package) {
 
             $path = InstalledVersions::getInstallPath($package);
@@ -365,15 +384,27 @@ class App
             if (!$path) continue;
 
             $plugin = CoreFileLoader::createPlugin($package, $path);
-
-            $plugin->boot();
-
             $plugin->setVersion($this->resolvePluginVersion($package));
 
             $this->plugins[$package] = $plugin;
 
         }
-        
+
+        $this->bootPlugins();
+
+    }
+
+    /**
+     * Boot every registered plugin, in registration order
+     *
+     * Split from the registration loop so that userland code running during
+     * boot always sees the complete plugin registry.
+     */
+    private function bootPlugins(): void
+    {
+        foreach ($this->plugins as $plugin) {
+            $plugin->boot();
+        }
     }
 
     private function resolvePluginVersion(string $package): ?string
