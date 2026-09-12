@@ -53,8 +53,7 @@ class Route
             if ($route['method'] !== strtoupper($method)) {
                 continue;
             }
-            $pattern = preg_replace('#\{[^}]+\}#', '([^/]+)', $route['path']);
-            $pattern = '#^' . $pattern . '$#';
+            $pattern = '#^' . self::pattern($route['path']) . '$#';
             if (preg_match($pattern, $uri, $matches)) {
                 array_shift($matches);
                 preg_match_all('#\{([^}]+)\}#', $route['path'], $paramNames);
@@ -66,6 +65,39 @@ class Route
         }
         event()->dispatch(Event::ROUTE_NOT_FOUND, $uri, $method);
         throw new RouteNotFoundException();
+    }
+
+    /**
+     * Builds the matching expression for a route path.
+     *
+     * Everything outside a {placeholder} is a literal and is escaped as one.
+     * Without that, regex metacharacters in a path are still metacharacters: a
+     * route for `/.well-known/jwks.json` would also answer `/Xwell-known/jwksXjson`,
+     * and one for `/admin.php` would answer `/adminXphp`.
+     *
+     * Splitting on the placeholder rather than replacing it keeps the two apart.
+     * With a single capturing group, PREG_SPLIT_DELIM_CAPTURE puts the delimiters
+     * at the odd indices, so which pieces are placeholders needs no second guess.
+     *
+     * @param string $path
+     *
+     * @return string
+     */
+    private static function pattern(string $path): string
+    {
+        $segments = preg_split('#(\{[^}]+\})#', $path, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+        if ($segments === false) {
+            return preg_quote($path, '#');
+        }
+
+        $pattern = '';
+
+        foreach ($segments as $index => $segment) {
+            $pattern .= $index % 2 === 1 ? '([^/]+)' : preg_quote($segment, '#');
+        }
+
+        return $pattern;
     }
 
     /**

@@ -80,4 +80,47 @@ class RouteTest extends NixPHPTestCase
         $this->assertSame('/test', \NixPHP\route('test'));
     }
 
+
+    public function testShouldTreatLiteralPathAsLiteral()
+    {
+        $route = new Route();
+        $route->add('GET', '/.well-known/jwks.json', function() { return 'keys'; }, 'jwks');
+
+        $this->assertIsArray($route->find('/.well-known/jwks.json', 'GET'));
+
+        // A dot is a dot. Without escaping it matches any character, and this
+        // route would answer for paths nobody registered.
+        foreach (['/Xwell-known/jwks.json', '/.well-known/jwksXjson'] as $uri) {
+            try {
+                $route->find($uri, 'GET');
+                $this->fail('Matched a path that was never registered: ' . $uri);
+            } catch (RouteNotFoundException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
+    public function testShouldStillMatchPlaceholdersNextToMetacharacters()
+    {
+        $route = new Route();
+        $route->add('GET', '/files/{name}.json', function() { return 'file'; }, 'file');
+
+        $result = $route->find('/files/report.json', 'GET');
+
+        $this->assertSame(['name' => 'report'], $result['params']);
+
+        $this->expectException(RouteNotFoundException::class);
+        $route->find('/files/reportXjson', 'GET');
+    }
+
+    public function testShouldNotLetAPathSmuggleInAnExpression()
+    {
+        $route = new Route();
+        $route->add('GET', '/search/(.*)', function() { return 'search'; }, 'search');
+
+        $this->assertIsArray($route->find('/search/(.*)', 'GET'));
+
+        $this->expectException(RouteNotFoundException::class);
+        $route->find('/search/anything-at-all', 'GET');
+    }
 }
