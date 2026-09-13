@@ -5,3 +5,4 @@ coverage-report
 .phpunit.result.cache
 docs/.venv
 tests/Fixtures/logs/*
+.DS_Store
