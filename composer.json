@@ -1,5 +1,6 @@
 {
   "name": "nixphp/framework",
+  "abandoned": "naf/framework",
   "description": "NixPHP - the ultra-light, functional PHP framework for fast microservices and APIs.",
   "minimum-stability": "stable",
   "license": "MIT",
