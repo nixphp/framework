@@ -1,3 +1,21 @@
+> [!IMPORTANT]
+> **NixPHP is now NAF — "Not Another Framework".**
+>
+> This package continues as **`naf/framework`**:
+> [github.com/nafphp/framework](https://github.com/nafphp/framework) ·
+> [documentation](https://nafphp.github.io/docs/) ·
+> [what changed and how to move](https://nafphp.github.io/docs/upgrading-from-nixphp/)
+>
+> ```bash
+> composer require naf/framework
+> ```
+>
+> The old name collided with [NixOS](https://nixos.org) down to the shell, where the
+> CLI binary was literally `nix`. This repository is archived and receives no further
+> releases; `nixphp/framework` stays on Packagist so existing installations keep working.
+>
+---
+
 <div align="center" style="text-align: center">
 
 ![Logo](https://nixphp.github.io/docs/assets/nixphp-logo-small-square.png)
